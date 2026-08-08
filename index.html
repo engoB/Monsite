@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Protection anti-référencement Google -->
+  <!-- Anti-référencement Google -->
   <meta name="robots" content="noindex, nofollow">
   
   <title>Notre Mariage — Magalie &amp; Sébastien</title>
@@ -86,54 +86,59 @@
     .timeline-item::after { content: ""; position: absolute; left: 0.45rem; top: 0.4rem; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); border: 2px solid var(--bg-primary); }
     .timeline-item:last-child::before { display: none; }
 
-    /* Style Mode Édition */
+    /* Mode Édition */
     .edit-mode [contenteditable="true"] { outline: 1px dashed #d4a95f !important; cursor: text; min-height: 1em; }
-    .edit-mode [contenteditable="true"]:focus { outline: 2px solid #a8533e !important; background: rgba(212, 169, 95, 0.08); }
+    .edit-mode [contenteditable="true"]:focus { outline: 2px solid #a8533e !important; background: rgba(212, 169, 95, 0.12); }
     .edit-mode .img-wrapper { position: relative; cursor: pointer; }
     .edit-mode .img-wrapper::after {
-      content: "📷 Remplacer cette image"; position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+      content: "📷 Cliquer pour changer l'image"; position: absolute; inset: 0; background: rgba(0,0,0,0.6);
       color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold;
-      opacity: 0; transition: opacity 0.2s; border-radius: 4px; pointer-events: none;
+      opacity: 0.85; transition: opacity 0.2s; border-radius: 4px; pointer-events: none;
     }
-    .edit-mode .img-wrapper:hover::after { opacity: 1; }
+    .edit-mode .img-wrapper:hover::after { opacity: 1; background: rgba(168, 83, 62, 0.85); }
   </style>
 </head>
 <body class="min-h-screen w-full">
 
-  <!-- Barre d'outils Édition / Formatage de texte -->
-  <div id="admin-bar" class="hidden fixed top-0 left-0 w-full z-[100] bg-[#3c3228] text-white px-4 py-2 shadow-xl flex flex-wrap items-center justify-between gap-3 text-xs">
+  <!-- Barre d'outils d'Édition -->
+  <div id="admin-bar" class="hidden fixed top-0 left-0 w-full z-[100] bg-[#3c3228] text-white px-4 py-2 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
     <div class="flex items-center gap-2 font-bold text-[#d4a95f]">
-      <i data-lucide="edit-3" class="w-4 h-4"></i> Mode Édition
+      <i data-lucide="edit-3" class="w-4 h-4"></i> Mode Édition Actif
     </div>
     
-    <!-- Outils de mise en forme du texte sélectionné -->
-    <div class="flex flex-wrap items-center gap-2 bg-[#4a3f35] px-3 py-1 rounded border border-gray-600">
-      <span class="text-gray-400 font-semibold mr-1">Texte sélectionné :</span>
-      <button onclick="formatText('bold')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded font-bold" title="Gras">B</button>
-      <button onclick="formatText('italic')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded italic" title="Italique">I</button>
-      <button onclick="formatText('underline')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded underline" title="Souligné">U</button>
+    <!-- Outils de formatage de texte -->
+    <div class="flex flex-wrap items-center gap-2 bg-[#4a3f35] px-3 py-1.5 rounded border border-gray-600">
+      <span class="text-gray-300 font-semibold mr-1">Sélection :</span>
+      
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('bold')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded font-bold" title="Gras">B</button>
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded italic" title="Italique">I</button>
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded underline" title="Souligné">U</button>
       
       <!-- Couleur du texte sélectionné -->
-      <label class="flex items-center gap-1 cursor-pointer bg-gray-700 px-2 py-1 rounded">
+      <label onmousedown="event.preventDefault()" class="flex items-center gap-1.5 bg-gray-700 px-2 py-1 rounded cursor-pointer">
         <span>Couleur</span>
-        <input type="color" onchange="formatTextColor(this.value)" class="w-4 h-4 bg-transparent border-0 cursor-pointer">
+        <input type="color" onchange="applyColor(this.value)" class="w-5 h-5 bg-transparent border-0 cursor-pointer">
       </label>
 
       <!-- Taille de police du texte sélectionné -->
-      <select onchange="formatText('fontSize', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
+      <select onfocus="saveSelection()" onchange="applyFormat('fontSize', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
         <option value="">Taille...</option>
-        <option value="2">Petite</option>
-        <option value="3">Normale</option>
-        <option value="5">Grande</option>
-        <option value="7">Très grande</option>
+        <option value="1">1 (Très petit)</option>
+        <option value="2">2 (Petit)</option>
+        <option value="3">3 (Normal)</option>
+        <option value="4">4 (Moyen)</option>
+        <option value="5">5 (Grand)</option>
+        <option value="6">6 (Très grand)</option>
+        <option value="7">7 (Titre)</option>
       </select>
 
       <!-- Police du texte sélectionné -->
-      <select onchange="formatText('fontName', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
+      <select onfocus="saveSelection()" onchange="applyFormat('fontName', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
         <option value="">Police...</option>
         <option value="Cormorant Garamond">Cormorant Garamond</option>
         <option value="Alegreya Sans">Alegreya Sans</option>
         <option value="Arial">Arial</option>
+        <option value="Times New Roman">Times New Roman</option>
       </select>
     </div>
 
@@ -176,14 +181,14 @@
 
   <!-- Hero -->
   <header id="accueil" class="relative w-full h-screen flex items-center justify-center text-center overflow-hidden">
-    <div class="img-wrapper absolute inset-0 w-full h-full" onclick="handleImageClick(this.querySelector('img'))">
+    <div class="img-wrapper absolute inset-0 w-full h-full" onclick="changeImage(this.querySelector('img'))">
       <img id="hero-img" loading="lazy" class="w-full h-full object-cover" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Château Balac">
     </div>
     <div class="hero-overlay absolute inset-0"></div>
     <div class="absolute bottom-12 right-12 z-10 text-right reveal">
-      <p class="uppercase tracking-[0.35em] text-sm mb-4 text-[#faf6f0] font-medium" contenteditable="false">enfin, Nous nous marions</p>
-      <h1 class="display-font text-6xl md:text-7xl font-medium text-white mb-4 leading-tight" contenteditable="false">Magalie &amp; Sébastien</h1>
-      <p class="display-font italic tracking-wide text-3xl text-[#f1e9dd]" contenteditable="false">31 Juillet 2027</p>
+      <p class="editable-text uppercase tracking-[0.35em] text-sm mb-4 text-[#faf6f0] font-medium">enfin, Nous nous marions</p>
+      <h1 class="editable-text display-font text-6xl md:text-7xl font-medium text-white mb-4 leading-tight">Magalie &amp; Sébastien</h1>
+      <p class="editable-text display-font italic tracking-wide text-3xl text-[#f1e9dd]">31 Juillet 2027</p>
     </div>
     <a href="#histoire" class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 text-white animate-bounce" aria-label="Défiler"><i data-lucide="chevron-down" class="w-8 h-8"></i></a>
   </header>
@@ -191,23 +196,23 @@
   <!-- Notre Histoire -->
   <section id="histoire" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Notre Histoire</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Notre Histoire</h2>
       <p class="divider-ornament text-[#8b5a7d] mb-16"></p>
     </div>
     <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
       <article class="reveal">
-        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))">
+        <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-72 object-cover rounded-sm shadow-md mb-6" src="https://images.pexels.com/photos/22707222/pexels-photo-22707222.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Rencontre">
         </div>
-        <h3 class="display-font text-2xl font-medium mb-3" contenteditable="false">La première rencontre</h3>
-        <p class="leading-relaxed text-[#6b5d4f]" contenteditable="false">Tout a commencé par un après-midi d'automne, autour d'un <strong>café partagé</strong> entre amis. Un regard, un sourire, et une conversation qui ne s'est <strong>jamais vraiment arrêtée</strong> depuis ce jour-là.</p>
+        <h3 class="editable-text display-font text-2xl font-medium mb-3">La première rencontre</h3>
+        <p class="editable-text leading-relaxed text-[#6b5d4f]">Tout a commencé par un après-midi d'automne, autour d'un <strong>café partagé</strong> entre amis. Un regard, un sourire, et une conversation qui ne s'est <strong>jamais vraiment arrêtée</strong> depuis ce jour-là.</p>
       </article>
       <article class="reveal">
-        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))">
+        <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-72 object-cover rounded-sm shadow-md mb-6" src="https://images.pexels.com/photos/29734262/pexels-photo-29734262.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Demande">
         </div>
-        <h3 class="display-font text-2xl font-medium mb-3" contenteditable="false">La demande</h3>
-        <p class="leading-relaxed text-[#6b5d4f]" contenteditable="false">Cinq ans plus tard, au sommet d'une colline baignée de <strong>lumière dorée</strong>, la question la plus importante a été posée. La réponse fut un <strong>oui</strong> rempli de larmes de joie.</p>
+        <h3 class="editable-text display-font text-2xl font-medium mb-3">La demande</h3>
+        <p class="editable-text leading-relaxed text-[#6b5d4f]">Cinq ans plus tard, au sommet d'une colline baignée de <strong>lumière dorée</strong>, la question la plus importante a été posée. La réponse fut un <strong>oui</strong> rempli de larmes de joie.</p>
       </article>
     </div>
   </section>
@@ -215,37 +220,37 @@
   <!-- Lieux & Horaires -->
   <section id="lieux" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Lieux &amp; Horaires</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Lieux &amp; Horaires</h2>
       <p class="divider-ornament text-[#d4a95f] mb-16"></p>
     </div>
     <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
       <div class="bg-[#faf6f0] rounded-sm p-8 shadow-sm reveal flex flex-col justify-between">
         <i data-lucide="landmark" class="mb-4 text-[#a8533e] w-9 h-9"></i>
         <div>
-          <h3 class="display-font text-2xl font-medium mb-3" contenteditable="false">Mairie</h3>
-          <p class="text-sm leading-relaxed mb-4 text-[#6b5d4f] whitespace-pre-line" contenteditable="false">Mairie de Saint-Laurent-Médoc
+          <h3 class="editable-text display-font text-2xl font-medium mb-3">Mairie</h3>
+          <p class="editable-text text-sm leading-relaxed mb-4 text-[#6b5d4f] whitespace-pre-line">Mairie de Saint-Laurent-Médoc
 2 Place de la Mairie
 33112 Saint-Laurent-Médoc
 
 Cérémonie civile à 11h00</p>
           <a href="https://maps.google.com/?q=Mairie+de+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-[#a8533e] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
         </div>
-        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))">
+        <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-48 object-cover rounded-sm mt-2" src="https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Mairie">
         </div>
       </div>
       <div class="bg-[#faf6f0] rounded-sm p-8 shadow-sm reveal flex flex-col justify-between">
         <i data-lucide="castle" class="mb-4 text-[#8b5a7d] w-9 h-9"></i>
         <div>
-          <h3 class="display-font text-2xl font-medium mb-3" contenteditable="false">Château Balac</h3>
-          <p class="text-sm leading-relaxed mb-4 text-[#6b5d4f] whitespace-pre-line" contenteditable="false">BALLAC D1215
+          <h3 class="editable-text display-font text-2xl font-medium mb-3">Château Balac</h3>
+          <p class="editable-text text-sm leading-relaxed mb-4 text-[#6b5d4f] whitespace-pre-line">BALLAC D1215
 33112 Saint-Laurent-Médoc
 
 Cérémonie laïque à 15h00
 Réception &amp; soirée dès 18h00</p>
           <a href="https://maps.google.com/?q=Chateau+Balac+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-[#8b5a7d] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
         </div>
-        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))">
+        <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-48 object-cover rounded-sm mt-2" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Château Balac">
         </div>
       </div>
@@ -255,33 +260,33 @@ Réception &amp; soirée dès 18h00</p>
   <!-- Programme Détaillé -->
   <section id="programme" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Programme de la journée</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Programme de la journée</h2>
       <p class="divider-ornament text-[#a8533e] mb-16"></p>
     </div>
     <div class="max-w-2xl mx-auto space-y-8 reveal">
       <div class="timeline-item pb-8">
-        <h4 class="font-bold mb-1" contenteditable="false">11h00 — Mairie</h4>
-        <p class="text-sm leading-relaxed text-[#6b5d4f]" contenteditable="false">Cérémonie civile à la <strong>Mairie de Saint-Laurent-Médoc</strong>. Merci d'arriver 15 minutes en avance.</p>
+        <h4 class="editable-text font-bold mb-1">11h00 — Mairie</h4>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f]">Cérémonie civile à la <strong>Mairie de Saint-Laurent-Médoc</strong>. Merci d'arriver 15 minutes en avance.</p>
       </div>
       <div class="timeline-item pb-8">
-        <h4 class="font-bold mb-1" contenteditable="false">14h30 — Accueil au Château</h4>
-        <p class="text-sm leading-relaxed text-[#6b5d4f]" contenteditable="false">Arrivée des invités au <strong>Château Balac</strong>. Installation et rafraîchissements de bienvenue.</p>
+        <h4 class="editable-text font-bold mb-1">14h30 — Accueil au Château</h4>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f]">Arrivée des invités au <strong>Château Balac</strong>. Installation et rafraîchissements de bienvenue.</p>
       </div>
       <div class="timeline-item pb-8">
-        <h4 class="font-bold mb-1" contenteditable="false">15h00 — Cérémonie laïque</h4>
-        <p class="text-sm leading-relaxed text-[#6b5d4f]" contenteditable="false">Cérémonie en plein air dans les <strong>jardins du château</strong>. Prévoir chapeau et crème solaire !</p>
+        <h4 class="editable-text font-bold mb-1">15h00 — Cérémonie laïque</h4>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f]">Cérémonie en plein air dans les <strong>jardins du château</strong>. Prévoir chapeau et crème solaire !</p>
       </div>
       <div class="timeline-item pb-8">
-        <h4 class="font-bold mb-1" contenteditable="false">16h30 — Vin d'honneur</h4>
-        <p class="text-sm leading-relaxed text-[#6b5d4f]" contenteditable="false"><strong>Cocktail</strong> et <strong>photos de groupe</strong> dans le parc arboré.</p>
+        <h4 class="editable-text font-bold mb-1">16h30 — Vin d'honneur</h4>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f]"><strong>Cocktail</strong> et <strong>photos de groupe</strong> dans le parc arboré.</p>
       </div>
       <div class="timeline-item pb-8">
-        <h4 class="font-bold mb-1" contenteditable="false">19h00 — Dîner</h4>
-        <p class="text-sm leading-relaxed text-[#6b5d4f]" contenteditable="false"><strong>Dîner assis</strong> dans la grande salle de réception. Menu gastronomique et vins du domaine.</p>
+        <h4 class="editable-text font-bold mb-1">19h00 — Dîner</h4>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f]"><strong>Dîner assis</strong> dans la grande salle de réception. Menu gastronomique et vins du domaine.</p>
       </div>
       <div class="timeline-item">
-        <h4 class="font-bold mb-1" contenteditable="false">22h00 — Soirée dansante</h4>
-        <p class="text-sm leading-relaxed text-[#6b5d4f]" contenteditable="false"><strong>Ouverture du bal</strong>, musique live et <strong>DJ</strong> jusqu'au bout de la nuit !</p>
+        <h4 class="editable-text font-bold mb-1">22h00 — Soirée dansante</h4>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f]"><strong>Ouverture du bal</strong>, musique live et <strong>DJ</strong> jusqu'au bout de la nuit !</p>
       </div>
     </div>
   </section>
@@ -289,37 +294,37 @@ Réception &amp; soirée dès 18h00</p>
   <!-- Team Mariés -->
   <section id="team" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">La Team Mariés</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">La Team Mariés</h2>
       <p class="divider-ornament text-[#2a7d7d] mb-16"></p>
     </div>
     <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
       <div class="text-center reveal">
-        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="handleImageClick(this.querySelector('img'))">
+        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-28 h-28 rounded-full object-cover shadow-md" src="https://images.pexels.com/photos/3811846/pexels-photo-3811846.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Sophie">
         </div>
-        <h4 class="display-font text-2xl font-medium mb-1" contenteditable="false">Sophie</h4>
-        <p class="text-xs text-[#6b5d4f]" contenteditable="false">Témoin de la mariée — Amie d'enfance inséparable</p>
+        <h4 class="editable-text display-font text-2xl font-medium mb-1">Sophie</h4>
+        <p class="editable-text text-xs text-[#6b5d4f]">Témoin de la mariée — Amie d'enfance inséparable</p>
       </div>
       <div class="text-center reveal">
-        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="handleImageClick(this.querySelector('img'))">
+        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-28 h-28 rounded-full object-cover shadow-md" src="https://images.pexels.com/photos/3778603/pexels-photo-3778603.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Thomas">
         </div>
-        <h4 class="display-font text-2xl font-medium mb-1" contenteditable="false">Thomas</h4>
-        <p class="text-xs text-[#6b5d4f]" contenteditable="false">Témoin du marié — Frère et complice de toujours</p>
+        <h4 class="editable-text display-font text-2xl font-medium mb-1">Thomas</h4>
+        <p class="editable-text text-xs text-[#6b5d4f]">Témoin du marié — Frère et complice de toujours</p>
       </div>
       <div class="text-center reveal">
-        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="handleImageClick(this.querySelector('img'))">
+        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-28 h-28 rounded-full object-cover shadow-md" src="https://images.pexels.com/photos/37346906/pexels-photo-37346906.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Camille">
         </div>
-        <h4 class="display-font text-2xl font-medium mb-1" contenteditable="false">Camille</h4>
-        <p class="text-xs text-[#6b5d4f]" contenteditable="false">Demoiselle d'honneur — Cousine et rayon de soleil</p>
+        <h4 class="editable-text display-font text-2xl font-medium mb-1">Camille</h4>
+        <p class="editable-text text-xs text-[#6b5d4f]">Demoiselle d'honneur — Cousine et rayon de soleil</p>
       </div>
       <div class="text-center reveal">
-        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="handleImageClick(this.querySelector('img'))">
+        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-28 h-28 rounded-full object-cover shadow-md" src="https://images.pexels.com/photos/18963011/pexels-photo-18963011.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Antoine">
         </div>
-        <h4 class="display-font text-2xl font-medium mb-1" contenteditable="false">Antoine</h4>
-        <p class="text-xs text-[#6b5d4f]" contenteditable="false">Garçon d'honneur — Ami de longue date</p>
+        <h4 class="editable-text display-font text-2xl font-medium mb-1">Antoine</h4>
+        <p class="editable-text text-xs text-[#6b5d4f]">Garçon d'honneur — Ami de longue date</p>
       </div>
     </div>
   </section>
@@ -327,45 +332,45 @@ Réception &amp; soirée dès 18h00</p>
   <!-- Le Jour J (Countdown + Cartes + Nuancier) -->
   <section id="jourj" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal mb-16">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Le Jour J, c'est dans...</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Le Jour J, c'est dans...</h2>
       <p class="divider-ornament text-[#a8533e]"></p>
     </div>
     
     <div class="max-w-3xl mx-auto grid grid-cols-4 gap-3 md:gap-6 mb-16 reveal">
       <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#d4a95f]">
         <div id="cd-days" class="display-font text-3xl md:text-5xl text-[#4a3f35]">00</div>
-        <div class="uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]" contenteditable="false">Jours</div>
+        <div class="editable-text uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]">Jours</div>
       </div>
       <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#a8533e]">
         <div id="cd-hours" class="display-font text-3xl md:text-5xl text-[#4a3f35]">00</div>
-        <div class="uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]" contenteditable="false">Heures</div>
+        <div class="editable-text uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]">Heures</div>
       </div>
       <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#8b5a7d]">
         <div id="cd-minutes" class="display-font text-3xl md:text-5xl text-[#4a3f35]">00</div>
-        <div class="uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]" contenteditable="false">Minutes</div>
+        <div class="editable-text uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]">Minutes</div>
       </div>
       <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#2a7d7d]">
         <div id="cd-seconds" class="display-font text-3xl md:text-5xl text-[#4a3f35]">00</div>
-        <div class="uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]" contenteditable="false">Secondes</div>
+        <div class="editable-text uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]">Secondes</div>
       </div>
     </div>
 
     <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-8">
       <div class="text-center p-8 rounded-sm bg-[#f1e9dd] shadow-sm reveal">
         <i data-lucide="church" class="mx-auto mb-4 text-[#d4a95f] w-10 h-10"></i>
-        <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Cérémonie</h4>
-        <p class="text-sm leading-relaxed text-[#6b5d4f]" contenteditable="false"><strong>15h00</strong> — Cérémonie en plein air dans les <strong>jardins du château</strong>. Merci d'arriver 30 minutes en avance.</p>
+        <h4 class="editable-text display-font text-2xl font-medium mb-2">Cérémonie</h4>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f]"><strong>15h00</strong> — Cérémonie en plein air dans les <strong>jardins du château</strong>. Merci d'arriver 30 minutes en avance.</p>
       </div>
       <div class="text-center p-8 rounded-sm bg-[#f1e9dd] shadow-sm reveal">
         <i data-lucide="wine" class="mx-auto mb-4 text-[#a8533e] w-10 h-10"></i>
-        <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Réception</h4>
-        <p class="text-sm leading-relaxed text-[#6b5d4f]" contenteditable="false"><strong>18h00</strong> — Cocktail, dîner et <strong>soirée dansante</strong> dans la grande salle jusqu'au bout de la nuit.</p>
+        <h4 class="editable-text display-font text-2xl font-medium mb-2">Réception</h4>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f]"><strong>18h00</strong> — Cocktail, dîner et <strong>soirée dansante</strong> dans la grande salle jusqu'au bout de la nuit.</p>
       </div>
       <div class="text-center p-8 rounded-sm bg-[#f1e9dd] shadow-sm reveal flex flex-col justify-between min-h-[220px]">
         <div>
           <i data-lucide="palette" class="mx-auto mb-4 text-[#8b5a7d] w-10 h-10"></i>
-          <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Dress Code</h4>
-          <p class="text-sm leading-relaxed text-[#6b5d4f] mb-4" contenteditable="false">Tenue de cérémonie <strong>élégante</strong>. Nous vous suggérons des teintes <strong>claires et champêtres</strong>.</p>
+          <h4 class="editable-text display-font text-2xl font-medium mb-2">Dress Code</h4>
+          <p class="editable-text text-sm leading-relaxed text-[#6b5d4f] mb-4">Tenue de cérémonie <strong>élégante</strong>. Nous vous suggérons des teintes <strong>claires et champêtres</strong>.</p>
         </div>
         <div class="flex items-center justify-center gap-1.5 pt-3 border-t border-[#e5dccf]">
           <span class="w-5 h-5 rounded-full border border-gray-300 block bg-[#faf6f0]"></span>
@@ -382,33 +387,33 @@ Réception &amp; soirée dès 18h00</p>
   <!-- RSVP -->
   <section id="rsvp" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-2xl mx-auto text-center reveal">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Confirmez votre présence</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Confirmez votre présence</h2>
       <p class="divider-ornament text-[#d4a95f] mb-8"></p>
-      <p class="leading-relaxed mb-12 text-[#2a7d7d] font-bold text-2xl" contenteditable="false">Votre réponse nous est <strong>précieuse</strong> pour préparer ce grand jour.<br>Merci de nous répondre avant le <strong>1er mai 2027</strong>.</p>
+      <p class="editable-text leading-relaxed mb-12 text-[#2a7d7d] font-bold text-2xl">Votre réponse nous est <strong>précieuse</strong> pour préparer ce grand jour.<br>Merci de nous répondre avant le <strong>1er mai 2027</strong>.</p>
     </div>
 
     <form id="rsvp-form" class="max-w-2xl mx-auto reveal space-y-5">
       <fieldset>
-        <legend class="uppercase tracking-widest text-xs mb-4 text-[#6b5d4f] font-medium" contenteditable="false">Votre réponse</legend>
+        <legend class="editable-text uppercase tracking-widest text-xs mb-4 text-[#6b5d4f] font-medium">Votre réponse</legend>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="relative"><input type="radio" id="resp-oui" name="response" value="oui" class="choice-input"><label for="resp-oui" class="choice-label" contenteditable="false">Oui, avec joie !</label></div>
-          <div class="relative"><input type="radio" id="resp-temps" name="response" value="temps" class="choice-input"><label for="resp-temps" class="choice-label" contenteditable="false">Besoin de temps</label></div>
-          <div class="relative"><input type="radio" id="resp-non" name="response" value="non" class="choice-input"><label for="resp-non" class="choice-label" contenteditable="false">Je ne pourrai pas</label></div>
+          <div class="relative"><input type="radio" id="resp-oui" name="response" value="oui" class="choice-input"><label for="resp-oui" class="choice-label editable-text">Oui, avec joie !</label></div>
+          <div class="relative"><input type="radio" id="resp-temps" name="response" value="temps" class="choice-input"><label for="resp-temps" class="choice-label editable-text">Besoin de temps</label></div>
+          <div class="relative"><input type="radio" id="resp-non" name="response" value="non" class="choice-input"><label for="resp-non" class="choice-label editable-text">Je ne pourrai pas</label></div>
         </div>
       </fieldset>
 
       <div>
-        <label for="rsvp-family" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Famille / Groupe</label>
+        <label for="rsvp-family" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Famille / Groupe</label>
         <input type="text" id="rsvp-family" class="rsvp-input" placeholder="Ex : Famille Martin, amis de la mariée…">
       </div>
 
       <div class="grid sm:grid-cols-2 gap-5">
         <div>
-          <label for="rsvp-adults" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Nombre d'adultes</label>
+          <label for="rsvp-adults" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Nombre d'adultes</label>
           <input type="number" id="rsvp-adults" min="0" max="20" value="1" class="rsvp-input">
         </div>
         <div>
-          <label for="rsvp-children" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Nombre d'enfants</label>
+          <label for="rsvp-children" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Nombre d'enfants</label>
           <input type="number" id="rsvp-children" min="0" max="20" value="0" class="rsvp-input">
         </div>
       </div>
@@ -417,22 +422,22 @@ Réception &amp; soirée dès 18h00</p>
 
       <div class="grid sm:grid-cols-2 gap-5">
         <div>
-          <label for="rsvp-email" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Email</label>
+          <label for="rsvp-email" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Email</label>
           <input type="email" id="rsvp-email" class="rsvp-input" placeholder="votre.email@exemple.com">
         </div>
         <div>
-          <label for="rsvp-phone" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Téléphone</label>
+          <label for="rsvp-phone" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Téléphone</label>
           <input type="tel" id="rsvp-phone" class="rsvp-input" placeholder="06 12 34 56 78">
         </div>
       </div>
 
       <div>
-        <label for="rsvp-chanson" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">La chanson qui vous fera danser à coup sûr ? 🎶</label>
+        <label for="rsvp-chanson" class="editable-text block text-sm mb-2 text-[#6b5d4f]">La chanson qui vous fera danser à coup sûr ? 🎶</label>
         <input type="text" id="rsvp-chanson" class="rsvp-input" placeholder="Ex : Daft Punk — Get Lucky">
       </div>
 
       <div>
-        <label for="rsvp-message" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Un mot pour les mariés (facultatif)</label>
+        <label for="rsvp-message" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Un mot pour les mariés (facultatif)</label>
         <textarea id="rsvp-message" rows="3" class="rsvp-input resize-none" placeholder="Allergies, régime particulier, message…"></textarea>
       </div>
 
@@ -440,30 +445,30 @@ Réception &amp; soirée dès 18h00</p>
 
       <button type="submit" id="rsvp-submit" class="w-full py-4 rounded-sm bg-[#4a3f35] text-[#faf6f0] uppercase tracking-widest text-sm font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
         <i id="rsvp-spinner" data-lucide="loader-2" class="spin hidden w-5 h-5"></i>
-        <span contenteditable="false">Envoyer ma réponse</span>
+        <span>Envoyer ma réponse</span>
       </button>
-      <p class="text-center text-xs text-[#8a7d6d] mt-4" contenteditable="false">Vos réponses sont enregistrées en <strong>toute sécurité</strong> à destination uniquement des mariés.</p>
+      <p class="editable-text text-center text-xs text-[#8a7d6d] mt-4">Vos réponses sont enregistrées en <strong>toute sécurité</strong> à destination uniquement des mariés.</p>
     </form>
 
     <div id="rsvp-success" class="hidden max-w-2xl mx-auto text-center bg-[#faf6f0] rounded-sm p-12 shadow-sm">
       <i data-lucide="flower" class="mx-auto mb-4 text-[#d4a95f] w-11 h-11"></i>
-      <h3 class="display-font text-3xl font-medium mb-3" contenteditable="false">Merci du fond du cœur !</h3>
-      <p class="text-[#6b5d4f]" contenteditable="false">Votre réponse a bien été enregistrée. Nous avons hâte de <strong>partager ce moment</strong> avec vous.</p>
+      <h3 class="editable-text display-font text-3xl font-medium mb-3">Merci du fond du cœur !</h3>
+      <p class="editable-text text-[#6b5d4f]">Votre réponse a bien été enregistrée. Nous avons hâte de <strong>partager ce moment</strong> avec vous.</p>
     </div>
   </section>
 
   <!-- Séjour -->
   <section id="sejour" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Organisez votre séjour</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Organisez votre séjour</h2>
       <p class="divider-ornament text-[#2a7d7d] mb-8"></p>
-      <p class="leading-relaxed mb-16 max-w-3xl mx-auto text-[#6b5d4f] font-bold text-xl" contenteditable="false">Vous venez de loin ? Voici quelques adresses pour <strong>dormir sur place</strong> et <strong>profiter de la région</strong> avant ou après la fête.</p>
+      <p class="editable-text leading-relaxed mb-16 max-w-3xl mx-auto text-[#6b5d4f] font-bold text-xl">Vous venez de loin ? Voici quelques adresses pour <strong>dormir sur place</strong> et <strong>profiter de la région</strong> avant ou après la fête.</p>
     </div>
 
     <!-- Carrousel 1: Hébergements -->
     <div class="max-w-5xl mx-auto mb-20 relative">
       <div class="flex items-center justify-between mb-6 px-2">
-        <h3 class="display-font text-3xl font-medium text-[#4a3f35]" contenteditable="false">Où dormir</h3>
+        <h3 class="editable-text display-font text-3xl font-medium text-[#4a3f35]">Où dormir</h3>
         <div class="flex gap-2">
           <button id="lodging-prev" class="p-2 rounded-full border border-[#4a3f35]/20 hover:bg-[#4a3f35]/5 transition" aria-label="Précédent"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
           <button id="lodging-next" class="p-2 rounded-full border border-[#4a3f35]/20 hover:bg-[#4a3f35]/5 transition" aria-label="Suivant"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
@@ -472,31 +477,31 @@ Réception &amp; soirée dès 18h00</p>
       </div>
       <div id="lodging-carousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 px-2" style="scrollbar-width:none;">
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/2952663/pexels-photo-2952663.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Hôtel"></div>
+          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/2952663/pexels-photo-2952663.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Hôtel"></div>
           <div class="p-5">
-            <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Hôtel du Domaine ★★★</h4>
-            <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">À 5 minutes du château. Chambres élégantes et <strong>petit-déjeuner compris</strong>. Tarif préférentiel <strong>« Mariage M&amp;S »</strong> sur réservation.</p>
+            <h4 class="editable-text display-font text-2xl font-medium mb-2">Hôtel du Domaine ★★★</h4>
+            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">À 5 minutes du château. Chambres élégantes et <strong>petit-déjeuner compris</strong>. Tarif préférentiel <strong>« Mariage M&amp;S »</strong> sur réservation.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/32289746/pexels-photo-32289746.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Chambres d'hôtes"></div>
+          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/32289746/pexels-photo-32289746.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Chambres d'hôtes"></div>
           <div class="p-5">
-            <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Chambres Les Vignes</h4>
-            <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Maison de charme au <strong>cœur des vignobles</strong>, à 10 minutes. Idéale pour les familles.</p>
+            <h4 class="editable-text display-font text-2xl font-medium mb-2">Chambres Les Vignes</h4>
+            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Maison de charme au <strong>cœur des vignobles</strong>, à 10 minutes. Idéale pour les familles.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/33963275/pexels-photo-33963275.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Gîte"></div>
+          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/33963275/pexels-photo-33963275.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Gîte"></div>
           <div class="p-5">
-            <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Gîte Le Magnolia</h4>
-            <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Maison d'hôtes de charme avec <strong>terrasse ombragée</strong> et <strong>jardin verdoyant</strong>, à 12 minutes.</p>
+            <h4 class="editable-text display-font text-2xl font-medium mb-2">Gîte Le Magnolia</h4>
+            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Maison d'hôtes de charme avec <strong>terrasse ombragée</strong> et <strong>jardin verdoyant</strong>, à 12 minutes.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/26647501/pexels-photo-26647501.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Ferme"></div>
+          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/26647501/pexels-photo-26647501.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Ferme"></div>
           <div class="p-5">
-            <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Ferme du Vignoble</h4>
-            <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Havre de paix rustique entouré de ceps de vigne. <strong>Petit-déjeuner fermier</strong> inclus.</p>
+            <h4 class="editable-text display-font text-2xl font-medium mb-2">Ferme du Vignoble</h4>
+            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Havre de paix rustique entouré de ceps de vigne. <strong>Petit-déjeuner fermier</strong> inclus.</p>
           </div>
         </article>
       </div>
@@ -505,7 +510,7 @@ Réception &amp; soirée dès 18h00</p>
     <!-- Carrousel 2: Activités -->
     <div class="max-w-5xl mx-auto">
       <div class="flex items-center justify-between mb-8 px-2">
-        <h3 class="display-font text-3xl font-medium text-[#4a3f35]" contenteditable="false">Que faire dans la région</h3>
+        <h3 class="editable-text display-font text-3xl font-medium text-[#4a3f35]">Que faire dans la région</h3>
         <div class="flex gap-2">
           <button id="activity-prev" class="p-2 rounded-full border border-[#4a3f35]/20 hover:bg-[#4a3f35]/5 transition" aria-label="Précédent"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
           <button id="activity-next" class="p-2 rounded-full border border-[#4a3f35]/20 hover:bg-[#4a3f35]/5 transition" aria-label="Suivant"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
@@ -514,31 +519,31 @@ Réception &amp; soirée dès 18h00</p>
       </div>
       <div id="activity-carousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 px-2" style="scrollbar-width:none;">
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30557600/pexels-photo-30557600.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vins"></div>
+          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30557600/pexels-photo-30557600.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vins"></div>
           <div class="p-5">
-            <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Route des vins</h4>
-            <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Visites de <strong>châteaux</strong> et <strong>dégustations</strong> dans les plus beaux domaines de la région.</p>
+            <h4 class="editable-text display-font text-2xl font-medium mb-2">Route des vins</h4>
+            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Visites de <strong>châteaux</strong> et <strong>dégustations</strong> dans les plus beaux domaines de la région.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/34799291/pexels-photo-34799291.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Médiéval"></div>
+          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/34799291/pexels-photo-34799291.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Médiéval"></div>
           <div class="p-5">
-            <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Villages médiévaux</h4>
-            <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Flânez dans les ruelles de <strong>Saint-Émilion</strong> et des villages alentour.</p>
+            <h4 class="editable-text display-font text-2xl font-medium mb-2">Villages médiévaux</h4>
+            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Flânez dans les ruelles de <strong>Saint-Émilion</strong> et des villages alentour.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/9722064/pexels-photo-9722064.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Plage"></div>
+          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/9722064/pexels-photo-9722064.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Plage"></div>
           <div class="p-5">
-            <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Plages du Bassin</h4>
-            <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Escapade vers les <strong>plages de sable fin</strong> du Bassin d'Arcachon.</p>
+            <h4 class="editable-text display-font text-2xl font-medium mb-2">Plages du Bassin</h4>
+            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Escapade vers les <strong>plages de sable fin</strong> du Bassin d'Arcachon.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30732698/pexels-photo-30732698.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vélo"></div>
+          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30732698/pexels-photo-30732698.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vélo"></div>
           <div class="p-5">
-            <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Balades à vélo</h4>
-            <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Sillonnez les <strong>chemins de vigne</strong> du Médoc lors d'une balade guidée.</p>
+            <h4 class="editable-text display-font text-2xl font-medium mb-2">Balades à vélo</h4>
+            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Sillonnez les <strong>chemins de vigne</strong> du Médoc lors d'une balade guidée.</p>
           </div>
         </article>
       </div>
@@ -549,44 +554,44 @@ Réception &amp; soirée dès 18h00</p>
   <section id="galerie" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
       <div class="flex items-center justify-center gap-4 mb-4">
-        <h2 class="display-font text-4xl md:text-5xl font-medium" contenteditable="false">Galerie</h2>
+        <h2 class="editable-text display-font text-4xl md:text-5xl font-medium">Galerie</h2>
         <button onclick="addGalleryImage()" class="admin-only hidden px-3 py-1 bg-[#a8533e] text-white text-xs rounded font-bold">+ Ajouter photo</button>
       </div>
       <p class="divider-ornament text-[#a8533e] mb-16"></p>
     </div>
     <div id="gallery-grid" class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 1"></div>
-      <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/22707222/pexels-photo-22707222.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 2"></div>
-      <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/29734262/pexels-photo-29734262.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 3"></div>
-      <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 4"></div>
+      <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 1"></div>
+      <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/22707222/pexels-photo-22707222.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 2"></div>
+      <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/29734262/pexels-photo-29734262.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 3"></div>
+      <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 4"></div>
     </div>
   </section>
 
   <!-- Contacts Jour J -->
   <section id="contacts-jourj" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Contacts du Jour J</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Contacts du Jour J</h2>
       <p class="divider-ornament text-[#8b5a7d] mb-8"></p>
-      <p class="leading-relaxed mb-12 max-w-2xl mx-auto text-[#6b5d4f]" contenteditable="false">En cas de besoin le jour du mariage, n'hésitez pas à contacter <strong>nos témoins</strong>.</p>
+      <p class="editable-text leading-relaxed mb-12 max-w-2xl mx-auto text-[#6b5d4f]">En cas de besoin le jour du mariage, n'hésitez pas à contacter <strong>nos témoins</strong>.</p>
     </div>
     <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-8">
       <div class="text-center p-8 rounded-sm bg-[#f1e9dd] shadow-sm reveal">
         <i data-lucide="phone" class="mx-auto mb-4 text-[#d4a95f] w-9 h-9"></i>
-        <h3 class="display-font text-2xl font-medium mb-1" contenteditable="false">Sophie</h3>
-        <p class="text-xs mb-2 text-[#6b5d4f]" contenteditable="false">Témoin de la mariée</p>
-        <a href="tel:+33600000000" class="text-sm font-medium text-[#a8533e] hover:opacity-70 transition" contenteditable="false">06 00 00 00 00</a>
+        <h3 class="editable-text display-font text-2xl font-medium mb-1">Sophie</h3>
+        <p class="editable-text text-xs mb-2 text-[#6b5d4f]">Témoin de la mariée</p>
+        <a href="tel:+33600000000" class="editable-text text-sm font-medium text-[#a8533e] hover:opacity-70 transition">06 00 00 00 00</a>
       </div>
       <div class="text-center p-8 rounded-sm bg-[#f1e9dd] shadow-sm reveal">
         <i data-lucide="phone" class="mx-auto mb-4 text-[#a8533e] w-9 h-9"></i>
-        <h3 class="display-font text-2xl font-medium mb-1" contenteditable="false">Thomas</h3>
-        <p class="text-xs mb-2 text-[#6b5d4f]" contenteditable="false">Témoin du marié</p>
-        <a href="tel:+33600000000" class="text-sm font-medium text-[#a8533e] hover:opacity-70 transition" contenteditable="false">06 00 00 00 00</a>
+        <h3 class="editable-text display-font text-2xl font-medium mb-1">Thomas</h3>
+        <p class="editable-text text-xs mb-2 text-[#6b5d4f]">Témoin du marié</p>
+        <a href="tel:+33600000000" class="editable-text text-sm font-medium text-[#a8533e] hover:opacity-70 transition">06 00 00 00 00</a>
       </div>
       <div class="text-center p-8 rounded-sm bg-[#f1e9dd] shadow-sm reveal">
         <i data-lucide="phone" class="mx-auto mb-4 text-[#2a7d7d] w-9 h-9"></i>
-        <h3 class="display-font text-2xl font-medium mb-1" contenteditable="false">Julie</h3>
-        <p class="text-xs mb-2 text-[#6b5d4f]" contenteditable="false">Wedding Planner</p>
-        <a href="tel:+33611223344" class="text-sm font-medium text-[#2a7d7d] hover:opacity-70 transition" contenteditable="false">06 11 22 33 44</a>
+        <h3 class="editable-text display-font text-2xl font-medium mb-1">Julie</h3>
+        <p class="editable-text text-xs mb-2 text-[#6b5d4f]">Wedding Planner</p>
+        <a href="tel:+33611223344" class="editable-text text-sm font-medium text-[#2a7d7d] hover:opacity-70 transition">06 11 22 33 44</a>
       </div>
     </div>
   </section>
@@ -594,50 +599,49 @@ Réception &amp; soirée dès 18h00</p>
   <!-- Nous contacter -->
   <section id="contact" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-4xl mx-auto text-center reveal">
-      <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Nous contacter</h2>
+      <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Nous contacter</h2>
       <p class="divider-ornament text-[#8b5a7d] mb-8"></p>
-      <p class="max-w-2xl mx-auto leading-relaxed mb-16 text-[#6b5d4f] font-bold text-xl" contenteditable="false">Une question sur le mariage, le trajet ou l'hébergement ?<br>N'hésitez pas à nous écrire ou nous appeler.</p>
+      <p class="editable-text max-w-2xl mx-auto leading-relaxed mb-16 text-[#6b5d4f] font-bold text-xl">Une question sur le mariage, le trajet ou l'hébergement ?<br>N'hésitez pas à nous écrire ou nous appeler.</p>
     </div>
     
     <div class="max-w-4xl mx-auto grid sm:grid-cols-3 gap-8 mb-16">
       <div class="text-center p-8 rounded-sm bg-[#faf6f0] shadow-sm reveal">
         <i data-lucide="mail" class="mx-auto mb-4 text-[#d4a95f] w-9 h-9"></i>
-        <h3 class="display-font text-2xl font-medium mb-2" contenteditable="false">Par email</h3>
-        <p class="text-sm break-words text-[#a8533e] font-medium" contenteditable="false">maglaville@gmail.com<br>sebastienkhai@gmail.com</p>
+        <h3 class="editable-text display-font text-2xl font-medium mb-2">Par email</h3>
+        <p class="editable-text text-sm break-words text-[#a8533e] font-medium">maglaville@gmail.com<br>sebastienkhai@gmail.com</p>
       </div>
       <div class="text-center p-8 rounded-sm bg-[#faf6f0] shadow-sm reveal">
         <i data-lucide="phone" class="mx-auto mb-4 text-[#a8533e] w-9 h-9"></i>
-        <h3 class="display-font text-2xl font-medium mb-2" contenteditable="false">Par téléphone</h3>
-        <p class="text-sm text-[#a8533e] font-medium" contenteditable="false">06 75 00 11 51<br>06 29 14 03 38</p>
+        <h3 class="editable-text display-font text-2xl font-medium mb-2">Par téléphone</h3>
+        <p class="editable-text text-sm text-[#a8533e] font-medium">06 75 00 11 51<br>06 29 14 03 38</p>
       </div>
       <div class="text-center p-8 rounded-sm bg-[#faf6f0] shadow-sm reveal">
         <i data-lucide="map-pin" class="mx-auto mb-4 text-[#8b5a7d] w-9 h-9"></i>
-        <h3 class="display-font text-2xl font-medium mb-2" contenteditable="false">Adresse</h3>
-        <p class="text-sm leading-relaxed text-[#6b5d4f] whitespace-pre-line" contenteditable="false">9 D route des Eycards
+        <h3 class="editable-text display-font text-2xl font-medium mb-2">Adresse</h3>
+        <p class="editable-text text-sm leading-relaxed text-[#6b5d4f] whitespace-pre-line">9 D route des Eycards
 33460 Margaux-Cantenac</p>
       </div>
     </div>
 
-    <!-- Formulaire de message direct -->
     <div class="max-w-2xl mx-auto bg-[#faf6f0] rounded-sm p-8 shadow-sm reveal">
-      <h3 class="display-font text-2xl font-medium mb-6" contenteditable="false">Envoyez-nous un message</h3>
+      <h3 class="editable-text display-font text-2xl font-medium mb-6">Envoyez-nous un message</h3>
       <form id="contact-form" class="space-y-5">
         <div>
-          <label for="contact-name" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Votre nom</label>
+          <label for="contact-name" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Votre nom</label>
           <input type="text" id="contact-name" class="rsvp-input w-full" placeholder="Ex : Marie Dupont">
         </div>
         <div>
-          <label for="contact-form-email" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Votre email</label>
+          <label for="contact-form-email" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Votre email</label>
           <input type="email" id="contact-form-email" class="rsvp-input w-full" placeholder="votre.email@exemple.com">
         </div>
         <div>
-          <label for="contact-form-message" class="block text-sm mb-2 text-[#6b5d4f]" contenteditable="false">Votre message</label>
+          <label for="contact-form-message" class="editable-text block text-sm mb-2 text-[#6b5d4f]">Votre message</label>
           <textarea id="contact-form-message" rows="4" class="rsvp-input resize-none w-full" placeholder="Écrivez votre message ici…"></textarea>
         </div>
         <p id="contact-error" class="hidden text-sm text-[#a3564f]">Erreur lors de l'envoi.</p>
         <button type="submit" id="contact-submit" class="w-full py-4 rounded-sm bg-[#4a3f35] text-[#faf6f0] uppercase tracking-widest text-sm font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
           <i id="contact-spinner" data-lucide="loader-2" class="spin hidden w-5 h-5"></i>
-          <span contenteditable="false">Envoyer</span>
+          <span>Envoyer</span>
         </button>
       </form>
     </div>
@@ -646,21 +650,21 @@ Réception &amp; soirée dès 18h00</p>
   <!-- Footer -->
   <footer class="w-full py-16 px-6 bg-[#4a3f35] text-center text-white">
     <i data-lucide="flower" class="mx-auto mb-4 text-[#d4a95f] w-11 h-11"></i>
-    <p class="display-font italic text-2xl text-[#f1e9dd] mb-2" contenteditable="false">Nous avons hâte de célébrer ce jour avec vous</p>
-    <p class="uppercase tracking-[0.3em] text-sm text-[#b89a6d]" contenteditable="false">Magalie &amp; Sébastien</p>
+    <p class="editable-text display-font italic text-2xl text-[#f1e9dd] mb-2">Nous avons hâte de célébrer ce jour avec vous</p>
+    <p class="editable-text uppercase tracking-[0.3em] text-sm text-[#b89a6d]">Magalie &amp; Sébastien</p>
   </footer>
 
-  <!-- SÉLECTEUR DE FICHIER INVISIBLE POUR UPLOAD PHOTO -->
-  <input type="file" id="image-file-input" accept="image/*" class="hidden">
+  <!-- SÉLECTEUR FICHIER INVISIBLE -->
+  <input type="file" id="local-file-picker" accept="image/*" class="hidden">
 
-  <!-- SCRIPTS & LOGIQUE DU SITE -->
+  <!-- SCRIPTS DU SITE -->
   <script>
     const GOOGLE_SCRIPT_URL = 'VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI';
     const WEDDING_DATE = '2027-07-31T15:00:00';
 
     lucide.createIcons();
 
-    // 1. Navigation & Scroll Animations
+    // 1. Nav & Scroll
     const navbar = document.querySelector('nav');
     let navTimeout;
     function showNav() { navbar.classList.remove('nav-hidden'); clearTimeout(navTimeout); }
@@ -682,7 +686,7 @@ Réception &amp; soirée dès 18h00</p>
     }, { threshold: 0.15 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // 2. Décompte Temps Réel
+    // 2. Décompte
     const targetTime = new Date(WEDDING_DATE).getTime();
     function updateCountdown() {
       let diff = Math.max(0, targetTime - Date.now());
@@ -708,7 +712,7 @@ Réception &amp; soirée dès 18h00</p>
     setupCarousel('lodging-carousel', 'lodging-prev', 'lodging-next');
     setupCarousel('activity-carousel', 'activity-prev', 'activity-next');
 
-    // 4. Champs Noms d'invités Dynamiques
+    // 4. RSVP Dynamic Fields
     function updateGuestNameFields() {
       const adults = parseInt(document.getElementById('rsvp-adults').value, 10) || 0;
       const children = parseInt(document.getElementById('rsvp-children').value, 10) || 0;
@@ -718,7 +722,7 @@ Réception &amp; soirée dès 18h00</p>
       if (total === 0) return;
 
       const heading = document.createElement('p');
-      heading.className = 'uppercase tracking-widest text-xs mb-3 text-[#6b5d4f] font-semibold';
+      heading.className = 'editable-text uppercase tracking-widest text-xs mb-3 text-[#6b5d4f] font-semibold';
       heading.textContent = 'Noms des participants';
       container.appendChild(heading);
 
@@ -737,7 +741,7 @@ Réception &amp; soirée dès 18h00</p>
     document.getElementById('rsvp-children').addEventListener('change', updateGuestNameFields);
     updateGuestNameFields();
 
-    // 5. Envoi Formulaire RSVP
+    // 5. RSVP Form
     document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const errorEl = document.getElementById('rsvp-error');
@@ -783,7 +787,7 @@ Réception &amp; soirée dès 18h00</p>
       }
     });
 
-    // 6. Envoi Formulaire Contact
+    // 6. Contact Form
     document.getElementById('contact-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('contact-name').value.trim();
@@ -811,105 +815,138 @@ Réception &amp; soirée dès 18h00</p>
     });
 
     // =========================================================================
-    // 7. MODE ÉDITION INVISIBLE ET FORMATAGE DÉTAILLÉ
+    // 7. MOTEUR D'ÉDITION FIABLE & FORMATAGE DE TEXTE CIBLÉ
     // =========================================================================
     let clickCount = 0;
-    let activeImageTarget = null;
+    let targetImgElement = null;
+    let savedRange = null;
 
-    // Déclenchement par 5 clics sur le logo "M & S"
+    // Déclenchement Édition
     document.getElementById('logo-trigger').addEventListener('click', (e) => {
       clickCount++;
-      if (clickCount >= 5) {
-        e.preventDefault();
-        enableEditMode();
-      }
+      if (clickCount >= 5) { e.preventDefault(); enableEditMode(); }
       setTimeout(() => clickCount = 0, 3000);
     });
 
-    // Déclenchement par ?edit=true dans l'URL
     if (new URLSearchParams(window.location.search).get('edit') === 'true') {
       enableEditMode();
     }
+
+    // Gestion de la sauvegarde automatique de la sélection de texte
+    function saveSelection() {
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        savedRange = sel.getRangeAt(0);
+      }
+    }
+
+    function restoreSelection() {
+      if (savedRange) {
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(savedRange);
+      }
+    }
+
+    document.addEventListener('selectionchange', () => {
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0 && sel.anchorNode) {
+        let node = sel.anchorNode;
+        if (node.nodeType === 3) node = node.parentNode;
+        if (node && node.isContentEditable) {
+          savedRange = sel.getRangeAt(0);
+        }
+      }
+    });
 
     function enableEditMode() {
       document.body.classList.add('edit-mode');
       document.getElementById('admin-bar').classList.remove('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-      document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'true'));
+      document.querySelectorAll('.editable-text').forEach(el => {
+        el.setAttribute('contenteditable', 'true');
+      });
+      alert("Mode Édition Activé !\n\n• Sélectionnez du texte puis cliquez sur 'B', 'I', 'Couleur', etc. pour le modifier.\n• Cliquez directement sur une image pour la changer.\n• Sauvegardez et téléchargez votre fichier index.html une fois terminé.");
     }
 
     function disableEditMode() {
       document.body.classList.remove('edit-mode');
       document.getElementById('admin-bar').classList.add('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
+      document.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
     }
 
-    // Formatage fin du texte sélectionné (WYSIWYG)
-    function formatText(cmd, value = null) {
-      document.execCommand(cmd, false, value);
-    }
-
-    function formatTextColor(colorHex) {
-      document.execCommand('foreColor', false, colorHex);
-    }
-
-    // Gestion fiable du remplacement des photos
-    function handleImageClick(imgEl) {
-      if (!document.body.classList.contains('edit-mode')) return;
-      activeImageTarget = imgEl;
-
-      const action = prompt("Mettre à jour l'image :\n1. Importer une photo depuis mon ordinateur\n2. Saisir l'URL d'une image web");
-      if (action === '1') {
-        document.getElementById('image-file-input').click();
-      } else if (action === '2') {
-        const url = prompt("Collez l'URL de votre image :");
-        if (url && url.trim()) activeImageTarget.src = url.trim();
+    // Commandes de mise en forme ciblée
+    function applyFormat(cmd, value = null) {
+      restoreSelection();
+      if (!value) {
+        document.execCommand(cmd, false, null);
+      } else {
+        document.execCommand(cmd, false, value);
       }
     }
 
-    document.getElementById('image-file-input').addEventListener('change', function(e) {
+    function applyColor(hexColor) {
+      restoreSelection();
+      document.execCommand('foreColor', false, hexColor);
+    }
+
+    // Remplacement d'image
+    function changeImage(imgEl) {
+      if (!document.body.classList.contains('edit-mode')) return;
+      targetImgElement = imgEl;
+      
+      const method = prompt("Remplacer l'image :\n1. Importer un fichier depuis votre ordinateur\n2. Saisir l'URL d'une image en ligne");
+      if (method === '1') {
+        document.getElementById('local-file-picker').click();
+      } else if (method === '2') {
+        const url = prompt("Collez l'URL de votre image :");
+        if (url && url.trim()) targetImgElement.src = url.trim();
+      }
+    }
+
+    document.getElementById('local-file-picker').addEventListener('change', function(e) {
       const file = e.target.files[0];
-      if (file && activeImageTarget) {
+      if (file && targetImgElement) {
         const reader = new FileReader();
-        reader.onload = function(evt) {
-          activeImageTarget.src = evt.target.result;
+        reader.onload = function(event) {
+          targetImgElement.src = event.target.result;
         };
         reader.readAsDataURL(file);
       }
     });
 
-    // Ajout de carte carrousel
+    // Ajout carrousel
     function addCarouselCard(carouselId) {
       const carousel = document.getElementById(carouselId);
-      const title = prompt("Titre de la carte :", "Titre");
-      const desc = prompt("Description :", "Texte descriptif...");
+      const title = prompt("Titre :", "Titre du lieu");
       if (!title) return;
+      const desc = prompt("Description :", "Description...");
 
       const article = document.createElement('article');
       article.className = 'bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start';
       article.innerHTML = `
-        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="${title}"></div>
+        <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="${title}"></div>
         <div class="p-5">
-          <h4 class="display-font text-2xl font-medium mb-2" contenteditable="true">${title}</h4>
-          <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="true">${desc}</p>
+          <h4 class="editable-text display-font text-2xl font-medium mb-2" contenteditable="true">${title}</h4>
+          <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]" contenteditable="true">${desc}</p>
         </div>
       `;
       carousel.appendChild(article);
     }
 
-    // Ajout à la galerie
+    // Ajout galerie
     function addGalleryImage() {
       const grid = document.getElementById('gallery-grid');
       const div = document.createElement('div');
       div.className = 'img-wrapper';
-      div.onclick = function() { handleImageClick(this.querySelector('img')); };
+      div.onclick = function() { changeImage(this.querySelector('img')); };
       div.innerHTML = `<img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal in-view" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Galerie">`;
       grid.appendChild(div);
-      handleImageClick(div.querySelector('img'));
+      changeImage(div.querySelector('img'));
     }
 
-    // Télécharger le fichier mis à jour
+    // Téléchargement HTML
     function downloadUpdatedHTML() {
       disableEditMode();
       const htmlContent = "<!doctype html>\n" + document.documentElement.outerHTML;
