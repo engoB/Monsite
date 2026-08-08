@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Protection anti-référencement Google / moteurs de recherche -->
+  <meta name="robots" content="noindex, nofollow">
+  
+  <title>Notre Mariage — Magalie &amp; Sébastien</title>
+  
+  <!-- Script de protection par mot de passe -->
+  <script>
+    (function() {
+      const MOT_DE_PASSE = "oui";
+      if (sessionStorage.getItem("invite_autorise") !== "true") {
+        const saisie = prompt("Veuillez entrer le mot de passe pour accéder au site :");
+        if (saisie && saisie.trim().toLowerCase() === MOT_DE_PASSE) {
+          sessionStorage.setItem("invite_autorise", "true");
+        } else {
+          alert("Mot de passe incorrect.");
+          document.write("<div style='font-family: sans-serif; text-align: center; margin-top: 100px; color: #4a3f35;'><h1>Accès non autorisé</h1><p>Veuillez rafraîchir la page et entrer le bon mot de passe.</p></div>");
+          window.stop();
+        }
+      }
+    })();
+  </script>
+
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #faf6f0;
+      --bg-secondary: #f1e9dd;
+      --text-main: #4a3f35;
+      --text-muted: #6b5d4f;
+      --accent-gold: #d4a95f;
+      --accent-terracotta: #a8533e;
+      --accent-plum: #8b5a7d;
+      --accent-teal: #2a7d7d;
+    }
+
+    body { font-family: 'Alegreya Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-main); }
+    .display-font { font-family: 'Cormorant Garamond', serif; }
+    
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+    
+    .hero-overlay { background: linear-gradient(180deg, rgba(60,50,40,0.35) 0%, rgba(60,50,40,0.15) 40%, rgba(60,50,40,0.6) 100%); }
+    
+    .divider-ornament::before, .divider-ornament::after {
+      content: ""; display: inline-block; width: 48px; height: 2px;
+      background: linear-gradient(90deg, var(--accent-gold), var(--accent-plum)); vertical-align: middle; margin: 0 14px;
+    }
+    
+    nav { transition: transform 0.3s ease; }
+    nav.nav-hidden { transform: translateY(-100%); }
+    
+    .rsvp-input {
+      width: 100%; background: #ffffff; border: 1px solid #e5dccf; border-radius: 4px;
+      padding: 0.75rem 1rem; color: var(--text-main); transition: border-color .2s, box-shadow .2s;
+    }
+    .rsvp-input:focus { outline: none; border-color: #b89a6d; box-shadow: 0 0 0 3px rgba(184,154,109,0.18); }
+    
+    .choice-label {
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      padding: 1rem; border: 1px solid #e5dccf; border-radius: 4px; background: #ffffff;
+      cursor: pointer; text-align: center; transition: all .2s; font-weight: 500;
+    }
+    .choice-label:hover { border-color: #b89a6d; }
+    .choice-input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice-input:checked + .choice-label { border-color: #b89a6d; background: #f1e9dd; box-shadow: inset 0 0 0 1px #b89a6d; }
+    
+    .spin { animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .timeline-item { position: relative; padding-left: 2.5rem; }
+    .timeline-item::before { content: ""; position: absolute; left: 0.75rem; top: 0; bottom: 0; width: 2px; background: #e5dccf; }
+    .timeline-item::after { content: ""; position: absolute; left: 0.45rem; top: 0.4rem; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); border: 2px solid var(--bg-primary); }
+    .timeline-item:last-child::before { display: none; }
+  </style>
+</head>
+<body class="min-h-screen w-full">
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 w-full z-50 bg-[#faf6f0]/90 backdrop-blur-sm border-b border-[#e5dccf]">
+    <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+      <a href="#accueil" class="display-font text-2xl font-semibold tracking-wide text-[#4a3f35]">M &amp; S</a>
+      <button id="menu-toggle" class="md:hidden p-2 text-[#4a3f35]" aria-label="Menu"><i data-lucide="menu"></i></button>
+      <div id="nav-links" class="hidden md:flex items-center gap-6 text-xs uppercase tracking-widest font-medium text-[#4a3f35]">
+        <a href="#accueil" class="hover:opacity-60 transition">Accueil</a>
+        <a href="#histoire" class="hover:opacity-60 transition">Histoire</a>
+        <a href="#lieux" class="hover:opacity-60 transition">Lieux</a>
+        <a href="#programme" class="hover:opacity-60 transition">Programme</a>
+        <a href="#team" class="hover:opacity-60 transition">Team</a>
+        <a href="#rsvp" class="hover:opacity-60 transition">RSVP</a>
+        <a href="#sejour" class="hover:opacity-60 transition">Séjour</a>
+        <a href="#galerie" class="hover:opacity-60 transition">Galerie</a>
+        <a href="#contact" class="hover:opacity-60 transition">Contacts</a>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 flex-col gap-2 border-t border-[#e5dccf] bg-[#faf6f0] text-sm uppercase tracking-widest">
+      <a href="#accueil" class="py-2">Accueil</a>
+      <a href="#histoire" class="py-2">Histoire</a>
+      <a href="#lieux" class="py-2">Lieux</a>
+      <a href="#programme" class="py-2">Programme</a>
+      <a href="#team" class="py-2">Team</a>
+      <a href="#rsvp" class="py-2">RSVP</a>
+      <a href="#sejour" class="py-2">Séjour</a>
+      <a href="#galerie" class="py-2">Galerie</a>
+      <a href="#contact" class="py-2">Contacts</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header id="accueil" class="relative w-full h-screen flex items-center justify-center text-center overflow-hidden">
+    <img id="hero-img" loading="lazy" class="absolute inset-0 w-full h-full object-cover" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Château Balac">
+    <div class="hero-overlay absolute inset-0"></div>
+    <div class="absolute bottom-16 right-8 md:right-16 z-10 text-right reveal">
+      <p class="uppercase tracking-[0.35em] text-sm mb-2 text-[#faf6f0] font-medium">Enfin, Nous nous marions</p>
+      <h1 class="display-font text-5xl md:text-7xl font-medium text-white mb-2">Magalie &amp; Sébastien</h1>
+      <p class="display-font italic tracking-wide text-2xl text-[#f1e9dd]">31 Juillet 2027</p>
+    </div>
+    <a href="#histoire" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 text-white animate-bounce" aria-label="Défiler">
+      <i data-lucide="chevron-down" class="w-8 h-8"></i>
+    </a>
+  </header>
+
+  <!-- Histoire -->
+  <section id="histoire" class="w-full py-24 px-6 scroll-mt-16">
+    <div class="max-w-5xl mx-auto text-center reveal">
+      <h2 class="display-font text-4xl font-medium mb-2">Notre Histoire</h2>
+      <p class="divider-ornament mb-16"></p>
+    </div>
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
+      <article class="reveal">
+        <img loading="lazy" class="w-full h-72 object-cover rounded-sm shadow-md mb-6" src="https://images.pexels.com/photos/22707222/pexels-photo-22707222.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Rencontre">
+        <h3 class="display-font text-2xl font-medium mb-3">La première rencontre</h3>
+        <p class="leading-relaxed text-[#6b5d4f]">Tout a commencé par un après-midi d'automne, autour d'un <strong>café partagé</strong> entre amis. Un regard, un sourire, et une conversation qui ne s'est <strong>jamais vraiment arrêtée</strong> depuis ce jour-là.</p>
+      </article>
+      <article class="reveal">
+        <img loading="lazy" class="w-full h-72 object-cover rounded-sm shadow-md mb-6" src="https://images.pexels.com/photos/29734262/pexels-photo-29734262.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Demande">
+        <h3 class="display-font text-2xl font-medium mb-3">La demande</h3>
+        <p class="leading-relaxed text-[#6b5d4f]">Cinq ans plus tard, au sommet d'une colline baignée de <strong>lumière dorée</strong>, la question la plus importante a été posée. La réponse fut un <strong>oui</strong> rempli de larmes de joie.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Lieux -->
+  <section id="lieux" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
+    <div class="max-w-5xl mx-auto text-center reveal">
+      <h2 class="display-font text-4xl font-medium mb-2">Lieux &amp; Horaires</h2>
+      <p class="divider-ornament mb-16"></p>
+    </div>
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
+      <div class="bg-[#faf6f0] rounded-sm p-8 shadow-sm reveal flex flex-col justify-between">
+        <div>
+          <i data-lucide="landmark" class="mb-4 text-[#a8533e] w-9 h-9"></i>
+          <h3 class="display-font text-2xl font-medium mb-3">Mairie</h3>
+          <p class="text-sm leading-relaxed mb-4 text-[#6b5d4f] whitespace-pre-line">Mairie de Saint-Laurent-Médoc
+2 Place de la Mairie
+33112 Saint-Laurent-Médoc
+
+Cérémonie civile à 11h00</p>
+          <a href="https://maps.google.com/?q=Mairie+de+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-[#a8533e] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
+        </div>
+        <img loading="lazy" class="w-full h-48 object-cover rounded-sm mt-2" src="https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Mairie">
+      </div>
+      <div class="bg-[#faf6f0] rounded-sm p-8 shadow-sm reveal flex flex-col justify-between">
+        <div>
+          <i data-lucide="castle" class="mb-4 text-[#8b5a7d] w-9 h-9"></i>
+          <h3 class="display-font text-2xl font-medium mb-3">Château Balac</h3>
+          <p class="text-sm leading-relaxed mb-4 text-[#6b5d4f] whitespace-pre-line">BALLAC D1215
+33112 Saint-Laurent-Médoc
+
+Cérémonie laïque à 15h00
+Réception &amp; soirée dès 18h00</p>
+          <a href="https://maps.google.com/?q=Chateau+Balac+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-[#8b5a7d] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
+        </div>
+        <img loading="lazy" class="w-full h-48 object-cover rounded-sm mt-2" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Château Balac">
+      </div>
+    </div>
+  </section>
+
+  <!-- Programme -->
+  <section id="programme" class="w-full py-24 px-6 scroll-mt-16">
+    <div class="max-w-5xl mx-auto text-center reveal">
+      <h2 class="display-font text-4xl font-medium mb-2">Programme de la journée</h2>
+      <p class="divider-ornament mb-16"></p>
+    </div>
+    <div class="max-w-2xl mx-auto space-y-8 reveal">
+      <div class="timeline-item pb-8">
+        <h4 class="font-bold mb-1">11h00 — Mairie</h4>
+        <p class="text-sm leading-relaxed text-[#6b5d4f]">Cérémonie civile à la <strong>Mairie de Saint-Laurent-Médoc</strong>. Merci d'arriver 15 minutes en avance.</p>
+      </div>
+      <div class="timeline-item pb-8">
+        <h4 class="font-bold mb-1">14h30 — Accueil au Château</h4>
+        <p class="text-sm leading-relaxed text-[#6b5d4f]">Arrivée des invités au <strong>Château Balac</strong>. Installation et rafraîchissements de bienvenue.</p>
+      </div>
+      <div class="timeline-item pb-8">
+        <h4 class="font-bold mb-1">15h00 — Cérémonie laïque</h4>
+        <p class="text-sm leading-relaxed text-[#6b5d4f]">Cérémonie en plein air dans les <strong>jardins du château</strong>. Prévoir chapeau et crème solaire !</p>
+      </div>
+      <div class="timeline-item pb-8">
+        <h4 class="font-bold mb-1">16h30 — Vin d'honneur</h4>
+        <p class="text-sm leading-relaxed text-[#6b5d4f]"><strong>Cocktail</strong> et <strong>photos de groupe</strong> dans le parc arboré.</p>
+      </div>
+      <div class="timeline-item pb-8">
+        <h4 class="font-bold mb-1">19h00 — Dîner</h4>
+        <p class="text-sm leading-relaxed text-[#6b5d4f]"><strong>Dîner assis</strong> dans la grande salle de réception. Menu gastronomique et vins du domaine.</p>
+      </div>
+      <div class="timeline-item">
+        <h4 class="font-bold mb-1">22h00 — Soirée dansante</h4>
+        <p class="text-sm leading-relaxed text-[#6b5d4f]"><strong>Ouverture du bal</strong>, musique live et <strong>DJ</strong> jusqu'au bout de la nuit !</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section id="team" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
+    <div class="max-w-5xl mx-auto text-center reveal">
+      <h2 class="display-font text-4xl font-medium mb-2">La Team Mariés</h2>
+      <p class="divider-ornament mb-16"></p>
+    </div>
+    <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div class="text-center reveal">
+        <img loading="lazy" class="w-28 h-28 mx-auto rounded-full object-cover shadow-md mb-4" src="https://images.pexels.com/photos/3811846/pexels-photo-3811846.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Sophie">
+        <h4 class="display-font text-xl font-medium mb-1">Sophie</h4>
+        <p class="text-xs text-[#6b5d4f]">Témoin de la mariée</p>
+      </div>
+      <div class="text-center reveal">
+        <img loading="lazy" class="w-28 h-28 mx-auto rounded-full object-cover shadow-md mb-4" src="https://images.pexels.com/photos/3778603/pexels-photo-3778603.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Thomas">
+        <h4 class="display-font text-xl font-medium mb-1">Thomas</h4>
+        <p class="text-xs text-[#6b5d4f]">Témoin du marié</p>
+      </div>
+      <div class="text-center reveal">
+        <img loading="lazy" class="w-28 h-28 mx-auto rounded-full object-cover shadow-md mb-4" src="https://images.pexels.com/photos/37346906/pexels-photo-37346906.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Camille">
+        <h4 class="display-font text-xl font-medium mb-1">Camille</h4>
+        <p class="text-xs text-[#6b5d4f]">Demoiselle d'honneur</p>
+      </div>
+      <div class="text-center reveal">
+        <img loading="lazy" class="w-28 h-28 mx-auto rounded-full object-cover shadow-md mb-4" src="https://images.pexels.com/photos/18963011/pexels-photo-18963011.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Antoine">
+        <h4 class="display-font text-xl font-medium mb-1">Antoine</h4>
+        <p class="text-xs text-[#6b5d4f]">Garçon d'honneur</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Décompte -->
+  <section id="jourj" class="w-full py-24 px-6 scroll-mt-16">
+    <div class="max-w-5xl mx-auto text-center reveal mb-16">
+      <h2 class="display-font text-4xl font-medium mb-2">Le Jour J, c'est dans...</h2>
+      <p class="divider-ornament"></p>
+    </div>
+    <div class="max-w-3xl mx-auto grid grid-cols-4 gap-3 md:gap-6 mb-16 reveal">
+      <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#d4a95f]">
+        <div id="cd-days" class="display-font text-3xl md:text-5xl">00</div>
+        <div class="uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]">Jours</div>
+      </div>
+      <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#a8533e]">
+        <div id="cd-hours" class="display-font text-3xl md:text-5xl">00</div>
+        <div class="uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]">Heures</div>
+      </div>
+      <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#8b5a7d]">
+        <div id="cd-minutes" class="display-font text-3xl md:text-5xl">00</div>
+        <div class="uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]">Minutes</div>
+      </div>
+      <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#2a7d7d]">
+        <div id="cd-seconds" class="display-font text-3xl md:text-5xl">00</div>
+        <div class="uppercase tracking-widest text-xs mt-1 text-[#6b5d4f]">Secondes</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSVP -->
+  <section id="rsvp" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
+    <div class="max-w-2xl mx-auto text-center reveal">
+      <h2 class="display-font text-4xl font-medium mb-2">Confirmez votre présence</h2>
+      <p class="divider-ornament mb-8"></p>
+      <p class="leading-relaxed mb-12 text-[#2a7d7d] font-bold text-lg">Votre réponse nous est <strong>précieuse</strong> pour préparer ce grand jour.<br>Merci de nous répondre avant le <strong>1er mai 2027</strong>.</p>
+    </div>
+
+    <form id="rsvp-form" class="max-w-2xl mx-auto reveal space-y-5">
+      <fieldset>
+        <legend class="uppercase tracking-widest text-xs mb-3 text-[#6b5d4f] font-semibold">Votre réponse</legend>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="relative">
+            <input type="radio" id="resp-oui" name="response" value="oui" class="choice-input">
+            <label for="resp-oui" class="choice-label">Oui, avec joie !</label>
+          </div>
+          <div class="relative">
+            <input type="radio" id="resp-temps" name="response" value="temps" class="choice-input">
+            <label for="resp-temps" class="choice-label">Besoin de temps</label>
+          </div>
+          <div class="relative">
+            <input type="radio" id="resp-non" name="response" value="non" class="choice-input">
+            <label for="resp-non" class="choice-label">Je ne pourrai pas</label>
+          </div>
+        </div>
+      </fieldset>
+
+      <div>
+        <label for="rsvp-family" class="block text-sm mb-2 text-[#6b5d4f]">Famille / Groupe</label>
+        <input type="text" id="rsvp-family" class="rsvp-input" placeholder="Ex : Famille Martin, amis de la mariée…">
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label for="rsvp-adults" class="block text-sm mb-2 text-[#6b5d4f]">Nombre d'adultes</label>
+          <input type="number" id="rsvp-adults" min="0" max="20" value="1" class="rsvp-input">
+        </div>
+        <div>
+          <label for="rsvp-children" class="block text-sm mb-2 text-[#6b5d4f]">Nombre d'enfants</label>
+          <input type="number" id="rsvp-children" min="0" max="20" value="0" class="rsvp-input">
+        </div>
+      </div>
+
+      <div id="guest-names-container"></div>
+
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label for="rsvp-email" class="block text-sm mb-2 text-[#6b5d4f]">Email</label>
+          <input type="email" id="rsvp-email" class="rsvp-input" placeholder="votre.email@exemple.com">
+        </div>
+        <div>
+          <label for="rsvp-phone" class="block text-sm mb-2 text-[#6b5d4f]">Téléphone</label>
+          <input type="tel" id="rsvp-phone" class="rsvp-input" placeholder="06 12 34 56 78">
+        </div>
+      </div>
+
+      <div>
+        <label for="rsvp-chanson" class="block text-sm mb-2 text-[#6b5d4f]">La chanson qui vous fera danser à coup sûr ? 🎶</label>
+        <input type="text" id="rsvp-chanson" class="rsvp-input" placeholder="Ex : Daft Punk — Get Lucky">
+      </div>
+
+      <div>
+        <label for="rsvp-message" class="block text-sm mb-2 text-[#6b5d4f]">Un mot pour les mariés (allergies, régimes, vœux…)</label>
+        <textarea id="rsvp-message" rows="3" class="rsvp-input resize-none" placeholder="Message…"></textarea>
+      </div>
+
+      <p id="rsvp-error" class="hidden text-sm text-[#a3564f]" role="alert"></p>
+
+      <button type="submit" id="rsvp-submit" class="w-full py-4 rounded-sm bg-[#4a3f35] text-[#faf6f0] uppercase tracking-widest text-sm font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
+        <i id="rsvp-spinner" data-lucide="loader-2" class="spin hidden w-5 h-5"></i>
+        <span>Envoyer ma réponse</span>
+      </button>
+    </form>
+
+    <div id="rsvp-success" class="hidden max-w-2xl mx-auto text-center bg-[#faf6f0] rounded-sm p-12 shadow-sm">
+      <i data-lucide="flower" class="mx-auto mb-4 text-[#d4a95f] w-11 h-11"></i>
+      <h3 class="display-font text-3xl font-medium mb-3">Merci du fond du cœur !</h3>
+      <p class="text-[#6b5d4f]">Votre réponse a bien été enregistrée dans notre liste d'invités. Nous avons hâte de célébrer cela avec vous !</p>
+    </div>
+  </section>
+
+  <!-- Séjour -->
+  <section id="sejour" class="w-full py-24 px-6 scroll-mt-16">
+    <div class="max-w-5xl mx-auto text-center reveal">
+      <h2 class="display-font text-4xl font-medium mb-2">Organisez votre séjour</h2>
+      <p class="divider-ornament mb-8"></p>
+      <p class="leading-relaxed mb-16 max-w-3xl mx-auto text-[#6b5d4f] font-bold text-lg">Vous venez de loin ? Voici quelques adresses pour <strong>dormir sur place</strong> et <strong>profiter de la région</strong>.</p>
+    </div>
+    
+    <!-- Hébergements Carousel -->
+    <div class="max-w-5xl mx-auto mb-16">
+      <h3 class="display-font text-3xl font-medium mb-6">Où dormir</h3>
+      <div id="lodging-carousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4" style="scrollbar-width:none;">
+        <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
+          <img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/2952663/pexels-photo-2952663.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Hôtel">
+          <div class="p-5">
+            <h4 class="display-font text-2xl font-medium mb-2">Hôtel du Domaine ★★★</h4>
+            <p class="text-xs leading-relaxed text-[#6b5d4f]">À 5 minutes du château. Chambres élégantes. Tarif préférentiel « Mariage M&amp;S ».</p>
+          </div>
+        </article>
+        <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
+          <img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/32289746/pexels-photo-32289746.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Chambres d'hôtes">
+          <div class="p-5">
+            <h4 class="display-font text-2xl font-medium mb-2">Chambres Les Vignes</h4>
+            <p class="text-xs leading-relaxed text-[#6b5d4f]">Maison de charme au cœur des vignobles, à 10 minutes du domaine.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Galerie Dynamique -->
+  <section id="galerie" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
+    <div class="max-w-5xl mx-auto text-center reveal">
+      <h2 class="display-font text-4xl font-medium mb-2">Galerie Photos</h2>
+      <p class="divider-ornament mb-16"></p>
+    </div>
+    <div id="gallery-grid" class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+  </section>
+
+  <!-- Contacts -->
+  <section id="contact" class="w-full py-24 px-6 scroll-mt-16">
+    <div class="max-w-4xl mx-auto text-center reveal">
+      <h2 class="display-font text-4xl font-medium mb-2">Nous contacter</h2>
+      <p class="divider-ornament mb-8"></p>
+      <p class="leading-relaxed mb-12 text-[#6b5d4f]">Une question sur le mariage, le trajet ou l'hébergement ? N'hésitez pas à nous écrire.</p>
+    </div>
+    
+    <div class="max-w-4xl mx-auto grid sm:grid-cols-3 gap-8 mb-16 text-center">
+      <div class="p-8 rounded-sm bg-[#f1e9dd] shadow-sm">
+        <i data-lucide="mail" class="mx-auto mb-4 text-[#d4a95f] w-9 h-9"></i>
+        <h3 class="display-font text-xl font-medium mb-2">Par email</h3>
+        <a href="mailto:maglaville@gmail.com" class="text-sm text-[#a8533e] hover:opacity-70 transition block">maglaville@gmail.com</a>
+        <a href="mailto:sebastienkhai@gmail.com" class="text-sm text-[#a8533e] hover:opacity-70 transition block">sebastienkhai@gmail.com</a>
+      </div>
+      <div class="p-8 rounded-sm bg-[#f1e9dd] shadow-sm">
+        <i data-lucide="phone" class="mx-auto mb-4 text-[#a8533e] w-9 h-9"></i>
+        <h3 class="display-font text-xl font-medium mb-2">Par téléphone</h3>
+        <p class="text-sm text-[#a8533e]">06 75 00 11 51<br>06 29 14 03 38</p>
+      </div>
+      <div class="p-8 rounded-sm bg-[#f1e9dd] shadow-sm">
+        <i data-lucide="map-pin" class="mx-auto mb-4 text-[#8b5a7d] w-9 h-9"></i>
+        <h3 class="display-font text-xl font-medium mb-2">Adresse</h3>
+        <p class="text-sm text-[#6b5d4f]">9 D route des Eycards<br>33460 Margaux-Cantenac</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="w-full py-16 px-6 bg-[#4a3f35] text-center text-white">
+    <i data-lucide="flower" class="mx-auto mb-4 text-[#d4a95f] w-11 h-11"></i>
+    <p class="display-font italic text-2xl text-[#f1e9dd] mb-2">Nous avons hâte de célébrer ce jour avec vous</p>
+    <p class="uppercase tracking-[0.3em] text-sm text-[#b89a6d]">Magalie &amp; Sébastien</p>
+  </footer>
+
+  <!-- SCRIPT DE CONFIGURATION ET D'INTERACTIVITÉ -->
+  <script>
+    // CONFIGURATION FACILE
+    const CONFIG = {
+      // Lien Google Apps Script pour enregistrer le RSVP dans Google Sheets
+      googleSheetScriptUrl: 'VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI',
+      
+      // Date du mariage
+      weddingDate: '2027-07-31T15:00:00',
+
+      // Photos de la galerie
+      galleryImages: [
+        'https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800',
+        'https://images.pexels.com/photos/22707222/pexels-photo-22707222.jpeg?auto=compress&cs=tinysrgb&w=800',
+        'https://images.pexels.com/photos/29734262/pexels-photo-29734262.jpeg?auto=compress&cs=tinysrgb&w=800',
+        'https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800'
+      ]
+    };
+
+    lucide.createIcons();
+
+    // Galerie
+    function renderGallery() {
+      const container = document.getElementById('gallery-grid');
+      if (!container) return;
+      container.innerHTML = CONFIG.galleryImages.map(url => `
+        <img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="${url}" alt="Galerie photo">
+      `).join('');
+    }
+    renderGallery();
+
+    // Nav auto-hide
+    const navbar = document.querySelector('nav');
+    let navTimeout;
+    function showNav() { navbar.classList.remove('nav-hidden'); clearTimeout(navTimeout); }
+    function scheduleNavHide() { navTimeout = setTimeout(() => navbar.classList.add('nav-hidden'), 3000); }
+    ['scroll','mousemove','touchstart'].forEach(e => window.addEventListener(e, () => { showNav(); scheduleNavHide(); }));
+
+    const toggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    toggle.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    mobileMenu.querySelectorAll('a').forEach(l => l.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+
+    // Scroll Reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          entry.target.style.transitionDelay = (i % 3) * 0.12 + 's';
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Décompte
+    const targetTime = new Date(CONFIG.weddingDate).getTime();
+    function updateCountdown() {
+      let diff = Math.max(0, targetTime - Date.now());
+      const d = Math.floor(diff / 86400000); diff -= d * 86400000;
+      const h = Math.floor(diff / 3600000); diff -= h * 3600000;
+      const m = Math.floor(diff / 60000); diff -= m * 60000;
+      const s = Math.floor(diff / 1000);
+      const pad = n => String(n).padStart(2, '0');
+      document.getElementById('cd-days').textContent = pad(d);
+      document.getElementById('cd-hours').textContent = pad(h);
+      document.getElementById('cd-minutes').textContent = pad(m);
+      document.getElementById('cd-seconds').textContent = pad(s);
+    }
+    updateCountdown(); setInterval(updateCountdown, 1000);
+
+    // Dynamic guest fields
+    function updateGuestNameFields() {
+      const adults = parseInt(document.getElementById('rsvp-adults').value, 10) || 0;
+      const children = parseInt(document.getElementById('rsvp-children').value, 10) || 0;
+      const total = adults + children;
+      const container = document.getElementById('guest-names-container');
+      container.innerHTML = '';
+      
+      if (total === 0) return;
+
+      const heading = document.createElement('p');
+      heading.className = 'uppercase tracking-widest text-xs mb-3 text-[#6b5d4f] font-semibold';
+      heading.textContent = 'Noms des participants';
+      container.appendChild(heading);
+
+      const grid = document.createElement('div');
+      grid.className = 'grid sm:grid-cols-2 gap-3';
+      for (let i = 0; i < total; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'guest-name-field rsvp-input';
+        input.placeholder = i < adults ? `Adulte ${i + 1}` : `Enfant ${i - adults + 1}`;
+        grid.appendChild(input);
+      }
+      container.appendChild(grid);
+    }
+    document.getElementById('rsvp-adults').addEventListener('change', updateGuestNameFields);
+    document.getElementById('rsvp-children').addEventListener('change', updateGuestNameFields);
+    updateGuestNameFields();
+
+    // Form submission
+    const form = document.getElementById('rsvp-form');
+    const errorEl = document.getElementById('rsvp-error');
+    const submitBtn = document.getElementById('rsvp-submit');
+    const spinner = document.getElementById('rsvp-spinner');
+    const successPanel = document.getElementById('rsvp-success');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.classList.add('hidden');
+
+      const resp = form.querySelector('input[name="response"]:checked');
+      const family = document.getElementById('rsvp-family').value.trim();
+      const email = document.getElementById('rsvp-email').value.trim();
+      const phone = document.getElementById('rsvp-phone').value.trim();
+      const adults = document.getElementById('rsvp-adults').value;
+      const children = document.getElementById('rsvp-children').value;
+      const message = document.getElementById('rsvp-message').value.trim();
+      const chanson = document.getElementById('rsvp-chanson').value.trim();
+
+      if (!resp) {
+        errorEl.textContent = 'Merci de choisir une réponse.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      if (!email && !phone) {
+        errorEl.textContent = 'Merci de fournir au moins un email ou un téléphone.';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      const guestNames = [];
+      document.querySelectorAll('.guest-name-field').forEach(input => {
+        if (input.value.trim()) guestNames.push(input.value.trim());
+      });
+
+      const payload = {
+        type: 'rsvp',
+        reponse: resp.value,
+        famille: family,
+        email,
+        telephone: phone,
+        adultes,
+        enfants: children,
+        noms_invites: guestNames.join(' | '),
+        chanson,
+        message,
+        date: new Date().toLocaleString('fr-FR')
+      };
+
+      submitBtn.disabled = true;
+      spinner.classList.remove('hidden');
+
+      try {
+        if (CONFIG.googleSheetScriptUrl && !CONFIG.googleSheetScriptUrl.includes('VOTRE_URL')) {
+          await fetch(CONFIG.googleSheetScriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        }
+        form.classList.add('hidden');
+        successPanel.classList.remove('hidden');
+      } catch (err) {
+        errorEl.textContent = 'Une erreur est survenue lors de l\'envoi. Veuillez réessayer.';
+        errorEl.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        spinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
