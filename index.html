@@ -30,10 +30,10 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   
-  <!-- Fonts d'origine exactement restaurées -->
+  <!-- Fonts Google Enrichies -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;700&family=Parisienne&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -89,13 +89,15 @@
     /* Mode Édition */
     .edit-mode [contenteditable="true"] { outline: 1px dashed #d4a95f !important; cursor: text; min-height: 1em; }
     .edit-mode [contenteditable="true"]:focus { outline: 2px solid #a8533e !important; background: rgba(212, 169, 95, 0.12); }
-    .edit-mode .img-wrapper { position: relative; cursor: pointer; overflow: hidden; }
+    .edit-mode .img-wrapper { position: relative; cursor: pointer; }
     .edit-mode .img-wrapper::after {
       content: "📷 Modifier / Repositionner"; position: absolute; inset: 0; background: rgba(0,0,0,0.55);
       color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold;
-      opacity: 0.85; transition: opacity 0.2s; border-radius: 4px; pointer-events: none;
+      opacity: 0.85; transition: opacity 0.2s; border-radius: 4px; pointer-events: none; z-index: 10;
     }
     .edit-mode .img-wrapper:hover::after { opacity: 1; background: rgba(168, 83, 62, 0.85); }
+    .custom-floating-element { transition: box-shadow 0.2s; }
+    .edit-mode .custom-floating-element { outline: 2px dashed #a8533e !important; }
   </style>
 </head>
 <body class="min-h-screen w-full relative">
@@ -113,49 +115,73 @@
     
     <!-- Formatting Tools -->
     <div class="flex flex-wrap items-center gap-2 bg-[#4a3f35] px-3 py-1.5 rounded border border-gray-600">
-      <span class="text-gray-300 font-semibold mr-1">Mise en forme :</span>
-      <button onmousedown="event.preventDefault()" onclick="applyFormat('bold')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded font-bold" title="Gras">B</button>
-      <button onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded italic" title="Italique">I</button>
-      <button onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded underline" title="Souligné">U</button>
+      <span class="text-gray-300 font-semibold mr-1">Texte :</span>
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('bold')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded font-bold" title="Gras">B</button>
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded italic" title="Italique">I</button>
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded underline" title="Souligné">U</button>
       
-      <label onmousedown="event.preventDefault()" class="flex items-center gap-1.5 bg-gray-700 px-2 py-1 rounded cursor-pointer">
+      <label onmousedown="event.preventDefault()" class="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded cursor-pointer">
         <span>Couleur</span>
-        <input type="color" onchange="applyColor(this.value)" class="w-5 h-5 bg-transparent border-0 cursor-pointer">
+        <input type="color" onchange="applyColor(this.value)" class="w-4 h-4 bg-transparent border-0 cursor-pointer">
       </label>
 
-      <select onfocus="saveSelection()" onchange="applyFormat('fontSize', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
-        <option value="">Taille...</option>
-        <option value="1">Très petit</option>
-        <option value="3">Normal</option>
-        <option value="5">Grand</option>
-        <option value="7">Très grand</option>
-      </select>
+      <!-- Curseur de taille de police (en pixels) -->
+      <div class="flex items-center gap-1.5 bg-gray-700 px-2 py-1 rounded">
+        <span>Taille :</span>
+        <input type="range" id="font-size-slider" min="10" max="90" value="18" oninput="applyFontSizePx(this.value)" class="w-20 cursor-pointer">
+        <span id="font-size-val" class="font-mono text-[#d4a95f]">18px</span>
+      </div>
 
-      <select onfocus="saveSelection()" onchange="applyFormat('fontName', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
-        <option value="">Police...</option>
-        <option value="Cormorant Garamond">Cormorant Garamond</option>
-        <option value="Alegreya Sans">Alegreya Sans</option>
+      <!-- Sélecteur étendu de polices -->
+      <select onfocus="saveSelection()" onchange="applyFontName(this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded cursor-pointer">
+        <option value="">Choisir une police...</option>
+        <option value="Cormorant Garamond">Cormorant Garamond (Titre Original)</option>
+        <option value="Alegreya Sans">Alegreya Sans (Corps Original)</option>
+        <option value="Great Vibes">Great Vibes (Calligraphie)</option>
+        <option value="Dancing Script">Dancing Script (Manuscrite)</option>
+        <option value="Parisienne">Parisienne (Romantique)</option>
+        <option value="Alex Brush">Alex Brush (Élégante)</option>
+        <option value="Playfair Display">Playfair Display (Chic Serif)</option>
+        <option value="Lora">Lora (Sérif Classique)</option>
+        <option value="Montserrat">Montserrat (Moderne Sans)</option>
+        <option value="Poppins">Poppins (Épuré Sans)</option>
       </select>
     </div>
 
-    <!-- Admin Tools -->
+    <!-- Admin & Image Actions -->
     <div class="flex items-center gap-2">
+      <button onclick="addNewFreeImage()" class="px-3 py-1.5 bg-[#a8533e] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
+        <i data-lucide="image-plus" class="w-3.5 h-3.5"></i> ➕ Image Libre
+      </button>
       <button onclick="openRsvpDashboard()" class="px-3 py-1.5 bg-[#8b5a7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
         <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i> Dashboard RSVP
       </button>
       <button onclick="copyHTMLToClipboard()" class="px-3 py-1.5 bg-[#2a7d7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
-        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copier le code HTML
+        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copier Code HTML
       </button>
       <button onclick="disableEditMode()" class="px-2 py-1.5 bg-gray-600 hover:bg-gray-700 rounded font-bold uppercase">Quitter</button>
     </div>
   </div>
 
-  <!-- Panneau de réglage dynamique de l'image (Zoom / Position) -->
+  <!-- Panneau de Réglage Image (Zoom / Position / Taille libre) -->
   <div id="image-adjust-toolbar" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-[105] bg-[#3c3228] text-white p-3 rounded-lg shadow-2xl border border-[#d4a95f] flex flex-wrap items-center gap-4 text-xs">
     <span class="font-bold text-[#d4a95f] flex items-center gap-1"><i data-lucide="sliders" class="w-3.5 h-3.5"></i> Réglage Image</span>
-    <label class="flex items-center gap-1.5">Zoom : <input type="range" id="img-scale" min="100" max="250" value="100" oninput="adjustActiveImage()" class="w-20"></label>
-    <label class="flex items-center gap-1.5">Position X : <input type="range" id="img-pos-x" min="0" max="100" value="50" oninput="adjustActiveImage()" class="w-20"></label>
-    <label class="flex items-center gap-1.5">Position Y : <input type="range" id="img-pos-y" min="0" max="100" value="50" oninput="adjustActiveImage()" class="w-20"></label>
+    
+    <!-- Controls standard ou libres -->
+    <div id="inline-img-controls" class="flex items-center gap-3">
+      <label class="flex items-center gap-1.5">Zoom : <input type="range" id="img-scale" min="100" max="250" value="100" oninput="adjustActiveImage()" class="w-20"></label>
+      <label class="flex items-center gap-1.5">Pos X : <input type="range" id="img-pos-x" min="0" max="100" value="50" oninput="adjustActiveImage()" class="w-20"></label>
+      <label class="flex items-center gap-1.5">Pos Y : <input type="range" id="img-pos-y" min="0" max="100" value="50" oninput="adjustActiveImage()" class="w-20"></label>
+    </div>
+
+    <div id="floating-img-controls" class="hidden flex items-center gap-3">
+      <label class="flex items-center gap-1.5">Position H : <input type="range" id="float-pos-x" min="0" max="90" value="10" oninput="adjustFloatingImage()" class="w-24">%</label>
+      <label class="flex items-center gap-1.5">Position V : <input type="range" id="float-pos-y" min="0" max="6000" step="20" value="300" oninput="adjustFloatingImage()" class="w-24">px</label>
+      <label class="flex items-center gap-1.5">Largeur : <input type="range" id="float-width" min="60" max="1000" value="250" oninput="adjustFloatingImage()" class="w-24">px</label>
+      <label class="flex items-center gap-1.5">Z-Index : <input type="range" id="float-zindex" min="1" max="100" value="35" oninput="adjustFloatingImage()" class="w-16"></label>
+      <button onclick="removeFloatingImage()" class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold">🗑️ Supprimer</button>
+    </div>
+
     <button onclick="closeImageAdjust()" class="px-2 py-1 bg-[#2a7d7d] rounded font-bold text-white">Valider</button>
   </div>
 
@@ -664,10 +690,9 @@ Réception &amp; soirée dès 18h00</p>
     <p class="editable-text uppercase tracking-[0.3em] text-sm text-[#b89a6d]">Magalie &amp; Sébastien</p>
   </footer>
 
-  <!-- MODAL / DASHBOARD ADMIN RSVP COMPLET -->
+  <!-- DASHBOARD ADMIN RSVP -->
   <div id="rsvp-dashboard-modal" class="hidden fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 md:p-8">
     <div class="bg-[#faf6f0] text-[#4a3f35] rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border border-[#d4a95f]">
-      <!-- Header Dashboard -->
       <div class="p-6 bg-[#4a3f35] text-[#faf6f0] flex justify-between items-center border-b border-[#d4a95f]">
         <div>
           <h3 class="display-font text-3xl font-medium">Dashboard RSVP &amp; Statistiques</h3>
@@ -681,9 +706,7 @@ Réception &amp; soirée dès 18h00</p>
         </div>
       </div>
 
-      <!-- Content Dashboard -->
       <div class="p-6 overflow-y-auto space-y-6 flex-1 text-sm">
-        <!-- Cards Stats -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div class="bg-[#f1e9dd] p-4 rounded border-t-2 border-[#d4a95f] text-center">
             <div id="stat-total-invites" class="display-font text-3xl font-bold">0</div>
@@ -707,14 +730,12 @@ Réception &amp; soirée dès 18h00</p>
           </div>
         </div>
 
-        <!-- Section Relance Réglable -->
         <div class="bg-[#f1e9dd] p-5 rounded border border-[#e5dccf] space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="display-font text-xl font-bold text-[#4a3f35] flex items-center gap-2"><i data-lucide="send" class="w-4 h-4 text-[#8b5a7d]"></i> Générateur de Relance Automatique</h4>
-            <span class="text-xs text-[#6b5d4f]">Délai suggéré : 30 jours avant le 1er mai 2027</span>
+            <h4 class="display-font text-xl font-bold text-[#4a3f35] flex items-center gap-2"><i data-lucide="send" class="w-4 h-4 text-[#8b5a7d]"></i> Relance Automatique</h4>
+            <span class="text-xs text-[#6b5d4f]">Date limite : 1er mai 2027</span>
           </div>
-          <p class="text-xs text-[#6b5d4f]">Modifiez le texte ci-dessous pour l'envoyer par SMS/Email aux retardataires :</p>
-          <textarea id="relance-template" rows="2" class="w-full p-3 bg-white rounded border border-gray-300 text-xs text-[#4a3f35]" oninput="updateRelanceText()">Bonjour [Nom], nous organisons les derniers détails pour le mariage du 31 Juillet 2027 ! Peux-tu nous confirmer ta présence avant le 1er mai ? Merci d'avance ! M&S</textarea>
+          <textarea id="relance-template" rows="2" class="w-full p-3 bg-white rounded border border-gray-300 text-xs text-[#4a3f35]">Bonjour, nous organisons les derniers détails pour notre mariage du 31 Juillet 2027 ! Peux-tu nous confirmer ta présence avant le 1er mai ? Merci d'avance ! M&S</textarea>
           <div class="flex justify-end">
             <button onclick="copyRelanceText()" class="px-3 py-1.5 bg-[#8b5a7d] hover:opacity-90 text-white rounded text-xs font-bold flex items-center gap-1">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copier le texte de relance
@@ -722,7 +743,6 @@ Réception &amp; soirée dès 18h00</p>
           </div>
         </div>
 
-        <!-- Tableau des Réponses -->
         <div>
           <h4 class="display-font text-xl font-bold mb-3">Détail des Invités</h4>
           <div class="overflow-x-auto rounded border border-[#e5dccf]">
@@ -739,9 +759,7 @@ Réception &amp; soirée dès 18h00</p>
                   <th class="p-3">Message</th>
                 </tr>
               </thead>
-              <tbody id="rsvp-table-body" class="divide-y divide-[#e5dccf] bg-white">
-                <!-- Rempli dynamiquement par JS -->
-              </tbody>
+              <tbody id="rsvp-table-body" class="divide-y divide-[#e5dccf] bg-white"></tbody>
             </table>
           </div>
         </div>
@@ -759,17 +777,14 @@ Réception &amp; soirée dès 18h00</p>
 
     lucide.createIcons();
 
-    // 1. Bouton Remonter en haut
+    // 1. Bouton Remonter
     const backToTopBtn = document.getElementById('back-to-top');
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 300) {
-        backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
-      } else {
-        backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
-      }
+      if (window.scrollY > 300) backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+      else backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
     });
 
-    // 2. Navigation & Scroll Animations
+    // 2. Navigation
     const navbar = document.querySelector('nav');
     let navTimeout;
     function showNav() { navbar.classList.remove('nav-hidden'); clearTimeout(navTimeout); }
@@ -817,7 +832,7 @@ Réception &amp; soirée dès 18h00</p>
     setupCarousel('lodging-carousel', 'lodging-prev', 'lodging-next');
     setupCarousel('activity-carousel', 'activity-prev', 'activity-next');
 
-    // 5. RSVP Noms Dynamiques
+    // 5. RSVP Dynamics
     function updateGuestNameFields() {
       const adults = parseInt(document.getElementById('rsvp-adults').value, 10) || 0;
       const children = parseInt(document.getElementById('rsvp-children').value, 10) || 0;
@@ -846,7 +861,6 @@ Réception &amp; soirée dès 18h00</p>
     document.getElementById('rsvp-children').addEventListener('change', updateGuestNameFields);
     updateGuestNameFields();
 
-    // Enregistrement Local des RSVP pour Dashboard
     let localRsvpData = JSON.parse(localStorage.getItem('mariage_rsvp_list') || '[]');
 
     document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
@@ -881,7 +895,6 @@ Réception &amp; soirée dès 18h00</p>
 
       submitBtn.disabled = true; spinner.classList.remove('hidden');
 
-      // Stocker localement pour le dashboard
       localRsvpData.push(payload);
       localStorage.setItem('mariage_rsvp_list', JSON.stringify(localRsvpData));
 
@@ -898,7 +911,6 @@ Réception &amp; soirée dès 18h00</p>
       }
     });
 
-    // Contact Form
     document.getElementById('contact-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('contact-name').value.trim();
@@ -926,10 +938,11 @@ Réception &amp; soirée dès 18h00</p>
     });
 
     // =========================================================================
-    // 6. MODE ÉDITION, ZOOM/REPOSITIONNEMENT EN TEMPS RÉEL, COPIE PRESSE-PAPIER
+    // 6. MODE ÉDITION, TAILLE EN PIXELS, POLICES MULTIPLES & IMAGES LIBRES
     // =========================================================================
     let clickCount = 0;
     let targetImgElement = null;
+    let activeWrapperContainer = null;
     let savedRange = null;
 
     document.getElementById('logo-trigger').addEventListener('click', (e) => {
@@ -989,31 +1002,89 @@ Réception &amp; soirée dès 18h00</p>
       document.execCommand('foreColor', false, hexColor);
     }
 
-    // Gestion Image + Barre d'Ajustement
-    function changeImage(imgEl) {
+    // Réglage Taille de police en Pixels
+    function applyFontSizePx(pxValue) {
+      document.getElementById('font-size-val').textContent = pxValue + 'px';
+      restoreSelection();
+      const sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) return;
+      
+      const span = document.createElement('span');
+      span.style.fontSize = pxValue + 'px';
+      const range = sel.getRangeAt(0);
+      
+      try {
+        span.appendChild(range.extractContents());
+        range.insertNode(span);
+      } catch(e) {
+        document.execCommand('fontSize', false, '7');
+      }
+    }
+
+    function applyFontName(fontName) {
+      if (!fontName) return;
+      restoreSelection();
+      document.execCommand('fontName', false, fontName);
+    }
+
+    // Fonction d'Ajout d'une NOUVELLE IMAGE LIBRE positionnable
+    function addNewFreeImage() {
+      if (!document.body.classList.contains('edit-mode')) return;
+      const picker = document.getElementById('local-file-picker');
+      picker.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            createFloatingImageElement(evt.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+        picker.onchange = null;
+      };
+      picker.click();
+    }
+
+    function createFloatingImageElement(src) {
+      const currentScrollY = window.scrollY + 200;
+      const container = document.createElement('div');
+      container.className = 'custom-floating-element img-wrapper';
+      container.style.position = 'absolute';
+      container.style.left = '10%';
+      container.style.top = currentScrollY + 'px';
+      container.style.width = '250px';
+      container.style.zIndex = '35';
+      container.onclick = function(e) {
+        e.stopPropagation();
+        changeImage(this.querySelector('img'), this);
+      };
+
+      const img = document.createElement('img');
+      img.src = src;
+      img.loading = 'lazy';
+      img.className = 'w-full h-auto object-cover rounded shadow-lg';
+      img.alt = 'Image libre';
+
+      container.appendChild(img);
+      document.body.appendChild(container);
+      changeImage(img, container);
+    }
+
+    // Remplacement & Ajustement des Images
+    function changeImage(imgEl, wrapperContainer = null) {
       if (!document.body.classList.contains('edit-mode')) return;
       targetImgElement = imgEl;
+      activeWrapperContainer = wrapperContainer || imgEl.closest('.custom-floating-element');
 
-      const method = prompt("Action Image :\n1. Importer une photo depuis votre ordinateur\n2. Saisir l'URL d'une image web\n3. Repositionner / Zoomer l'image actuelle");
-      if (method === '1') {
-        document.getElementById('local-file-picker').click();
-      } else if (method === '2') {
-        const url = prompt("Collez l'URL de votre image :");
-        if (url && url.trim()) {
-          targetImgElement.src = url.trim();
-          openImageAdjustToolbar();
-        }
-      } else if (method === '3') {
-        openImageAdjustToolbar();
-      }
+      openImageAdjustToolbar();
     }
 
     document.getElementById('local-file-picker').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file && targetImgElement) {
         const reader = new FileReader();
-        reader.onload = function(event) {
-          targetImgElement.src = event.target.result;
+        reader.onload = function(evt) {
+          targetImgElement.src = evt.target.result;
           openImageAdjustToolbar();
         };
         reader.readAsDataURL(file);
@@ -1023,14 +1094,28 @@ Réception &amp; soirée dès 18h00</p>
     function openImageAdjustToolbar() {
       if (!targetImgElement) return;
       document.getElementById('image-adjust-toolbar').classList.remove('hidden');
-      
-      // Récupérer les valeurs existantes
-      const currentScale = targetImgElement.style.transform ? targetImgElement.style.transform.replace(/[^\d.]/g, '') * 100 : 100;
-      const currentPos = targetImgElement.style.objectPosition ? targetImgElement.style.objectPosition.split(' ') : ['50%', '50%'];
-      
-      document.getElementById('img-scale').value = currentScale || 100;
-      document.getElementById('img-pos-x').value = parseInt(currentPos[0]) || 50;
-      document.getElementById('img-pos-y').value = parseInt(currentPos[1]) || 50;
+
+      if (activeWrapperContainer) {
+        // Image flottante libre
+        document.getElementById('inline-img-controls').classList.add('hidden');
+        document.getElementById('floating-img-controls').classList.remove('hidden');
+
+        document.getElementById('float-pos-x').value = parseInt(activeWrapperContainer.style.left) || 10;
+        document.getElementById('float-pos-y').value = parseInt(activeWrapperContainer.style.top) || 300;
+        document.getElementById('float-width').value = parseInt(activeWrapperContainer.style.width) || 250;
+        document.getElementById('float-zindex').value = parseInt(activeWrapperContainer.style.zIndex) || 35;
+      } else {
+        // Image classique de section
+        document.getElementById('floating-img-controls').classList.add('hidden');
+        document.getElementById('inline-img-controls').classList.remove('hidden');
+
+        const currentScale = targetImgElement.style.transform ? targetImgElement.style.transform.replace(/[^\d.]/g, '') * 100 : 100;
+        const currentPos = targetImgElement.style.objectPosition ? targetImgElement.style.objectPosition.split(' ') : ['50%', '50%'];
+
+        document.getElementById('img-scale').value = currentScale || 100;
+        document.getElementById('img-pos-x').value = parseInt(currentPos[0]) || 50;
+        document.getElementById('img-pos-y').value = parseInt(currentPos[1]) || 50;
+      }
     }
 
     function adjustActiveImage() {
@@ -1043,18 +1128,39 @@ Réception &amp; soirée dès 18h00</p>
       targetImgElement.style.objectPosition = `${posX}% ${posY}%`;
     }
 
-    function closeImageAdjust() {
-      document.getElementById('image-adjust-toolbar').classList.add('hidden');
+    function adjustFloatingImage() {
+      if (!activeWrapperContainer) return;
+      const posX = document.getElementById('float-pos-x').value;
+      const posY = document.getElementById('float-pos-y').value;
+      const width = document.getElementById('float-width').value;
+      const zIndex = document.getElementById('float-zindex').value;
+
+      activeWrapperContainer.style.left = posX + '%';
+      activeWrapperContainer.style.top = posY + 'px';
+      activeWrapperContainer.style.width = width + 'px';
+      activeWrapperContainer.style.zIndex = zIndex;
     }
 
-    // Copier le code HTML dans le Presse-papier
+    function removeFloatingImage() {
+      if (activeWrapperContainer) {
+        activeWrapperContainer.remove();
+        closeImageAdjust();
+      }
+    }
+
+    function closeImageAdjust() {
+      document.getElementById('image-adjust-toolbar').classList.add('hidden');
+      activeWrapperContainer = null;
+    }
+
+    // Copier le Code HTML
     async function copyHTMLToClipboard() {
       disableEditMode();
       const htmlContent = "<!doctype html>\n" + document.documentElement.outerHTML;
       
       try {
         await navigator.clipboard.writeText(htmlContent);
-        alert("✅ Code HTML copié avec succès dans le presse-papier !\n\nVous pouvez maintenant directement le coller dans votre fichier 'index.html' sur GitHub.");
+        alert("✅ Code HTML copié dans le presse-papier ! Vous pouvez le coller dans GitHub.");
       } catch (err) {
         const textarea = document.createElement('textarea');
         textarea.value = htmlContent;
@@ -1068,7 +1174,7 @@ Réception &amp; soirée dès 18h00</p>
       }
     }
 
-    // Carrousel & Galerie Adders
+    // Carrousels & Galerie Adders
     function addCarouselCard(carouselId) {
       const carousel = document.getElementById(carouselId);
       const title = prompt("Titre :", "Titre du lieu");
@@ -1097,9 +1203,7 @@ Réception &amp; soirée dès 18h00</p>
       changeImage(div.querySelector('img'));
     }
 
-    // =========================================================================
-    // 7. DASHBOARD RSVP & EXPORT CSV / EXCEL
-    // =========================================================================
+    // Dashboard RSVP
     function openRsvpDashboard() {
       renderRsvpDashboard();
       document.getElementById('rsvp-dashboard-modal').classList.remove('hidden');
