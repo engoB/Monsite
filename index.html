@@ -30,7 +30,7 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   
-  <!-- Fonts d'origine identiques -->
+  <!-- Fonts d'origine -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
@@ -86,37 +86,61 @@
     .timeline-item::after { content: ""; position: absolute; left: 0.45rem; top: 0.4rem; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); border: 2px solid var(--bg-primary); }
     .timeline-item:last-child::before { display: none; }
 
-    /* Mode édition styles */
-    .edit-mode [contenteditable="true"] { outline: 2px dashed var(--accent-gold) !important; cursor: text; padding: 2px; }
-    .img-wrapper { position: relative; }
-    .edit-mode .img-wrapper:hover::after {
-      content: "📷 Changer l'image"; position: absolute; inset: 0; background: rgba(0,0,0,0.65);
-      color: white; display: flex; items-center; justify-content: center; font-weight: bold; cursor: pointer; border-radius: 4px;
+    /* Style Mode Édition */
+    .edit-mode [contenteditable="true"] { outline: 1px dashed #d4a95f !important; cursor: text; min-height: 1em; }
+    .edit-mode [contenteditable="true"]:focus { outline: 2px solid #a8533e !important; background: rgba(212, 169, 95, 0.08); }
+    .edit-mode .img-wrapper { position: relative; cursor: pointer; }
+    .edit-mode .img-wrapper::after {
+      content: "📷 Remplacer cette image"; position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+      color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold;
+      opacity: 0; transition: opacity 0.2s; border-radius: 4px; pointer-events: none;
     }
+    .edit-mode .img-wrapper:hover::after { opacity: 1; }
   </style>
 </head>
 <body class="min-h-screen w-full">
 
-  <!-- Barre de contrôle Mode Édition (cachée par défaut) -->
-  <div id="admin-bar" class="hidden fixed top-0 left-0 w-full z-[100] bg-[#4a3f35] text-white px-6 py-3 shadow-xl flex flex-wrap items-center justify-between gap-4 text-sm">
-    <div class="flex items-center gap-2 font-semibold text-[#d4a95f]">
-      <i data-lucide="edit-3"></i> Mode Édition Activé
+  <!-- Barre d'outils Édition / Formatage de texte -->
+  <div id="admin-bar" class="hidden fixed top-0 left-0 w-full z-[100] bg-[#3c3228] text-white px-4 py-2 shadow-xl flex flex-wrap items-center justify-between gap-3 text-xs">
+    <div class="flex items-center gap-2 font-bold text-[#d4a95f]">
+      <i data-lucide="edit-3" class="w-4 h-4"></i> Mode Édition
     </div>
-    <div class="flex flex-wrap items-center gap-3">
-      <button onclick="toggleColorPicker()" class="px-3 py-1.5 bg-[#8b5a7d] hover:opacity-90 rounded text-xs font-bold uppercase tracking-wider">🎨 Couleurs</button>
-      <button onclick="downloadUpdatedHTML()" class="px-4 py-1.5 bg-[#2a7d7d] hover:opacity-90 rounded text-xs font-bold uppercase tracking-wider">💾 Télécharger HTML mis à jour</button>
-      <button onclick="disableEditMode()" class="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 rounded text-xs font-bold uppercase tracking-wider">❌ Quitter</button>
-    </div>
-  </div>
+    
+    <!-- Outils de mise en forme du texte sélectionné -->
+    <div class="flex flex-wrap items-center gap-2 bg-[#4a3f35] px-3 py-1 rounded border border-gray-600">
+      <span class="text-gray-400 font-semibold mr-1">Texte sélectionné :</span>
+      <button onclick="formatText('bold')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded font-bold" title="Gras">B</button>
+      <button onclick="formatText('italic')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded italic" title="Italique">I</button>
+      <button onclick="formatText('underline')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded underline" title="Souligné">U</button>
+      
+      <!-- Couleur du texte sélectionné -->
+      <label class="flex items-center gap-1 cursor-pointer bg-gray-700 px-2 py-1 rounded">
+        <span>Couleur</span>
+        <input type="color" onchange="formatTextColor(this.value)" class="w-4 h-4 bg-transparent border-0 cursor-pointer">
+      </label>
 
-  <!-- Panneau Sélecteur de Couleurs -->
-  <div id="color-picker-panel" class="hidden fixed top-16 right-6 z-[100] bg-white text-[#4a3f35] p-5 rounded shadow-2xl border border-gray-200 w-80 space-y-4">
-    <h4 class="font-bold border-b pb-2 text-base display-font">Personnaliser les Couleurs</h4>
-    <div class="space-y-3 text-xs">
-      <div class="flex justify-between items-center"><label>Fond Principal :</label><input type="color" id="picker-bg-primary" value="#faf6f0" onchange="updateThemeColor('--bg-primary', this.value)"></div>
-      <div class="flex justify-between items-center"><label>Fond Secondaire :</label><input type="color" id="picker-bg-secondary" value="#f1e9dd" onchange="updateThemeColor('--bg-secondary', this.value)"></div>
-      <div class="flex justify-between items-center"><label>Texte Principal :</label><input type="color" id="picker-text-main" value="#4a3f35" onchange="updateThemeColor('--text-main', this.value)"></div>
-      <div class="flex justify-between items-center"><label>Dorure / Accent :</label><input type="color" id="picker-accent-gold" value="#d4a95f" onchange="updateThemeColor('--accent-gold', this.value)"></div>
+      <!-- Taille de police du texte sélectionné -->
+      <select onchange="formatText('fontSize', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
+        <option value="">Taille...</option>
+        <option value="2">Petite</option>
+        <option value="3">Normale</option>
+        <option value="5">Grande</option>
+        <option value="7">Très grande</option>
+      </select>
+
+      <!-- Police du texte sélectionné -->
+      <select onchange="formatText('fontName', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
+        <option value="">Police...</option>
+        <option value="Cormorant Garamond">Cormorant Garamond</option>
+        <option value="Alegreya Sans">Alegreya Sans</option>
+        <option value="Arial">Arial</option>
+      </select>
+    </div>
+
+    <!-- Actions Globales -->
+    <div class="flex items-center gap-2">
+      <button onclick="downloadUpdatedHTML()" class="px-3 py-1.5 bg-[#2a7d7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider">💾 Sauvegarder &amp; Télécharger</button>
+      <button onclick="disableEditMode()" class="px-2 py-1.5 bg-gray-600 hover:bg-gray-700 rounded font-bold uppercase">Quitter</button>
     </div>
   </div>
 
@@ -152,7 +176,7 @@
 
   <!-- Hero -->
   <header id="accueil" class="relative w-full h-screen flex items-center justify-center text-center overflow-hidden">
-    <div class="img-wrapper absolute inset-0 w-full h-full" onclick="triggerImageChange(this.querySelector('img'))">
+    <div class="img-wrapper absolute inset-0 w-full h-full" onclick="handleImageClick(this.querySelector('img'))">
       <img id="hero-img" loading="lazy" class="w-full h-full object-cover" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Château Balac">
     </div>
     <div class="hero-overlay absolute inset-0"></div>
@@ -172,14 +196,14 @@
     </div>
     <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
       <article class="reveal">
-        <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))">
+        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-72 object-cover rounded-sm shadow-md mb-6" src="https://images.pexels.com/photos/22707222/pexels-photo-22707222.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Rencontre">
         </div>
         <h3 class="display-font text-2xl font-medium mb-3" contenteditable="false">La première rencontre</h3>
         <p class="leading-relaxed text-[#6b5d4f]" contenteditable="false">Tout a commencé par un après-midi d'automne, autour d'un <strong>café partagé</strong> entre amis. Un regard, un sourire, et une conversation qui ne s'est <strong>jamais vraiment arrêtée</strong> depuis ce jour-là.</p>
       </article>
       <article class="reveal">
-        <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))">
+        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-72 object-cover rounded-sm shadow-md mb-6" src="https://images.pexels.com/photos/29734262/pexels-photo-29734262.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Demande">
         </div>
         <h3 class="display-font text-2xl font-medium mb-3" contenteditable="false">La demande</h3>
@@ -206,7 +230,7 @@
 Cérémonie civile à 11h00</p>
           <a href="https://maps.google.com/?q=Mairie+de+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-[#a8533e] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
         </div>
-        <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))">
+        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-48 object-cover rounded-sm mt-2" src="https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Mairie">
         </div>
       </div>
@@ -221,7 +245,7 @@ Cérémonie laïque à 15h00
 Réception &amp; soirée dès 18h00</p>
           <a href="https://maps.google.com/?q=Chateau+Balac+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-[#8b5a7d] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
         </div>
-        <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))">
+        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-48 object-cover rounded-sm mt-2" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Château Balac">
         </div>
       </div>
@@ -270,28 +294,28 @@ Réception &amp; soirée dès 18h00</p>
     </div>
     <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
       <div class="text-center reveal">
-        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="triggerImageChange(this.querySelector('img'))">
+        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="handleImageClick(this.querySelector('img'))">
           <img loading="lazy" class="w-28 h-28 rounded-full object-cover shadow-md" src="https://images.pexels.com/photos/3811846/pexels-photo-3811846.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Sophie">
         </div>
         <h4 class="display-font text-2xl font-medium mb-1" contenteditable="false">Sophie</h4>
         <p class="text-xs text-[#6b5d4f]" contenteditable="false">Témoin de la mariée — Amie d'enfance inséparable</p>
       </div>
       <div class="text-center reveal">
-        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="triggerImageChange(this.querySelector('img'))">
+        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="handleImageClick(this.querySelector('img'))">
           <img loading="lazy" class="w-28 h-28 rounded-full object-cover shadow-md" src="https://images.pexels.com/photos/3778603/pexels-photo-3778603.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Thomas">
         </div>
         <h4 class="display-font text-2xl font-medium mb-1" contenteditable="false">Thomas</h4>
         <p class="text-xs text-[#6b5d4f]" contenteditable="false">Témoin du marié — Frère et complice de toujours</p>
       </div>
       <div class="text-center reveal">
-        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="triggerImageChange(this.querySelector('img'))">
+        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="handleImageClick(this.querySelector('img'))">
           <img loading="lazy" class="w-28 h-28 rounded-full object-cover shadow-md" src="https://images.pexels.com/photos/37346906/pexels-photo-37346906.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Camille">
         </div>
         <h4 class="display-font text-2xl font-medium mb-1" contenteditable="false">Camille</h4>
         <p class="text-xs text-[#6b5d4f]" contenteditable="false">Demoiselle d'honneur — Cousine et rayon de soleil</p>
       </div>
       <div class="text-center reveal">
-        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="triggerImageChange(this.querySelector('img'))">
+        <div class="img-wrapper w-28 h-28 mx-auto mb-4" onclick="handleImageClick(this.querySelector('img'))">
           <img loading="lazy" class="w-28 h-28 rounded-full object-cover shadow-md" src="https://images.pexels.com/photos/18963011/pexels-photo-18963011.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Antoine">
         </div>
         <h4 class="display-font text-2xl font-medium mb-1" contenteditable="false">Antoine</h4>
@@ -307,7 +331,6 @@ Réception &amp; soirée dès 18h00</p>
       <p class="divider-ornament text-[#a8533e]"></p>
     </div>
     
-    <!-- Décompte -->
     <div class="max-w-3xl mx-auto grid grid-cols-4 gap-3 md:gap-6 mb-16 reveal">
       <div class="bg-[#f1e9dd] rounded-sm py-5 text-center shadow-sm border-t-2 border-[#d4a95f]">
         <div id="cd-days" class="display-font text-3xl md:text-5xl text-[#4a3f35]">00</div>
@@ -327,7 +350,6 @@ Réception &amp; soirée dès 18h00</p>
       </div>
     </div>
 
-    <!-- 3 Cartes Informations (Cérémonie, Réception, Dress Code) -->
     <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-8">
       <div class="text-center p-8 rounded-sm bg-[#f1e9dd] shadow-sm reveal">
         <i data-lucide="church" class="mx-auto mb-4 text-[#d4a95f] w-10 h-10"></i>
@@ -430,7 +452,7 @@ Réception &amp; soirée dès 18h00</p>
     </div>
   </section>
 
-  <!-- Séjour (Carrousel 1: Hébergements + Carrousel 2: Activités) -->
+  <!-- Séjour -->
   <section id="sejour" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
       <h2 class="display-font text-4xl md:text-5xl font-medium mb-4" contenteditable="false">Organisez votre séjour</h2>
@@ -450,28 +472,28 @@ Réception &amp; soirée dès 18h00</p>
       </div>
       <div id="lodging-carousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 px-2" style="scrollbar-width:none;">
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/2952663/pexels-photo-2952663.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Hôtel"></div>
+          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/2952663/pexels-photo-2952663.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Hôtel"></div>
           <div class="p-5">
             <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Hôtel du Domaine ★★★</h4>
             <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">À 5 minutes du château. Chambres élégantes et <strong>petit-déjeuner compris</strong>. Tarif préférentiel <strong>« Mariage M&amp;S »</strong> sur réservation.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/32289746/pexels-photo-32289746.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Chambres d'hôtes"></div>
+          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/32289746/pexels-photo-32289746.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Chambres d'hôtes"></div>
           <div class="p-5">
             <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Chambres Les Vignes</h4>
             <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Maison de charme au <strong>cœur des vignobles</strong>, à 10 minutes. Idéale pour les familles.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/33963275/pexels-photo-33963275.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Gîte"></div>
+          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/33963275/pexels-photo-33963275.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Gîte"></div>
           <div class="p-5">
             <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Gîte Le Magnolia</h4>
             <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Maison d'hôtes de charme avec <strong>terrasse ombragée</strong> et <strong>jardin verdoyant</strong>, à 12 minutes.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/26647501/pexels-photo-26647501.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Ferme"></div>
+          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/26647501/pexels-photo-26647501.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Ferme"></div>
           <div class="p-5">
             <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Ferme du Vignoble</h4>
             <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Havre de paix rustique entouré de ceps de vigne. <strong>Petit-déjeuner fermier</strong> inclus.</p>
@@ -492,28 +514,28 @@ Réception &amp; soirée dès 18h00</p>
       </div>
       <div id="activity-carousel" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 px-2" style="scrollbar-width:none;">
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30557600/pexels-photo-30557600.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vins"></div>
+          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30557600/pexels-photo-30557600.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vins"></div>
           <div class="p-5">
             <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Route des vins</h4>
             <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Visites de <strong>châteaux</strong> et <strong>dégustations</strong> dans les plus beaux domaines de la région.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/34799291/pexels-photo-34799291.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Médiéval"></div>
+          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/34799291/pexels-photo-34799291.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Médiéval"></div>
           <div class="p-5">
             <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Villages médiévaux</h4>
             <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Flânez dans les ruelles de <strong>Saint-Émilion</strong> et des villages alentour.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/9722064/pexels-photo-9722064.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Plage"></div>
+          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/9722064/pexels-photo-9722064.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Plage"></div>
           <div class="p-5">
             <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Plages du Bassin</h4>
             <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Escapade vers les <strong>plages de sable fin</strong> du Bassin d'Arcachon.</p>
           </div>
         </article>
         <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30732698/pexels-photo-30732698.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vélo"></div>
+          <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30732698/pexels-photo-30732698.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vélo"></div>
           <div class="p-5">
             <h4 class="display-font text-2xl font-medium mb-2" contenteditable="false">Balades à vélo</h4>
             <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="false">Sillonnez les <strong>chemins de vigne</strong> du Médoc lors d'une balade guidée.</p>
@@ -533,10 +555,10 @@ Réception &amp; soirée dès 18h00</p>
       <p class="divider-ornament text-[#a8533e] mb-16"></p>
     </div>
     <div id="gallery-grid" class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 1"></div>
-      <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/22707222/pexels-photo-22707222.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 2"></div>
-      <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/29734262/pexels-photo-29734262.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 3"></div>
-      <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 4"></div>
+      <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 1"></div>
+      <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/22707222/pexels-photo-22707222.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 2"></div>
+      <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/29734262/pexels-photo-29734262.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 3"></div>
+      <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal" src="https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Photo Galerie 4"></div>
     </div>
   </section>
 
@@ -628,18 +650,17 @@ Réception &amp; soirée dès 18h00</p>
     <p class="uppercase tracking-[0.3em] text-sm text-[#b89a6d]" contenteditable="false">Magalie &amp; Sébastien</p>
   </footer>
 
-  <!-- File Input caché pour l'upload d'images -->
-  <input type="file" id="image-uploader" accept="image/*" class="hidden">
+  <!-- SÉLECTEUR DE FICHIER INVISIBLE POUR UPLOAD PHOTO -->
+  <input type="file" id="image-file-input" accept="image/*" class="hidden">
 
   <!-- SCRIPTS & LOGIQUE DU SITE -->
   <script>
-    // URL Google Apps Script pour Google Sheets
     const GOOGLE_SCRIPT_URL = 'VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI';
     const WEDDING_DATE = '2027-07-31T15:00:00';
 
     lucide.createIcons();
 
-    // 1. Navigation & Animations Scroll
+    // 1. Navigation & Scroll Animations
     const navbar = document.querySelector('nav');
     let navTimeout;
     function showNav() { navbar.classList.remove('nav-hidden'); clearTimeout(navTimeout); }
@@ -694,7 +715,6 @@ Réception &amp; soirée dès 18h00</p>
       const total = adults + children;
       const container = document.getElementById('guest-names-container');
       container.innerHTML = '';
-      
       if (total === 0) return;
 
       const heading = document.createElement('p');
@@ -737,8 +757,7 @@ Réception &amp; soirée dès 18h00</p>
       document.querySelectorAll('.guest-name-field').forEach(input => { if (input.value.trim()) guestNames.push(input.value.trim()); });
 
       const payload = {
-        type: 'rsvp',
-        reponse: resp.value,
+        type: 'rsvp', reponse: resp.value,
         famille: document.getElementById('rsvp-family').value.trim(),
         email, telephone: phone,
         adultes: document.getElementById('rsvp-adults').value,
@@ -764,7 +783,7 @@ Réception &amp; soirée dès 18h00</p>
       }
     });
 
-    // 6. Envoi Formulaire de Contact
+    // 6. Envoi Formulaire Contact
     document.getElementById('contact-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('contact-name').value.trim();
@@ -792,12 +811,12 @@ Réception &amp; soirée dès 18h00</p>
     });
 
     // =========================================================================
-    // 7. FONCTIONNALITÉS DU MODE ÉDITION INVISIBLE
+    // 7. MODE ÉDITION INVISIBLE ET FORMATAGE DÉTAILLÉ
     // =========================================================================
     let clickCount = 0;
-    let targetImageToChange = null;
+    let activeImageTarget = null;
 
-    // Déclenchement par 5 clics sur le logo M&S
+    // Déclenchement par 5 clics sur le logo "M & S"
     document.getElementById('logo-trigger').addEventListener('click', (e) => {
       clickCount++;
       if (clickCount >= 5) {
@@ -807,7 +826,7 @@ Réception &amp; soirée dès 18h00</p>
       setTimeout(() => clickCount = 0, 3000);
     });
 
-    // Déclenchement via paramètre URL ?edit=true
+    // Déclenchement par ?edit=true dans l'URL
     if (new URLSearchParams(window.location.search).get('edit') === 'true') {
       enableEditMode();
     }
@@ -817,62 +836,60 @@ Réception &amp; soirée dès 18h00</p>
       document.getElementById('admin-bar').classList.remove('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
       document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'true'));
-      alert("Mode Édition Activé !\n\n1. Cliquez sur n'importe quel texte pour le modifier.\n2. Cliquez sur une photo pour la remplacer.\n3. Utilisez les boutons [+ Ajouter] pour les carrousels.\n4. Téléchargez le fichier HTML final pour le publier sur GitHub.");
     }
 
     function disableEditMode() {
       document.body.classList.remove('edit-mode');
       document.getElementById('admin-bar').classList.add('hidden');
-      document.getElementById('color-picker-panel').classList.add('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', 'false'));
     }
 
-    function toggleColorPicker() {
-      document.getElementById('color-picker-panel').classList.toggle('hidden');
+    // Formatage fin du texte sélectionné (WYSIWYG)
+    function formatText(cmd, value = null) {
+      document.execCommand(cmd, false, value);
     }
 
-    function updateThemeColor(varName, hexValue) {
-      document.documentElement.style.setProperty(varName, hexValue);
+    function formatTextColor(colorHex) {
+      document.execCommand('foreColor', false, colorHex);
     }
 
-    // Gestion du changement d'image
-    function triggerImageChange(imgEl) {
+    // Gestion fiable du remplacement des photos
+    function handleImageClick(imgEl) {
       if (!document.body.classList.contains('edit-mode')) return;
-      targetImageToChange = imgEl;
-      
-      const choice = prompt("Changer l'image :\n1. Tapez '1' pour importer une photo depuis votre ordinateur\n2. Collez directement une URL web (.jpg, .png)");
-      if (choice === '1') {
-        document.getElementById('image-uploader').click();
-      } else if (choice && choice.startsWith('http')) {
-        imgEl.src = choice;
+      activeImageTarget = imgEl;
+
+      const action = prompt("Mettre à jour l'image :\n1. Importer une photo depuis mon ordinateur\n2. Saisir l'URL d'une image web");
+      if (action === '1') {
+        document.getElementById('image-file-input').click();
+      } else if (action === '2') {
+        const url = prompt("Collez l'URL de votre image :");
+        if (url && url.trim()) activeImageTarget.src = url.trim();
       }
     }
 
-    document.getElementById('image-uploader').addEventListener('change', (e) => {
+    document.getElementById('image-file-input').addEventListener('change', function(e) {
       const file = e.target.files[0];
-      if (file && targetImageToChange) {
+      if (file && activeImageTarget) {
         const reader = new FileReader();
-        reader.onload = (evt) => {
-          targetImageToChange.src = evt.target.result;
+        reader.onload = function(evt) {
+          activeImageTarget.src = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
     });
 
-    // Ajout dynamique de cartes dans les carrousels
+    // Ajout de carte carrousel
     function addCarouselCard(carouselId) {
       const carousel = document.getElementById(carouselId);
-      const title = prompt("Titre de la nouvelle carte :", "Nouveau lieu");
-      const desc = prompt("Description :", "Description du lieu ou de l'activité...");
-      const imgUrl = prompt("URL de la photo (ou laissez vide pour une photo par défaut) :", "https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800");
-
+      const title = prompt("Titre de la carte :", "Titre");
+      const desc = prompt("Description :", "Texte descriptif...");
       if (!title) return;
 
       const article = document.createElement('article');
       article.className = 'bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start';
       article.innerHTML = `
-        <div class="img-wrapper" onclick="triggerImageChange(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="${imgUrl}" alt="${title}"></div>
+        <div class="img-wrapper" onclick="handleImageClick(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="${title}"></div>
         <div class="p-5">
           <h4 class="display-font text-2xl font-medium mb-2" contenteditable="true">${title}</h4>
           <p class="text-xs leading-relaxed text-[#6b5d4f]" contenteditable="true">${desc}</p>
@@ -881,32 +898,26 @@ Réception &amp; soirée dès 18h00</p>
       carousel.appendChild(article);
     }
 
-    // Ajout d'image dans la galerie
+    // Ajout à la galerie
     function addGalleryImage() {
       const grid = document.getElementById('gallery-grid');
-      const imgUrl = prompt("URL de la nouvelle photo :", "https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800");
-      if (!imgUrl) return;
-
       const div = document.createElement('div');
       div.className = 'img-wrapper';
-      div.onclick = function() { triggerImageChange(this.querySelector('img')); };
-      div.innerHTML = `<img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal in-view" src="${imgUrl}" alt="Photo Galerie">`;
+      div.onclick = function() { handleImageClick(this.querySelector('img')); };
+      div.innerHTML = `<img loading="lazy" class="w-full h-56 md:h-72 object-cover rounded-sm shadow-sm reveal in-view" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Galerie">`;
       grid.appendChild(div);
+      handleImageClick(div.querySelector('img'));
     }
 
-    // Exportation du fichier HTML modifié
+    // Télécharger le fichier mis à jour
     function downloadUpdatedHTML() {
-      // Nettoyage temporaire des états d'édition avant export
       disableEditMode();
-
       const htmlContent = "<!doctype html>\n" + document.documentElement.outerHTML;
       const blob = new Blob([htmlContent], { type: 'text/html' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'index.html';
       a.click();
-
-      // Réactivation du mode édition
       enableEditMode();
     }
   </script>
