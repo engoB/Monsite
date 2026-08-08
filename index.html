@@ -30,10 +30,10 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   
-  <!-- Fonts Google Enrichies -->
+  <!-- Google Fonts Haute Qualité -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@400;500;700&family=Parisienne&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Dancing+Script:wght@400;600;700&family=Great+Vibes&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600;700&family=Parisienne&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -46,39 +46,45 @@
       --accent-plum: #8b5a7d;
       --accent-teal: #2a7d7d;
       
-      /* Couleurs par défaut du dégradé des séparateurs */
-      --divider-color-1: #d4a95f;
-      --divider-color-2: #8b5a7d;
-      --divider-color-3: #a8533e;
-      --divider-color-4: #2a7d7d;
+      /* Couleurs & Dimensions des Séparateurs en Dégradé avec Alpha */
+      --divider-color-1: rgba(212, 169, 95, 1);
+      --divider-color-2: rgba(139, 90, 125, 1);
+      --divider-color-3: rgba(168, 83, 62, 1);
+      --divider-color-4: rgba(42, 125, 125, 1);
+      --divider-height: 5px;
+      --divider-width: 52px;
     }
 
     body { font-family: 'Alegreya Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-main); }
     .display-font { font-family: 'Cormorant Garamond', serif; }
     
-    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     .reveal.in-view { opacity: 1; transform: translateY(0); }
     
-    .hero-overlay { background: linear-gradient(180deg, rgba(60,50,40,0.35) 0%, rgba(60,50,40,0.15) 40%, rgba(60,50,40,0.55) 100%); }
+    .hero-overlay { background: linear-gradient(180deg, rgba(60,50,40,0.4) 0%, rgba(60,50,40,0.18) 40%, rgba(60,50,40,0.62) 100%); }
     
+    /* Séparateurs en dégradé personnalisables */
     .divider-ornament::before, .divider-ornament::after {
-      content: ""; display: inline-block; width: 48px; height: 6px;
+      content: ""; display: inline-block; width: var(--divider-width); height: var(--divider-height);
       background: linear-gradient(90deg, var(--divider-color-1), var(--divider-color-2), var(--divider-color-3), var(--divider-color-4));
-      vertical-align: middle; margin: 0 14px; opacity: 1;
+      vertical-align: middle; margin: 0 14px; border-radius: 3px;
     }
     
-    nav { transition: transform 0.3s ease; }
+    nav { transition: top 0.3s ease, transform 0.3s ease; }
     nav.nav-hidden { transform: translateY(-100%); }
     
+    /* Décalage dynamique de la barre de menu en Mode Édition pour éviter tout chevauchement */
+    .edit-mode nav { top: 48px !important; }
+
     .rsvp-input {
-      width: 100%; background: #ffffff; border: 1px solid #e5dccf; border-radius: 2px;
+      width: 100%; background: #ffffff; border: 1px solid #e5dccf; border-radius: 4px;
       padding: 0.75rem 1rem; color: var(--text-main); transition: border-color .2s, box-shadow .2s;
     }
     .rsvp-input:focus { outline: none; border-color: #b89a6d; box-shadow: 0 0 0 3px rgba(184,154,109,0.18); }
     
     .choice-label {
       display: flex; align-items: center; justify-content: center; gap: .5rem;
-      padding: 1rem; border: 1px solid #e5dccf; border-radius: 2px; background: #ffffff;
+      padding: 1rem; border: 1px solid #e5dccf; border-radius: 4px; background: #ffffff;
       cursor: pointer; text-align: center; transition: all .2s; font-weight: 500;
     }
     .choice-label:hover { border-color: #b89a6d; }
@@ -93,7 +99,7 @@
     .timeline-item::after { content: ""; position: absolute; left: 0.45rem; top: 0.4rem; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); border: 2px solid var(--bg-primary); }
     .timeline-item:last-child::before { display: none; }
 
-    /* Mode Édition */
+    /* Styles Mode Édition */
     .edit-mode [contenteditable="true"] { outline: 1px dashed #d4a95f !important; cursor: text; min-height: 1em; }
     .edit-mode [contenteditable="true"]:focus { outline: 2px solid #a8533e !important; background: rgba(212, 169, 95, 0.12); }
     .edit-mode .img-wrapper { position: relative; cursor: pointer; }
@@ -103,111 +109,149 @@
       opacity: 0.85; transition: opacity 0.2s; border-radius: 4px; pointer-events: none; z-index: 10;
     }
     .edit-mode .img-wrapper:hover::after { opacity: 1; background: rgba(168, 83, 62, 0.85); }
-    .edit-mode button:not(#admin-bar button):not(#image-adjust-toolbar button), 
+    .edit-mode [data-lucide] { outline: 1px dashed #d4a95f; cursor: pointer; transition: transform 0.2s; }
+    .edit-mode [data-lucide]:hover { outline: 2px solid #a8533e; transform: scale(1.18); }
+    .edit-mode button:not(#admin-bar button):not(#image-adjust-toolbar button):not(#divider-panel button):not(#button-style-panel button):not(#icon-picker-modal button), 
     .edit-mode .custom-button { outline: 2px dashed #2a7d7d; cursor: pointer; }
-    .custom-floating-element { transition: box-shadow 0.2s; }
     .edit-mode .custom-floating-element { outline: 2px dashed #a8533e !important; }
   </style>
 </head>
 <body class="min-h-screen w-full relative">
 
   <!-- Bouton Remonter en haut de page -->
-  <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-6 right-6 z-40 p-3 bg-[#4a3f35] text-[#faf6f0] rounded-full shadow-xl opacity-0 pointer-events-none transition-all duration-300 hover:bg-[#8b5a7d] hover:scale-110" aria-label="Remonter tout en haut">
+  <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-6 right-6 z-40 p-3.5 bg-[#4a3f35] text-[#faf6f0] rounded-full shadow-2xl opacity-0 pointer-events-none transition-all duration-300 hover:bg-[#8b5a7d] hover:scale-110" aria-label="Remonter tout en haut">
     <i data-lucide="arrow-up" class="w-5 h-5"></i>
   </button>
 
-  <!-- Barre d'outils d'Édition -->
-  <div id="admin-bar" class="hidden fixed top-0 left-0 w-full z-[100] bg-[#3c3228] text-white px-4 py-2 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
+  <!-- BARRE D'OUTILS DE CONFIGURATION & ÉDITION (FIXE EN HAUT) -->
+  <div id="admin-bar" class="hidden fixed top-0 left-0 w-full z-[100] bg-[#3c3228] text-white px-4 py-2 shadow-2xl flex flex-wrap items-center justify-between gap-2 text-xs">
     <div class="flex items-center gap-2 font-bold text-[#d4a95f]">
       <i data-lucide="edit-3" class="w-4 h-4"></i> Mode Édition
     </div>
     
-    <!-- Formatting Tools -->
-    <div class="flex flex-wrap items-center gap-2 bg-[#4a3f35] px-3 py-1.5 rounded border border-gray-600">
+    <!-- Outils de Formattage de Texte -->
+    <div class="flex flex-wrap items-center gap-1.5 bg-[#4a3f35] px-3 py-1 rounded border border-gray-600">
       <span class="text-gray-300 font-semibold mr-1">Texte :</span>
-      <button onmousedown="event.preventDefault()" onclick="applyFormat('bold')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded font-bold" title="Gras">B</button>
-      <button onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded italic" title="Italique">I</button>
-      <button onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded underline" title="Souligné">U</button>
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('bold')" class="px-2 py-0.5 bg-gray-700 hover:bg-gray-600 rounded font-bold" title="Gras">B</button>
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="px-2 py-0.5 bg-gray-700 hover:bg-gray-600 rounded italic" title="Italique">I</button>
+      <button onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="px-2 py-0.5 bg-gray-700 hover:bg-gray-600 rounded underline" title="Souligné">U</button>
       
-      <label onmousedown="event.preventDefault()" class="flex items-center gap-1 bg-gray-700 px-2 py-1 rounded cursor-pointer">
+      <label onmousedown="event.preventDefault()" class="flex items-center gap-1 bg-gray-700 px-2 py-0.5 rounded cursor-pointer">
         <span>Couleur</span>
         <input type="color" onchange="applyColor(this.value)" class="w-4 h-4 bg-transparent border-0 cursor-pointer">
       </label>
 
-      <!-- Curseur de taille de police (en pixels) -->
-      <div class="flex items-center gap-1.5 bg-gray-700 px-2 py-1 rounded">
+      <!-- Taille en Pixels -->
+      <div class="flex items-center gap-1 bg-gray-700 px-2 py-0.5 rounded">
         <span>Taille :</span>
-        <input type="range" id="font-size-slider" min="10" max="90" value="18" oninput="applyFontSizePx(this.value)" class="w-20 cursor-pointer">
+        <input type="range" id="font-size-slider" min="10" max="90" value="18" oninput="applyFontSizePx(this.value)" class="w-16 cursor-pointer">
         <span id="font-size-val" class="font-mono text-[#d4a95f]">18px</span>
       </div>
 
-      <!-- Sélecteur étendu de polices -->
-      <select onfocus="saveSelection()" onchange="applyFontName(this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded cursor-pointer">
-        <option value="">Choisir une police...</option>
-        <option value="Cormorant Garamond">Cormorant Garamond (Titre Original)</option>
-        <option value="Alegreya Sans">Alegreya Sans (Corps Original)</option>
-        <option value="Great Vibes">Great Vibes (Calligraphie)</option>
-        <option value="Dancing Script">Dancing Script (Manuscrite)</option>
-        <option value="Parisienne">Parisienne (Romantique)</option>
-        <option value="Alex Brush">Alex Brush (Élégante)</option>
-        <option value="Playfair Display">Playfair Display (Chic Serif)</option>
-        <option value="Lora">Lora (Sérif Classique)</option>
-        <option value="Montserrat">Montserrat (Moderne Sans)</option>
-        <option value="Poppins">Poppins (Épuré Sans)</option>
+      <!-- Sélecteur de Polices -->
+      <select onfocus="saveSelection()" onchange="applyFontName(this.value)" class="bg-gray-700 text-white text-xs px-1.5 py-0.5 rounded cursor-pointer">
+        <option value="">Police...</option>
+        <option value="Cormorant Garamond">Cormorant Garamond</option>
+        <option value="Alegreya Sans">Alegreya Sans</option>
+        <option value="Great Vibes">Great Vibes</option>
+        <option value="Dancing Script">Dancing Script</option>
+        <option value="Parisienne">Parisienne</option>
+        <option value="Alex Brush">Alex Brush</option>
+        <option value="Playfair Display">Playfair Display</option>
+        <option value="Lora">Lora</option>
+        <option value="Montserrat">Montserrat</option>
+        <option value="Poppins">Poppins</option>
       </select>
     </div>
 
-    <!-- Panneaux Personnalisation Couleurs Dégradés & Boutons -->
+    <!-- Options Avancées -->
     <div class="flex items-center gap-2">
-      <button onclick="toggleDividerPanel()" class="px-2.5 py-1.5 bg-[#8b5a7d] hover:opacity-90 rounded font-bold text-white uppercase flex items-center gap-1">
-        🎨 Dégradé Séparateurs
+      <button onclick="toggleDividerPanel()" class="px-2.5 py-1 bg-[#8b5a7d] hover:opacity-90 rounded font-bold text-white uppercase flex items-center gap-1">
+        🎨 Séparateurs
       </button>
-      <button onclick="addNewFreeImage()" class="px-2.5 py-1.5 bg-[#a8533e] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
+      <button onclick="addNewFreeImage()" class="px-2.5 py-1 bg-[#a8533e] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
         🖼️ Image Libre
       </button>
-      <button onclick="openRsvpDashboard()" class="px-2.5 py-1.5 bg-[#4a3f35] border border-[#d4a95f] hover:opacity-90 rounded font-bold text-[#d4a95f] uppercase flex items-center gap-1">
+      <button onclick="openRsvpDashboard()" class="px-2.5 py-1 bg-[#4a3f35] border border-[#d4a95f] hover:opacity-90 rounded font-bold text-[#d4a95f] uppercase flex items-center gap-1">
         📊 RSVP
       </button>
-      <button onclick="copyHTMLToClipboard()" class="px-3 py-1.5 bg-[#2a7d7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
-        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copier Code HTML
+      <button onclick="copyHTMLToClipboard()" class="px-3 py-1 bg-[#2a7d7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
+        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copier HTML
       </button>
-      <button onclick="disableEditMode()" class="px-2 py-1.5 bg-gray-600 hover:bg-gray-700 rounded font-bold uppercase">Quitter</button>
+      <button onclick="disableEditMode()" class="px-2 py-1 bg-gray-600 hover:bg-gray-700 rounded font-bold uppercase">Quitter</button>
     </div>
   </div>
 
-  <!-- Panneau Réglage des Dégradés des Séparateurs (2 à 4 Couleurs) -->
-  <div id="divider-panel" class="hidden fixed top-14 right-6 z-[105] bg-[#3c3228] text-white p-4 rounded-lg shadow-2xl border border-[#d4a95f] space-y-3 text-xs w-72">
+  <!-- PANNEAU CONFIGURATION DÉGRADÉ & ALPHA DES SÉPARATEURS -->
+  <div id="divider-panel" class="hidden fixed top-14 right-6 z-[105] bg-[#3c3228] text-white p-4 rounded-lg shadow-2xl border border-[#d4a95f] space-y-3 text-xs w-80">
     <div class="flex justify-between items-center border-b border-gray-600 pb-2">
-      <span class="font-bold text-[#d4a95f]">Couleurs du Dégradé Séparateurs</span>
+      <span class="font-bold text-[#d4a95f]">Réglage des Séparateurs en Dégradé</span>
       <button onclick="toggleDividerPanel()" class="text-gray-400 hover:text-white">✕</button>
     </div>
-    <div class="grid grid-cols-2 gap-2">
-      <label class="flex flex-col gap-1">Couleur 1 : <input type="color" id="div-col-1" value="#d4a95f" onchange="updateDividerGradient()" class="w-full h-8 bg-transparent cursor-pointer rounded"></label>
-      <label class="flex flex-col gap-1">Couleur 2 : <input type="color" id="div-col-2" value="#8b5a7d" onchange="updateDividerGradient()" class="w-full h-8 bg-transparent cursor-pointer rounded"></label>
-      <label class="flex flex-col gap-1">Couleur 3 : <input type="color" id="div-col-3" value="#a8533e" onchange="updateDividerGradient()" class="w-full h-8 bg-transparent cursor-pointer rounded"></label>
-      <label class="flex flex-col gap-1">Couleur 4 : <input type="color" id="div-col-4" value="#2a7d7d" onchange="updateDividerGradient()" class="w-full h-8 bg-transparent cursor-pointer rounded"></label>
+    
+    <div class="space-y-2">
+      <div class="grid grid-cols-2 gap-2">
+        <label class="flex flex-col gap-1">Couleur 1 :
+          <div class="flex items-center gap-1">
+            <input type="color" id="div-col-1" value="#d4a95f" onchange="updateDividerGradient()" class="w-8 h-6 bg-transparent cursor-pointer">
+            <input type="range" id="div-alpha-1" min="0" max="1" step="0.05" value="1" oninput="updateDividerGradient()" class="w-16" title="Opacité">
+          </div>
+        </label>
+        <label class="flex flex-col gap-1">Couleur 2 :
+          <div class="flex items-center gap-1">
+            <input type="color" id="div-col-2" value="#8b5a7d" onchange="updateDividerGradient()" class="w-8 h-6 bg-transparent cursor-pointer">
+            <input type="range" id="div-alpha-2" min="0" max="1" step="0.05" value="1" oninput="updateDividerGradient()" class="w-16" title="Opacité">
+          </div>
+        </label>
+        <label class="flex flex-col gap-1">Couleur 3 :
+          <div class="flex items-center gap-1">
+            <input type="color" id="div-col-3" value="#a8533e" onchange="updateDividerGradient()" class="w-8 h-6 bg-transparent cursor-pointer">
+            <input type="range" id="div-alpha-3" min="0" max="1" step="0.05" value="1" oninput="updateDividerGradient()" class="w-16" title="Opacité">
+          </div>
+        </label>
+        <label class="flex flex-col gap-1">Couleur 4 :
+          <div class="flex items-center gap-1">
+            <input type="color" id="div-col-4" value="#2a7d7d" onchange="updateDividerGradient()" class="w-8 h-6 bg-transparent cursor-pointer">
+            <input type="range" id="div-alpha-4" min="0" max="1" step="0.05" value="1" oninput="updateDividerGradient()" class="w-16" title="Opacité">
+          </div>
+        </label>
+      </div>
+
+      <div class="flex justify-between items-center pt-2 border-t border-gray-700">
+        <span>Épaisseur (Hauteur) :</span>
+        <input type="range" id="div-height" min="2" max="16" value="5" oninput="updateDividerGradient()" class="w-24 cursor-pointer">
+      </div>
+      <div class="flex justify-between items-center">
+        <span>Largeur :</span>
+        <input type="range" id="div-width" min="20" max="120" value="52" oninput="updateDividerGradient()" class="w-24 cursor-pointer">
+      </div>
     </div>
-    <div class="text-[10px] text-gray-400">Le dégradé s'applique instantanément sur toutes les barres ornementales.</div>
   </div>
 
-  <!-- Panneau Styliser un Bouton Sélectionné -->
+  <!-- PANNEAU PERSONNALISATION D'UN BOUTON SÉLECTIONNÉ -->
   <div id="button-style-panel" class="hidden fixed top-14 left-6 z-[105] bg-[#3c3228] text-white p-4 rounded-lg shadow-2xl border border-[#2a7d7d] space-y-3 text-xs w-80">
     <div class="flex justify-between items-center border-b border-gray-600 pb-2">
-      <span class="font-bold text-[#2a7d7d]">Styliser le Bouton</span>
+      <span class="font-bold text-[#2a7d7d]">Styliser le Bouton Sélectionné</span>
       <button onclick="closeButtonStylePanel()" class="text-gray-400 hover:text-white">✕</button>
     </div>
     <div class="grid grid-cols-2 gap-2">
-      <label class="flex items-center gap-1.5">Fond : <input type="color" id="btn-bg-col" onchange="applyButtonStyle()" class="w-6 h-6 bg-transparent cursor-pointer"></label>
-      <label class="flex items-center gap-1.5">Texte : <input type="color" id="btn-txt-col" onchange="applyButtonStyle()" class="w-6 h-6 bg-transparent cursor-pointer"></label>
+      <label class="flex flex-col gap-1">Fond (avec Opacité) :
+        <div class="flex items-center gap-1">
+          <input type="color" id="btn-bg-col" value="#4a3f35" onchange="applyButtonStyle()" class="w-8 h-6 bg-transparent cursor-pointer">
+          <input type="range" id="btn-bg-alpha" min="0" max="1" step="0.05" value="1" oninput="applyButtonStyle()" class="w-16" title="Opacité Fond">
+        </div>
+      </label>
+      <label class="flex flex-col gap-1">Couleur Texte :
+        <input type="color" id="btn-txt-col" value="#faf6f0" onchange="applyButtonStyle()" class="w-full h-6 bg-transparent cursor-pointer">
+      </label>
     </div>
-    <div class="flex items-center gap-2">
-      <span>Arrondi :</span>
+    <div class="flex items-center justify-between">
+      <span>Arrondi des angles :</span>
       <input type="range" id="btn-radius" min="0" max="30" value="4" oninput="applyButtonStyle()" class="w-24 cursor-pointer">
-      <span id="btn-radius-val" class="font-mono text-[#d4a95f]">4px</span>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center justify-between">
       <span>Police :</span>
-      <select id="btn-font-family" onchange="applyButtonStyle()" class="bg-gray-700 text-white text-xs px-2 py-1 rounded cursor-pointer w-full">
+      <select id="btn-font-family" onchange="applyButtonStyle()" class="bg-gray-700 text-white text-xs px-2 py-1 rounded cursor-pointer">
         <option value="Alegreya Sans">Alegreya Sans</option>
         <option value="Cormorant Garamond">Cormorant Garamond</option>
         <option value="Montserrat">Montserrat</option>
@@ -216,7 +260,29 @@
     </div>
   </div>
 
-  <!-- Panneau Réglage Image (Zoom / Position) -->
+  <!-- SÉLECTEUR D'ICÔNES UNIVERSEL (MODAL) -->
+  <div id="icon-picker-modal" class="hidden fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#faf6f0] text-[#4a3f35] rounded-lg shadow-2xl w-full max-w-md p-6 space-y-4 border border-[#d4a95f]">
+      <div class="flex justify-between items-center border-b border-[#e5dccf] pb-3">
+        <h3 class="display-font text-2xl font-bold text-[#4a3f35]">Changer l'icône</h3>
+        <button onclick="closeIconPickerModal()" class="text-gray-500 hover:text-black">✕</button>
+      </div>
+      
+      <p class="text-xs text-[#6b5d4f]">Choisissez une icône ci-dessous ou tapez le nom exact d'une icône Lucide :</p>
+      
+      <!-- Grille d'icônes populaires -->
+      <div class="grid grid-cols-6 gap-3 text-center py-2" id="popular-icons-grid">
+        <!-- Rempli par JS -->
+      </div>
+
+      <div class="flex items-center gap-2 pt-2 border-t border-[#e5dccf]">
+        <input type="text" id="custom-icon-input" class="rsvp-input text-xs" placeholder="Ex: heart, church, wine, phone...">
+        <button onclick="applyCustomIconInput()" class="px-4 py-2 bg-[#2a7d7d] text-white rounded text-xs font-bold uppercase">Appliquer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANNEAU RÉGLAGE IMAGE (ZOOM / POSITION / TAILLE) -->
   <div id="image-adjust-toolbar" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-[105] bg-[#3c3228] text-white p-3 rounded-lg shadow-2xl border border-[#d4a95f] flex flex-wrap items-center gap-4 text-xs">
     <span class="font-bold text-[#d4a95f] flex items-center gap-1"><i data-lucide="sliders" class="w-3.5 h-3.5"></i> Réglage Image</span>
     
@@ -237,11 +303,11 @@
     <button onclick="closeImageAdjust()" class="px-2 py-1 bg-[#2a7d7d] rounded font-bold text-white">Valider</button>
   </div>
 
-  <!-- Navigation -->
+  <!-- BARRE DE NAVIGATION (NAVBAR) -->
   <nav class="fixed top-0 left-0 w-full z-50 bg-[#faf6f0]/90 backdrop-blur-sm border-b border-[#e5dccf]">
     <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
       
-      <!-- Brand + Logo personnalisé Menu -->
+      <!-- Brand + Logo Menu -->
       <a href="#accueil" id="logo-trigger" class="flex items-center gap-2">
         <div class="img-wrapper w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-[#d4a95f]/20" onclick="changeImage(this.querySelector('img'))">
           <img id="nav-logo-img" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=100" class="w-full h-full object-cover" alt="Logo Nav">
@@ -251,7 +317,7 @@
 
       <button id="menu-toggle" class="md:hidden p-2 text-[#4a3f35]" aria-label="Menu"><i data-lucide="menu"></i></button>
       
-      <!-- Liens Menu Personnalisables -->
+      <!-- Liens Menu -->
       <div id="nav-links" class="hidden md:flex items-center gap-4 lg:gap-6 text-xs uppercase tracking-widest font-medium text-[#4a3f35]">
         <a href="#accueil" class="editable-text hover:opacity-60 transition">Accueil</a>
         <a href="#histoire" class="editable-text hover:opacity-60 transition">Histoire</a>
@@ -279,7 +345,7 @@
     </div>
   </nav>
 
-  <!-- Hero -->
+  <!-- Hero Section -->
   <header id="accueil" class="relative w-full h-screen flex items-center justify-center text-center overflow-hidden">
     <div class="img-wrapper absolute inset-0 w-full h-full" onclick="changeImage(this.querySelector('img'))">
       <img id="hero-img" loading="lazy" class="w-full h-full object-cover" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Château Balac">
@@ -297,7 +363,7 @@
   <section id="histoire" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
       <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Notre Histoire</h2>
-      <p class="divider-ornament text-[#8b5a7d] mb-16"></p>
+      <p class="divider-ornament mb-16"></p>
     </div>
     <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-12">
       <article class="reveal">
@@ -321,7 +387,7 @@
   <section id="lieux" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
       <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Lieux &amp; Horaires</h2>
-      <p class="divider-ornament text-[#d4a95f] mb-16"></p>
+      <p class="divider-ornament mb-16"></p>
     </div>
     <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
       <div class="bg-[#faf6f0] rounded-sm p-8 shadow-sm reveal flex flex-col justify-between">
@@ -361,7 +427,7 @@ Réception &amp; soirée dès 18h00</p>
   <section id="programme" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
       <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Programme de la journée</h2>
-      <p class="divider-ornament text-[#a8533e] mb-16"></p>
+      <p class="divider-ornament mb-16"></p>
     </div>
     <div class="max-w-2xl mx-auto space-y-8 reveal">
       <div class="timeline-item pb-8">
@@ -395,7 +461,7 @@ Réception &amp; soirée dès 18h00</p>
   <section id="team" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal">
       <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">La Team Mariés</h2>
-      <p class="divider-ornament text-[#2a7d7d] mb-16"></p>
+      <p class="divider-ornament mb-16"></p>
     </div>
     <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
       <div class="text-center reveal">
@@ -433,7 +499,7 @@ Réception &amp; soirée dès 18h00</p>
   <section id="jourj" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal mb-16">
       <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Le Jour J, c'est dans...</h2>
-      <p class="divider-ornament text-[#a8533e]"></p>
+      <p class="divider-ornament"></p>
     </div>
     
     <div class="max-w-3xl mx-auto grid grid-cols-4 gap-3 md:gap-6 mb-16 reveal">
@@ -488,7 +554,7 @@ Réception &amp; soirée dès 18h00</p>
   <section id="rsvp" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-2xl mx-auto text-center reveal">
       <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Confirmez votre présence</h2>
-      <p class="divider-ornament text-[#d4a95f] mb-8"></p>
+      <p class="divider-ornament mb-8"></p>
       <p class="editable-text leading-relaxed mb-12 text-[#2a7d7d] font-bold text-2xl">Votre réponse nous est <strong>précieuse</strong> pour préparer ce grand jour.<br>Merci de nous répondre avant le <strong>1er mai 2027</strong>.</p>
     </div>
 
@@ -801,7 +867,7 @@ Réception &amp; soirée dès 18h00</p>
   <!-- SÉLECTEUR FICHIER INVISIBLE -->
   <input type="file" id="local-file-picker" accept="image/*" class="hidden">
 
-  <!-- SCRIPTS PRINCIPAUX -->
+  <!-- SCRIPTS DU SITE -->
   <script>
     const GOOGLE_SCRIPT_URL = 'VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI';
     const WEDDING_DATE = '2027-07-31T15:00:00';
@@ -969,12 +1035,13 @@ Réception &amp; soirée dès 18h00</p>
     });
 
     // =========================================================================
-    // 6. MODE ÉDITION ENRICHIE (DÉGRADÉS, BOUTONS, MENU & IMAGES)
+    // 6. MODE ÉDITION ENRICHIE & GESTIONNAIRE D'ICÔNES UNIVERSEL
     // =========================================================================
     let clickCount = 0;
     let targetImgElement = null;
     let activeWrapperContainer = null;
     let activeCustomButton = null;
+    let activeIconElement = null;
     let savedRange = null;
 
     document.getElementById('logo-trigger').addEventListener('click', (e) => {
@@ -1015,12 +1082,15 @@ Réception &amp; soirée dès 18h00</p>
       document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
       document.querySelectorAll('.editable-text').forEach(el => el.setAttribute('contenteditable', 'true'));
 
-      // Attacher gestionnaire de clic pour styliser les boutons
+      // Attacher événements d'édition pour les boutons
       document.querySelectorAll('button, .custom-button').forEach(btn => {
-        if (!btn.closest('#admin-bar') && !btn.closest('#image-adjust-toolbar') && !btn.closest('#divider-panel') && !btn.closest('#button-style-panel')) {
+        if (!btn.closest('#admin-bar') && !btn.closest('#image-adjust-toolbar') && !btn.closest('#divider-panel') && !btn.closest('#button-style-panel') && !btn.closest('#icon-picker-modal')) {
           btn.addEventListener('click', handleButtonClickInEditMode);
         }
       });
+
+      // Attacher événements de changement pour TOUTES les icônes du site
+      attachIconClickEvents();
     }
 
     function disableEditMode() {
@@ -1029,8 +1099,63 @@ Réception &amp; soirée dès 18h00</p>
       document.getElementById('image-adjust-toolbar').classList.add('hidden');
       document.getElementById('divider-panel').classList.add('hidden');
       document.getElementById('button-style-panel').classList.add('hidden');
+      document.getElementById('icon-picker-modal').classList.add('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+    }
+
+    // Gestionnaire de Clic sur Icône
+    function attachIconClickEvents() {
+      document.querySelectorAll('[data-lucide]').forEach(icon => {
+        if (!icon.closest('#admin-bar') && !icon.closest('#icon-picker-modal')) {
+          icon.addEventListener('click', handleIconClick);
+        }
+      });
+    }
+
+    function handleIconClick(e) {
+      if (!document.body.classList.contains('edit-mode')) return;
+      e.stopPropagation();
+      e.preventDefault();
+      activeIconElement = e.currentTarget;
+      openIconPickerModal();
+    }
+
+    // Modal Sélecteur d'Icônes
+    const POPULAR_ICONS = ['heart', 'flower', 'church', 'castle', 'landmark', 'wine', 'glass-water', 'music', 'sparkles', 'calendar', 'clock', 'map-pin', 'mail', 'phone', 'camera', 'gem', 'gift', 'star'];
+
+    function openIconPickerModal() {
+      const grid = document.getElementById('popular-icons-grid');
+      grid.innerHTML = '';
+
+      POPULAR_ICONS.forEach(name => {
+        const btn = document.createElement('button');
+        btn.className = 'p-2 bg-white rounded shadow border border-gray-200 hover:bg-[#d4a95f]/20 flex items-center justify-center';
+        btn.innerHTML = `<i data-lucide="${name}" class="w-5 h-5 text-[#4a3f35]"></i>`;
+        btn.onclick = () => selectIcon(name);
+        grid.appendChild(btn);
+      });
+
+      lucide.createIcons();
+      document.getElementById('icon-picker-modal').classList.remove('hidden');
+    }
+
+    function closeIconPickerModal() {
+      document.getElementById('icon-picker-modal').classList.add('hidden');
+      activeIconElement = null;
+    }
+
+    function selectIcon(iconName) {
+      if (!activeIconElement) return;
+      activeIconElement.setAttribute('data-lucide', iconName);
+      lucide.createIcons();
+      attachIconClickEvents();
+      closeIconPickerModal();
+    }
+
+    function applyCustomIconInput() {
+      const val = document.getElementById('custom-icon-input').value.trim().toLowerCase();
+      if (val) selectIcon(val);
     }
 
     function applyFormat(cmd, value = null) {
@@ -1067,24 +1192,36 @@ Réception &amp; soirée dès 18h00</p>
       document.execCommand('fontName', false, fontName);
     }
 
-    // Gestion du Dégradé des Séparateurs
+    // Convertisseur Hex + Alpha vers RGBA
+    function hexToRgba(hex, alpha) {
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      return `rgba(${(num >> 16) & 255}, ${(num >> 8) & 255}, ${num & 255}, ${alpha})`;
+    }
+
+    // Gestion Dégradés Séparateurs avec Alpha
     function toggleDividerPanel() {
       document.getElementById('divider-panel').classList.toggle('hidden');
     }
 
     function updateDividerGradient() {
-      const c1 = document.getElementById('div-col-1').value;
-      const c2 = document.getElementById('div-col-2').value;
-      const c3 = document.getElementById('div-col-3').value;
-      const c4 = document.getElementById('div-col-4').value;
+      const c1 = hexToRgba(document.getElementById('div-col-1').value, document.getElementById('div-alpha-1').value);
+      const c2 = hexToRgba(document.getElementById('div-col-2').value, document.getElementById('div-alpha-2').value);
+      const c3 = hexToRgba(document.getElementById('div-col-3').value, document.getElementById('div-alpha-3').value);
+      const c4 = hexToRgba(document.getElementById('div-col-4').value, document.getElementById('div-alpha-4').value);
+      const height = document.getElementById('div-height').value + 'px';
+      const width = document.getElementById('div-width').value + 'px';
 
       document.documentElement.style.setProperty('--divider-color-1', c1);
       document.documentElement.style.setProperty('--divider-color-2', c2);
       document.documentElement.style.setProperty('--divider-color-3', c3);
       document.documentElement.style.setProperty('--divider-color-4', c4);
+      document.documentElement.style.setProperty('--divider-height', height);
+      document.documentElement.style.setProperty('--divider-width', width);
     }
 
-    // Personnalisation des Boutons
+    // Personnalisation des Boutons avec Alpha
     function handleButtonClickInEditMode(e) {
       if (!document.body.classList.contains('edit-mode')) return;
       e.preventDefault();
@@ -1092,20 +1229,18 @@ Réception &amp; soirée dès 18h00</p>
 
       document.getElementById('button-style-panel').classList.remove('hidden');
       document.getElementById('btn-radius').value = parseInt(window.getComputedStyle(activeCustomButton).borderRadius) || 4;
-      document.getElementById('btn-radius-val').textContent = document.getElementById('btn-radius').value + 'px';
     }
 
     function applyButtonStyle() {
       if (!activeCustomButton) return;
-      const bgCol = document.getElementById('btn-bg-col').value;
+      const hexBg = document.getElementById('btn-bg-col').value;
+      const bgAlpha = document.getElementById('btn-bg-alpha').value;
       const txtCol = document.getElementById('btn-txt-col').value;
       const radius = document.getElementById('btn-radius').value;
       const font = document.getElementById('btn-font-family').value;
 
-      document.getElementById('btn-radius-val').textContent = radius + 'px';
-      
-      if (bgCol) activeCustomButton.style.backgroundColor = bgCol;
-      if (txtCol) activeCustomButton.style.color = txtCol;
+      activeCustomButton.style.backgroundColor = hexToRgba(hexBg, bgAlpha);
+      activeCustomButton.style.color = txtCol;
       activeCustomButton.style.borderRadius = radius + 'px';
       activeCustomButton.style.fontFamily = font;
     }
