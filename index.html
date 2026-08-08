@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- Anti-référencement Google -->
+  <!-- Protection anti-référencement Google -->
   <meta name="robots" content="noindex, nofollow">
   
   <title>Notre Mariage — Magalie &amp; Sébastien</title>
@@ -30,7 +30,7 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   
-  <!-- Fonts d'origine -->
+  <!-- Fonts d'origine exactement restaurées -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
@@ -89,64 +89,74 @@
     /* Mode Édition */
     .edit-mode [contenteditable="true"] { outline: 1px dashed #d4a95f !important; cursor: text; min-height: 1em; }
     .edit-mode [contenteditable="true"]:focus { outline: 2px solid #a8533e !important; background: rgba(212, 169, 95, 0.12); }
-    .edit-mode .img-wrapper { position: relative; cursor: pointer; }
+    .edit-mode .img-wrapper { position: relative; cursor: pointer; overflow: hidden; }
     .edit-mode .img-wrapper::after {
-      content: "📷 Cliquer pour changer l'image"; position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+      content: "📷 Modifier / Repositionner"; position: absolute; inset: 0; background: rgba(0,0,0,0.55);
       color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold;
       opacity: 0.85; transition: opacity 0.2s; border-radius: 4px; pointer-events: none;
     }
     .edit-mode .img-wrapper:hover::after { opacity: 1; background: rgba(168, 83, 62, 0.85); }
   </style>
 </head>
-<body class="min-h-screen w-full">
+<body class="min-h-screen w-full relative">
+
+  <!-- Bouton Remonter en haut de page -->
+  <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-6 right-6 z-40 p-3 bg-[#4a3f35] text-[#faf6f0] rounded-full shadow-xl opacity-0 pointer-events-none transition-all duration-300 hover:bg-[#8b5a7d] hover:scale-110" aria-label="Remonter tout en haut">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
 
   <!-- Barre d'outils d'Édition -->
   <div id="admin-bar" class="hidden fixed top-0 left-0 w-full z-[100] bg-[#3c3228] text-white px-4 py-2 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
     <div class="flex items-center gap-2 font-bold text-[#d4a95f]">
-      <i data-lucide="edit-3" class="w-4 h-4"></i> Mode Édition Actif
+      <i data-lucide="edit-3" class="w-4 h-4"></i> Mode Édition
     </div>
     
-    <!-- Outils de formatage de texte -->
+    <!-- Formatting Tools -->
     <div class="flex flex-wrap items-center gap-2 bg-[#4a3f35] px-3 py-1.5 rounded border border-gray-600">
-      <span class="text-gray-300 font-semibold mr-1">Sélection :</span>
-      
+      <span class="text-gray-300 font-semibold mr-1">Mise en forme :</span>
       <button onmousedown="event.preventDefault()" onclick="applyFormat('bold')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded font-bold" title="Gras">B</button>
       <button onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded italic" title="Italique">I</button>
       <button onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="px-2.5 py-1 bg-gray-700 hover:bg-gray-600 rounded underline" title="Souligné">U</button>
       
-      <!-- Couleur du texte sélectionné -->
       <label onmousedown="event.preventDefault()" class="flex items-center gap-1.5 bg-gray-700 px-2 py-1 rounded cursor-pointer">
         <span>Couleur</span>
         <input type="color" onchange="applyColor(this.value)" class="w-5 h-5 bg-transparent border-0 cursor-pointer">
       </label>
 
-      <!-- Taille de police du texte sélectionné -->
       <select onfocus="saveSelection()" onchange="applyFormat('fontSize', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
         <option value="">Taille...</option>
-        <option value="1">1 (Très petit)</option>
-        <option value="2">2 (Petit)</option>
-        <option value="3">3 (Normal)</option>
-        <option value="4">4 (Moyen)</option>
-        <option value="5">5 (Grand)</option>
-        <option value="6">6 (Très grand)</option>
-        <option value="7">7 (Titre)</option>
+        <option value="1">Très petit</option>
+        <option value="3">Normal</option>
+        <option value="5">Grand</option>
+        <option value="7">Très grand</option>
       </select>
 
-      <!-- Police du texte sélectionné -->
       <select onfocus="saveSelection()" onchange="applyFormat('fontName', this.value)" class="bg-gray-700 text-white text-xs px-2 py-1 rounded">
         <option value="">Police...</option>
         <option value="Cormorant Garamond">Cormorant Garamond</option>
         <option value="Alegreya Sans">Alegreya Sans</option>
-        <option value="Arial">Arial</option>
-        <option value="Times New Roman">Times New Roman</option>
       </select>
     </div>
 
-    <!-- Actions Globales -->
+    <!-- Admin Tools -->
     <div class="flex items-center gap-2">
-      <button onclick="downloadUpdatedHTML()" class="px-3 py-1.5 bg-[#2a7d7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider">💾 Sauvegarder &amp; Télécharger</button>
+      <button onclick="openRsvpDashboard()" class="px-3 py-1.5 bg-[#8b5a7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
+        <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i> Dashboard RSVP
+      </button>
+      <button onclick="copyHTMLToClipboard()" class="px-3 py-1.5 bg-[#2a7d7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
+        <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copier le code HTML
+      </button>
       <button onclick="disableEditMode()" class="px-2 py-1.5 bg-gray-600 hover:bg-gray-700 rounded font-bold uppercase">Quitter</button>
     </div>
+  </div>
+
+  <!-- Panneau de réglage dynamique de l'image (Zoom / Position) -->
+  <div id="image-adjust-toolbar" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-[105] bg-[#3c3228] text-white p-3 rounded-lg shadow-2xl border border-[#d4a95f] flex flex-wrap items-center gap-4 text-xs">
+    <span class="font-bold text-[#d4a95f] flex items-center gap-1"><i data-lucide="sliders" class="w-3.5 h-3.5"></i> Réglage Image</span>
+    <label class="flex items-center gap-1.5">Zoom : <input type="range" id="img-scale" min="100" max="250" value="100" oninput="adjustActiveImage()" class="w-20"></label>
+    <label class="flex items-center gap-1.5">Position X : <input type="range" id="img-pos-x" min="0" max="100" value="50" oninput="adjustActiveImage()" class="w-20"></label>
+    <label class="flex items-center gap-1.5">Position Y : <input type="range" id="img-pos-y" min="0" max="100" value="50" oninput="adjustActiveImage()" class="w-20"></label>
+    <button onclick="closeImageAdjust()" class="px-2 py-1 bg-[#2a7d7d] rounded font-bold text-white">Valider</button>
   </div>
 
   <!-- Navigation -->
@@ -384,7 +394,7 @@ Réception &amp; soirée dès 18h00</p>
     </div>
   </section>
 
-  <!-- RSVP -->
+  <!-- RSVP Form -->
   <section id="rsvp" class="w-full py-24 px-6 bg-[#f1e9dd] scroll-mt-16">
     <div class="max-w-2xl mx-auto text-center reveal">
       <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Confirmez votre présence</h2>
@@ -654,17 +664,112 @@ Réception &amp; soirée dès 18h00</p>
     <p class="editable-text uppercase tracking-[0.3em] text-sm text-[#b89a6d]">Magalie &amp; Sébastien</p>
   </footer>
 
+  <!-- MODAL / DASHBOARD ADMIN RSVP COMPLET -->
+  <div id="rsvp-dashboard-modal" class="hidden fixed inset-0 z-[200] bg-black/70 backdrop-blur-md flex items-center justify-center p-4 md:p-8">
+    <div class="bg-[#faf6f0] text-[#4a3f35] rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border border-[#d4a95f]">
+      <!-- Header Dashboard -->
+      <div class="p-6 bg-[#4a3f35] text-[#faf6f0] flex justify-between items-center border-b border-[#d4a95f]">
+        <div>
+          <h3 class="display-font text-3xl font-medium">Dashboard RSVP &amp; Statistiques</h3>
+          <p class="text-xs text-[#d4a95f]">Gestion en temps réel de la liste des invités</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="exportToCSV()" class="px-3 py-1.5 bg-[#2a7d7d] hover:opacity-90 text-white rounded text-xs font-bold uppercase flex items-center gap-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Export Excel (CSV)
+          </button>
+          <button onclick="closeRsvpDashboard()" class="text-white hover:text-[#d4a95f] p-1"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+      </div>
+
+      <!-- Content Dashboard -->
+      <div class="p-6 overflow-y-auto space-y-6 flex-1 text-sm">
+        <!-- Cards Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div class="bg-[#f1e9dd] p-4 rounded border-t-2 border-[#d4a95f] text-center">
+            <div id="stat-total-invites" class="display-font text-3xl font-bold">0</div>
+            <div class="text-xs text-[#6b5d4f] uppercase font-semibold">Total Réponses</div>
+          </div>
+          <div class="bg-[#f1e9dd] p-4 rounded border-t-2 border-[#2a7d7d] text-center">
+            <div id="stat-presences" class="display-font text-3xl font-bold text-[#2a7d7d]">0</div>
+            <div class="text-xs text-[#6b5d4f] uppercase font-semibold">Présents (Oui)</div>
+          </div>
+          <div class="bg-[#f1e9dd] p-4 rounded border-t-2 border-[#a8533e] text-center">
+            <div id="stat-absences" class="display-font text-3xl font-bold text-[#a8533e]">0</div>
+            <div class="text-xs text-[#6b5d4f] uppercase font-semibold">Absents (Non)</div>
+          </div>
+          <div class="bg-[#f1e9dd] p-4 rounded border-t-2 border-[#8b5a7d] text-center">
+            <div id="stat-adultes" class="display-font text-3xl font-bold">0</div>
+            <div class="text-xs text-[#6b5d4f] uppercase font-semibold">Total Adultes</div>
+          </div>
+          <div class="bg-[#f1e9dd] p-4 rounded border-t-2 border-[#d4a95f] text-center">
+            <div id="stat-enfants" class="display-font text-3xl font-bold">0</div>
+            <div class="text-xs text-[#6b5d4f] uppercase font-semibold">Total Enfants</div>
+          </div>
+        </div>
+
+        <!-- Section Relance Réglable -->
+        <div class="bg-[#f1e9dd] p-5 rounded border border-[#e5dccf] space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="display-font text-xl font-bold text-[#4a3f35] flex items-center gap-2"><i data-lucide="send" class="w-4 h-4 text-[#8b5a7d]"></i> Générateur de Relance Automatique</h4>
+            <span class="text-xs text-[#6b5d4f]">Délai suggéré : 30 jours avant le 1er mai 2027</span>
+          </div>
+          <p class="text-xs text-[#6b5d4f]">Modifiez le texte ci-dessous pour l'envoyer par SMS/Email aux retardataires :</p>
+          <textarea id="relance-template" rows="2" class="w-full p-3 bg-white rounded border border-gray-300 text-xs text-[#4a3f35]" oninput="updateRelanceText()">Bonjour [Nom], nous organisons les derniers détails pour le mariage du 31 Juillet 2027 ! Peux-tu nous confirmer ta présence avant le 1er mai ? Merci d'avance ! M&S</textarea>
+          <div class="flex justify-end">
+            <button onclick="copyRelanceText()" class="px-3 py-1.5 bg-[#8b5a7d] hover:opacity-90 text-white rounded text-xs font-bold flex items-center gap-1">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copier le texte de relance
+            </button>
+          </div>
+        </div>
+
+        <!-- Tableau des Réponses -->
+        <div>
+          <h4 class="display-font text-xl font-bold mb-3">Détail des Invités</h4>
+          <div class="overflow-x-auto rounded border border-[#e5dccf]">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-[#4a3f35] text-[#faf6f0] uppercase tracking-wider">
+                  <th class="p-3">Famille / Nom</th>
+                  <th class="p-3">Réponse</th>
+                  <th class="p-3">Adultes</th>
+                  <th class="p-3">Enfants</th>
+                  <th class="p-3">Noms Participants</th>
+                  <th class="p-3">Contact</th>
+                  <th class="p-3">Chanson</th>
+                  <th class="p-3">Message</th>
+                </tr>
+              </thead>
+              <tbody id="rsvp-table-body" class="divide-y divide-[#e5dccf] bg-white">
+                <!-- Rempli dynamiquement par JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- SÉLECTEUR FICHIER INVISIBLE -->
   <input type="file" id="local-file-picker" accept="image/*" class="hidden">
 
-  <!-- SCRIPTS DU SITE -->
+  <!-- SCRIPTS PRINCIPAUX -->
   <script>
     const GOOGLE_SCRIPT_URL = 'VOTRE_URL_GOOGLE_APPS_SCRIPT_ICI';
     const WEDDING_DATE = '2027-07-31T15:00:00';
 
     lucide.createIcons();
 
-    // 1. Nav & Scroll
+    // 1. Bouton Remonter en haut
+    const backToTopBtn = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+      } else {
+        backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+      }
+    });
+
+    // 2. Navigation & Scroll Animations
     const navbar = document.querySelector('nav');
     let navTimeout;
     function showNav() { navbar.classList.remove('nav-hidden'); clearTimeout(navTimeout); }
@@ -686,7 +791,7 @@ Réception &amp; soirée dès 18h00</p>
     }, { threshold: 0.15 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // 2. Décompte
+    // 3. Décompte
     const targetTime = new Date(WEDDING_DATE).getTime();
     function updateCountdown() {
       let diff = Math.max(0, targetTime - Date.now());
@@ -702,7 +807,7 @@ Réception &amp; soirée dès 18h00</p>
     }
     updateCountdown(); setInterval(updateCountdown, 1000);
 
-    // 3. Carrousels
+    // 4. Carrousels
     const setupCarousel = (cId, pId, nId) => {
       const c = document.getElementById(cId), p = document.getElementById(pId), n = document.getElementById(nId);
       if (!c || !p || !n) return;
@@ -712,7 +817,7 @@ Réception &amp; soirée dès 18h00</p>
     setupCarousel('lodging-carousel', 'lodging-prev', 'lodging-next');
     setupCarousel('activity-carousel', 'activity-prev', 'activity-next');
 
-    // 4. RSVP Dynamic Fields
+    // 5. RSVP Noms Dynamiques
     function updateGuestNameFields() {
       const adults = parseInt(document.getElementById('rsvp-adults').value, 10) || 0;
       const children = parseInt(document.getElementById('rsvp-children').value, 10) || 0;
@@ -741,7 +846,9 @@ Réception &amp; soirée dès 18h00</p>
     document.getElementById('rsvp-children').addEventListener('change', updateGuestNameFields);
     updateGuestNameFields();
 
-    // 5. RSVP Form
+    // Enregistrement Local des RSVP pour Dashboard
+    let localRsvpData = JSON.parse(localStorage.getItem('mariage_rsvp_list') || '[]');
+
     document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const errorEl = document.getElementById('rsvp-error');
@@ -762,7 +869,7 @@ Réception &amp; soirée dès 18h00</p>
 
       const payload = {
         type: 'rsvp', reponse: resp.value,
-        famille: document.getElementById('rsvp-family').value.trim(),
+        famille: document.getElementById('rsvp-family').value.trim() || 'Invité',
         email, telephone: phone,
         adultes: document.getElementById('rsvp-adults').value,
         enfants: document.getElementById('rsvp-children').value,
@@ -773,6 +880,10 @@ Réception &amp; soirée dès 18h00</p>
       };
 
       submitBtn.disabled = true; spinner.classList.remove('hidden');
+
+      // Stocker localement pour le dashboard
+      localRsvpData.push(payload);
+      localStorage.setItem('mariage_rsvp_list', JSON.stringify(localRsvpData));
 
       try {
         if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes('VOTRE_URL')) {
@@ -787,7 +898,7 @@ Réception &amp; soirée dès 18h00</p>
       }
     });
 
-    // 6. Contact Form
+    // Contact Form
     document.getElementById('contact-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('contact-name').value.trim();
@@ -815,13 +926,12 @@ Réception &amp; soirée dès 18h00</p>
     });
 
     // =========================================================================
-    // 7. MOTEUR D'ÉDITION FIABLE & FORMATAGE DE TEXTE CIBLÉ
+    // 6. MODE ÉDITION, ZOOM/REPOSITIONNEMENT EN TEMPS RÉEL, COPIE PRESSE-PAPIER
     // =========================================================================
     let clickCount = 0;
     let targetImgElement = null;
     let savedRange = null;
 
-    // Déclenchement Édition
     document.getElementById('logo-trigger').addEventListener('click', (e) => {
       clickCount++;
       if (clickCount >= 5) { e.preventDefault(); enableEditMode(); }
@@ -832,12 +942,9 @@ Réception &amp; soirée dès 18h00</p>
       enableEditMode();
     }
 
-    // Gestion de la sauvegarde automatique de la sélection de texte
     function saveSelection() {
       const sel = window.getSelection();
-      if (sel.rangeCount > 0) {
-        savedRange = sel.getRangeAt(0);
-      }
+      if (sel.rangeCount > 0) savedRange = sel.getRangeAt(0);
     }
 
     function restoreSelection() {
@@ -853,9 +960,7 @@ Réception &amp; soirée dès 18h00</p>
       if (sel.rangeCount > 0 && sel.anchorNode) {
         let node = sel.anchorNode;
         if (node.nodeType === 3) node = node.parentNode;
-        if (node && node.isContentEditable) {
-          savedRange = sel.getRangeAt(0);
-        }
+        if (node && node.isContentEditable) savedRange = sel.getRangeAt(0);
       }
     });
 
@@ -863,27 +968,20 @@ Réception &amp; soirée dès 18h00</p>
       document.body.classList.add('edit-mode');
       document.getElementById('admin-bar').classList.remove('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
-      document.querySelectorAll('.editable-text').forEach(el => {
-        el.setAttribute('contenteditable', 'true');
-      });
-      alert("Mode Édition Activé !\n\n• Sélectionnez du texte puis cliquez sur 'B', 'I', 'Couleur', etc. pour le modifier.\n• Cliquez directement sur une image pour la changer.\n• Sauvegardez et téléchargez votre fichier index.html une fois terminé.");
+      document.querySelectorAll('.editable-text').forEach(el => el.setAttribute('contenteditable', 'true'));
     }
 
     function disableEditMode() {
       document.body.classList.remove('edit-mode');
       document.getElementById('admin-bar').classList.add('hidden');
+      document.getElementById('image-adjust-toolbar').classList.add('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
     }
 
-    // Commandes de mise en forme ciblée
     function applyFormat(cmd, value = null) {
       restoreSelection();
-      if (!value) {
-        document.execCommand(cmd, false, null);
-      } else {
-        document.execCommand(cmd, false, value);
-      }
+      document.execCommand(cmd, false, value);
     }
 
     function applyColor(hexColor) {
@@ -891,17 +989,22 @@ Réception &amp; soirée dès 18h00</p>
       document.execCommand('foreColor', false, hexColor);
     }
 
-    // Remplacement d'image
+    // Gestion Image + Barre d'Ajustement
     function changeImage(imgEl) {
       if (!document.body.classList.contains('edit-mode')) return;
       targetImgElement = imgEl;
-      
-      const method = prompt("Remplacer l'image :\n1. Importer un fichier depuis votre ordinateur\n2. Saisir l'URL d'une image en ligne");
+
+      const method = prompt("Action Image :\n1. Importer une photo depuis votre ordinateur\n2. Saisir l'URL d'une image web\n3. Repositionner / Zoomer l'image actuelle");
       if (method === '1') {
         document.getElementById('local-file-picker').click();
       } else if (method === '2') {
         const url = prompt("Collez l'URL de votre image :");
-        if (url && url.trim()) targetImgElement.src = url.trim();
+        if (url && url.trim()) {
+          targetImgElement.src = url.trim();
+          openImageAdjustToolbar();
+        }
+      } else if (method === '3') {
+        openImageAdjustToolbar();
       }
     }
 
@@ -911,12 +1014,61 @@ Réception &amp; soirée dès 18h00</p>
         const reader = new FileReader();
         reader.onload = function(event) {
           targetImgElement.src = event.target.result;
+          openImageAdjustToolbar();
         };
         reader.readAsDataURL(file);
       }
     });
 
-    // Ajout carrousel
+    function openImageAdjustToolbar() {
+      if (!targetImgElement) return;
+      document.getElementById('image-adjust-toolbar').classList.remove('hidden');
+      
+      // Récupérer les valeurs existantes
+      const currentScale = targetImgElement.style.transform ? targetImgElement.style.transform.replace(/[^\d.]/g, '') * 100 : 100;
+      const currentPos = targetImgElement.style.objectPosition ? targetImgElement.style.objectPosition.split(' ') : ['50%', '50%'];
+      
+      document.getElementById('img-scale').value = currentScale || 100;
+      document.getElementById('img-pos-x').value = parseInt(currentPos[0]) || 50;
+      document.getElementById('img-pos-y').value = parseInt(currentPos[1]) || 50;
+    }
+
+    function adjustActiveImage() {
+      if (!targetImgElement) return;
+      const scale = document.getElementById('img-scale').value;
+      const posX = document.getElementById('img-pos-x').value;
+      const posY = document.getElementById('img-pos-y').value;
+
+      targetImgElement.style.transform = `scale(${scale / 100})`;
+      targetImgElement.style.objectPosition = `${posX}% ${posY}%`;
+    }
+
+    function closeImageAdjust() {
+      document.getElementById('image-adjust-toolbar').classList.add('hidden');
+    }
+
+    // Copier le code HTML dans le Presse-papier
+    async function copyHTMLToClipboard() {
+      disableEditMode();
+      const htmlContent = "<!doctype html>\n" + document.documentElement.outerHTML;
+      
+      try {
+        await navigator.clipboard.writeText(htmlContent);
+        alert("✅ Code HTML copié avec succès dans le presse-papier !\n\nVous pouvez maintenant directement le coller dans votre fichier 'index.html' sur GitHub.");
+      } catch (err) {
+        const textarea = document.createElement('textarea');
+        textarea.value = htmlContent;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert("✅ Code HTML copié dans le presse-papier !");
+      } finally {
+        enableEditMode();
+      }
+    }
+
+    // Carrousel & Galerie Adders
     function addCarouselCard(carouselId) {
       const carousel = document.getElementById(carouselId);
       const title = prompt("Titre :", "Titre du lieu");
@@ -935,7 +1087,6 @@ Réception &amp; soirée dès 18h00</p>
       carousel.appendChild(article);
     }
 
-    // Ajout galerie
     function addGalleryImage() {
       const grid = document.getElementById('gallery-grid');
       const div = document.createElement('div');
@@ -946,16 +1097,90 @@ Réception &amp; soirée dès 18h00</p>
       changeImage(div.querySelector('img'));
     }
 
-    // Téléchargement HTML
-    function downloadUpdatedHTML() {
-      disableEditMode();
-      const htmlContent = "<!doctype html>\n" + document.documentElement.outerHTML;
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'index.html';
-      a.click();
-      enableEditMode();
+    // =========================================================================
+    // 7. DASHBOARD RSVP & EXPORT CSV / EXCEL
+    // =========================================================================
+    function openRsvpDashboard() {
+      renderRsvpDashboard();
+      document.getElementById('rsvp-dashboard-modal').classList.remove('hidden');
+    }
+
+    function closeRsvpDashboard() {
+      document.getElementById('rsvp-dashboard-modal').classList.add('hidden');
+    }
+
+    function renderRsvpDashboard() {
+      const body = document.getElementById('rsvp-table-body');
+      body.innerHTML = '';
+
+      let total = localRsvpData.length;
+      let oui = 0, non = 0, adultes = 0, enfants = 0;
+
+      localRsvpData.forEach(item => {
+        if (item.reponse === 'oui') oui++;
+        if (item.reponse === 'non') non++;
+        adultes += parseInt(item.adultes || 0, 10);
+        enfants += parseInt(item.enfants || 0, 10);
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50 border-b border-[#e5dccf]';
+        tr.innerHTML = `
+          <td class="p-3 font-semibold">${item.famille || 'Inconnu'}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.reponse === 'oui' ? 'bg-green-100 text-green-800' : (item.reponse === 'non' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')}">${(item.reponse || '').toUpperCase()}</span></td>
+          <td class="p-3">${item.adultes || 0}</td>
+          <td class="p-3">${item.enfants || 0}</td>
+          <td class="p-3">${item.noms_invites || '-'}</td>
+          <td class="p-3">${item.email || item.telephone || '-'}</td>
+          <td class="p-3 italic">${item.chanson || '-'}</td>
+          <td class="p-3">${item.message || '-'}</td>
+        `;
+        body.appendChild(tr);
+      });
+
+      document.getElementById('stat-total-invites').textContent = total;
+      document.getElementById('stat-presences').textContent = oui;
+      document.getElementById('stat-absences').textContent = non;
+      document.getElementById('stat-adultes').textContent = adultes;
+      document.getElementById('stat-enfants').textContent = enfants;
+    }
+
+    function copyRelanceText() {
+      const text = document.getElementById('relance-template').value;
+      navigator.clipboard.writeText(text);
+      alert("Texte de relance copié !");
+    }
+
+    function exportToCSV() {
+      if (localRsvpData.length === 0) {
+        alert("Aucune donnée RSVP enregistrée pour l'instant.");
+        return;
+      }
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+      csvContent += "Date;Famille/Groupe;Reponse;Adultes;Enfants;Noms Participants;Email;Telephone;Chanson;Message\n";
+
+      localRsvpData.forEach(r => {
+        const row = [
+          `"${r.date || ''}"`,
+          `"${r.famille || ''}"`,
+          `"${r.reponse || ''}"`,
+          `"${r.adultes || 0}"`,
+          `"${r.enfants || 0}"`,
+          `"${r.noms_invites || ''}"`,
+          `"${r.email || ''}"`,
+          `"${r.telephone || ''}"`,
+          `"${r.chanson || ''}"`,
+          `"${r.message || ''}"`
+        ];
+        csvContent += row.join(";") + "\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "mariage_rsvp_export.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   </script>
 </body>
