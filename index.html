@@ -45,6 +45,12 @@
       --accent-terracotta: #a8533e;
       --accent-plum: #8b5a7d;
       --accent-teal: #2a7d7d;
+      
+      /* Couleurs par défaut du dégradé des séparateurs */
+      --divider-color-1: #d4a95f;
+      --divider-color-2: #8b5a7d;
+      --divider-color-3: #a8533e;
+      --divider-color-4: #2a7d7d;
     }
 
     body { font-family: 'Alegreya Sans', sans-serif; background-color: var(--bg-primary); color: var(--text-main); }
@@ -57,7 +63,8 @@
     
     .divider-ornament::before, .divider-ornament::after {
       content: ""; display: inline-block; width: 48px; height: 6px;
-      background: linear-gradient(90deg, var(--accent-gold), var(--accent-plum)); vertical-align: middle; margin: 0 14px; opacity: 1;
+      background: linear-gradient(90deg, var(--divider-color-1), var(--divider-color-2), var(--divider-color-3), var(--divider-color-4));
+      vertical-align: middle; margin: 0 14px; opacity: 1;
     }
     
     nav { transition: transform 0.3s ease; }
@@ -91,11 +98,13 @@
     .edit-mode [contenteditable="true"]:focus { outline: 2px solid #a8533e !important; background: rgba(212, 169, 95, 0.12); }
     .edit-mode .img-wrapper { position: relative; cursor: pointer; }
     .edit-mode .img-wrapper::after {
-      content: "📷 Modifier / Repositionner"; position: absolute; inset: 0; background: rgba(0,0,0,0.55);
-      color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold;
+      content: "📷 Modifier"; position: absolute; inset: 0; background: rgba(0,0,0,0.55);
+      color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;
       opacity: 0.85; transition: opacity 0.2s; border-radius: 4px; pointer-events: none; z-index: 10;
     }
     .edit-mode .img-wrapper:hover::after { opacity: 1; background: rgba(168, 83, 62, 0.85); }
+    .edit-mode button:not(#admin-bar button):not(#image-adjust-toolbar button), 
+    .edit-mode .custom-button { outline: 2px dashed #2a7d7d; cursor: pointer; }
     .custom-floating-element { transition: box-shadow 0.2s; }
     .edit-mode .custom-floating-element { outline: 2px dashed #a8533e !important; }
   </style>
@@ -148,13 +157,16 @@
       </select>
     </div>
 
-    <!-- Admin & Image Actions -->
+    <!-- Panneaux Personnalisation Couleurs Dégradés & Boutons -->
     <div class="flex items-center gap-2">
-      <button onclick="addNewFreeImage()" class="px-3 py-1.5 bg-[#a8533e] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
-        <i data-lucide="image-plus" class="w-3.5 h-3.5"></i> ➕ Image Libre
+      <button onclick="toggleDividerPanel()" class="px-2.5 py-1.5 bg-[#8b5a7d] hover:opacity-90 rounded font-bold text-white uppercase flex items-center gap-1">
+        🎨 Dégradé Séparateurs
       </button>
-      <button onclick="openRsvpDashboard()" class="px-3 py-1.5 bg-[#8b5a7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
-        <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i> Dashboard RSVP
+      <button onclick="addNewFreeImage()" class="px-2.5 py-1.5 bg-[#a8533e] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
+        🖼️ Image Libre
+      </button>
+      <button onclick="openRsvpDashboard()" class="px-2.5 py-1.5 bg-[#4a3f35] border border-[#d4a95f] hover:opacity-90 rounded font-bold text-[#d4a95f] uppercase flex items-center gap-1">
+        📊 RSVP
       </button>
       <button onclick="copyHTMLToClipboard()" class="px-3 py-1.5 bg-[#2a7d7d] hover:opacity-90 rounded font-bold text-white uppercase tracking-wider flex items-center gap-1">
         <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copier Code HTML
@@ -163,11 +175,51 @@
     </div>
   </div>
 
-  <!-- Panneau de Réglage Image (Zoom / Position / Taille libre) -->
+  <!-- Panneau Réglage des Dégradés des Séparateurs (2 à 4 Couleurs) -->
+  <div id="divider-panel" class="hidden fixed top-14 right-6 z-[105] bg-[#3c3228] text-white p-4 rounded-lg shadow-2xl border border-[#d4a95f] space-y-3 text-xs w-72">
+    <div class="flex justify-between items-center border-b border-gray-600 pb-2">
+      <span class="font-bold text-[#d4a95f]">Couleurs du Dégradé Séparateurs</span>
+      <button onclick="toggleDividerPanel()" class="text-gray-400 hover:text-white">✕</button>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <label class="flex flex-col gap-1">Couleur 1 : <input type="color" id="div-col-1" value="#d4a95f" onchange="updateDividerGradient()" class="w-full h-8 bg-transparent cursor-pointer rounded"></label>
+      <label class="flex flex-col gap-1">Couleur 2 : <input type="color" id="div-col-2" value="#8b5a7d" onchange="updateDividerGradient()" class="w-full h-8 bg-transparent cursor-pointer rounded"></label>
+      <label class="flex flex-col gap-1">Couleur 3 : <input type="color" id="div-col-3" value="#a8533e" onchange="updateDividerGradient()" class="w-full h-8 bg-transparent cursor-pointer rounded"></label>
+      <label class="flex flex-col gap-1">Couleur 4 : <input type="color" id="div-col-4" value="#2a7d7d" onchange="updateDividerGradient()" class="w-full h-8 bg-transparent cursor-pointer rounded"></label>
+    </div>
+    <div class="text-[10px] text-gray-400">Le dégradé s'applique instantanément sur toutes les barres ornementales.</div>
+  </div>
+
+  <!-- Panneau Styliser un Bouton Sélectionné -->
+  <div id="button-style-panel" class="hidden fixed top-14 left-6 z-[105] bg-[#3c3228] text-white p-4 rounded-lg shadow-2xl border border-[#2a7d7d] space-y-3 text-xs w-80">
+    <div class="flex justify-between items-center border-b border-gray-600 pb-2">
+      <span class="font-bold text-[#2a7d7d]">Styliser le Bouton</span>
+      <button onclick="closeButtonStylePanel()" class="text-gray-400 hover:text-white">✕</button>
+    </div>
+    <div class="grid grid-cols-2 gap-2">
+      <label class="flex items-center gap-1.5">Fond : <input type="color" id="btn-bg-col" onchange="applyButtonStyle()" class="w-6 h-6 bg-transparent cursor-pointer"></label>
+      <label class="flex items-center gap-1.5">Texte : <input type="color" id="btn-txt-col" onchange="applyButtonStyle()" class="w-6 h-6 bg-transparent cursor-pointer"></label>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>Arrondi :</span>
+      <input type="range" id="btn-radius" min="0" max="30" value="4" oninput="applyButtonStyle()" class="w-24 cursor-pointer">
+      <span id="btn-radius-val" class="font-mono text-[#d4a95f]">4px</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span>Police :</span>
+      <select id="btn-font-family" onchange="applyButtonStyle()" class="bg-gray-700 text-white text-xs px-2 py-1 rounded cursor-pointer w-full">
+        <option value="Alegreya Sans">Alegreya Sans</option>
+        <option value="Cormorant Garamond">Cormorant Garamond</option>
+        <option value="Montserrat">Montserrat</option>
+        <option value="Poppins">Poppins</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Panneau Réglage Image (Zoom / Position) -->
   <div id="image-adjust-toolbar" class="hidden fixed top-14 left-1/2 -translate-x-1/2 z-[105] bg-[#3c3228] text-white p-3 rounded-lg shadow-2xl border border-[#d4a95f] flex flex-wrap items-center gap-4 text-xs">
     <span class="font-bold text-[#d4a95f] flex items-center gap-1"><i data-lucide="sliders" class="w-3.5 h-3.5"></i> Réglage Image</span>
     
-    <!-- Controls standard ou libres -->
     <div id="inline-img-controls" class="flex items-center gap-3">
       <label class="flex items-center gap-1.5">Zoom : <input type="range" id="img-scale" min="100" max="250" value="100" oninput="adjustActiveImage()" class="w-20"></label>
       <label class="flex items-center gap-1.5">Pos X : <input type="range" id="img-pos-x" min="0" max="100" value="50" oninput="adjustActiveImage()" class="w-20"></label>
@@ -175,9 +227,9 @@
     </div>
 
     <div id="floating-img-controls" class="hidden flex items-center gap-3">
-      <label class="flex items-center gap-1.5">Position H : <input type="range" id="float-pos-x" min="0" max="90" value="10" oninput="adjustFloatingImage()" class="w-24">%</label>
-      <label class="flex items-center gap-1.5">Position V : <input type="range" id="float-pos-y" min="0" max="6000" step="20" value="300" oninput="adjustFloatingImage()" class="w-24">px</label>
-      <label class="flex items-center gap-1.5">Largeur : <input type="range" id="float-width" min="60" max="1000" value="250" oninput="adjustFloatingImage()" class="w-24">px</label>
+      <label class="flex items-center gap-1.5">Pos H : <input type="range" id="float-pos-x" min="0" max="90" value="10" oninput="adjustFloatingImage()" class="w-24">%</label>
+      <label class="flex items-center gap-1.5">Pos V : <input type="range" id="float-pos-y" min="0" max="6000" step="20" value="300" oninput="adjustFloatingImage()" class="w-24">px</label>
+      <label class="flex items-center gap-1.5">Largeur : <input type="range" id="float-width" min="40" max="1000" value="200" oninput="adjustFloatingImage()" class="w-24">px</label>
       <label class="flex items-center gap-1.5">Z-Index : <input type="range" id="float-zindex" min="1" max="100" value="35" oninput="adjustFloatingImage()" class="w-16"></label>
       <button onclick="removeFloatingImage()" class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded font-bold">🗑️ Supprimer</button>
     </div>
@@ -188,30 +240,42 @@
   <!-- Navigation -->
   <nav class="fixed top-0 left-0 w-full z-50 bg-[#faf6f0]/90 backdrop-blur-sm border-b border-[#e5dccf]">
     <div class="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
-      <a href="#accueil" id="logo-trigger" class="flex items-center gap-2"><span class="display-font tracking-wide text-[#4a3f35] font-semibold text-2xl">M &amp; S</span></a>
+      
+      <!-- Brand + Logo personnalisé Menu -->
+      <a href="#accueil" id="logo-trigger" class="flex items-center gap-2">
+        <div class="img-wrapper w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-[#d4a95f]/20" onclick="changeImage(this.querySelector('img'))">
+          <img id="nav-logo-img" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=100" class="w-full h-full object-cover" alt="Logo Nav">
+        </div>
+        <span class="editable-text display-font tracking-wide text-[#4a3f35] font-semibold text-2xl">M &amp; S</span>
+      </a>
+
       <button id="menu-toggle" class="md:hidden p-2 text-[#4a3f35]" aria-label="Menu"><i data-lucide="menu"></i></button>
+      
+      <!-- Liens Menu Personnalisables -->
       <div id="nav-links" class="hidden md:flex items-center gap-4 lg:gap-6 text-xs uppercase tracking-widest font-medium text-[#4a3f35]">
-        <a href="#accueil" class="hover:opacity-60 transition">Accueil</a>
-        <a href="#histoire" class="hover:opacity-60 transition">Histoire</a>
-        <a href="#lieux" class="hover:opacity-60 transition">Lieux</a>
-        <a href="#programme" class="hover:opacity-60 transition">Programme</a>
-        <a href="#team" class="hover:opacity-60 transition">Team</a>
-        <a href="#rsvp" class="hover:opacity-60 transition">RSVP</a>
-        <a href="#sejour" class="hover:opacity-60 transition">Séjour</a>
-        <a href="#galerie" class="hover:opacity-60 transition">Galerie</a>
-        <a href="#contacts-jourj" class="hover:opacity-60 transition">Contacts</a>
+        <a href="#accueil" class="editable-text hover:opacity-60 transition">Accueil</a>
+        <a href="#histoire" class="editable-text hover:opacity-60 transition">Histoire</a>
+        <a href="#lieux" class="editable-text hover:opacity-60 transition">Lieux</a>
+        <a href="#programme" class="editable-text hover:opacity-60 transition">Programme</a>
+        <a href="#team" class="editable-text hover:opacity-60 transition">Team</a>
+        <a href="#rsvp" class="editable-text hover:opacity-60 transition">RSVP</a>
+        <a href="#sejour" class="editable-text hover:opacity-60 transition">Séjour</a>
+        <a href="#galerie" class="editable-text hover:opacity-60 transition">Galerie</a>
+        <a href="#contacts-jourj" class="editable-text hover:opacity-60 transition">Contacts</a>
       </div>
     </div>
+
+    <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 flex-col gap-3 border-t border-[#e5dccf] bg-[#faf6f0] text-sm uppercase tracking-widest">
-      <a href="#accueil" class="py-2">Accueil</a>
-      <a href="#histoire" class="py-2">Histoire</a>
-      <a href="#lieux" class="py-2">Lieux</a>
-      <a href="#programme" class="py-2">Programme</a>
-      <a href="#team" class="py-2">Team</a>
-      <a href="#rsvp" class="py-2">RSVP</a>
-      <a href="#sejour" class="py-2">Séjour</a>
-      <a href="#galerie" class="py-2">Galerie</a>
-      <a href="#contacts-jourj" class="py-2">Contacts</a>
+      <a href="#accueil" class="editable-text py-2">Accueil</a>
+      <a href="#histoire" class="editable-text py-2">Histoire</a>
+      <a href="#lieux" class="editable-text py-2">Lieux</a>
+      <a href="#programme" class="editable-text py-2">Programme</a>
+      <a href="#team" class="editable-text py-2">Team</a>
+      <a href="#rsvp" class="editable-text py-2">RSVP</a>
+      <a href="#sejour" class="editable-text py-2">Séjour</a>
+      <a href="#galerie" class="editable-text py-2">Galerie</a>
+      <a href="#contacts-jourj" class="editable-text py-2">Contacts</a>
     </div>
   </nav>
 
@@ -269,7 +333,7 @@
 33112 Saint-Laurent-Médoc
 
 Cérémonie civile à 11h00</p>
-          <a href="https://maps.google.com/?q=Mairie+de+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-[#a8533e] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
+          <a href="https://maps.google.com/?q=Mairie+de+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="custom-button inline-flex items-center gap-2 text-sm font-medium text-[#a8533e] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
         </div>
         <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-48 object-cover rounded-sm mt-2" src="https://images.pexels.com/photos/38256977/pexels-photo-38256977.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Mairie">
@@ -284,7 +348,7 @@ Cérémonie civile à 11h00</p>
 
 Cérémonie laïque à 15h00
 Réception &amp; soirée dès 18h00</p>
-          <a href="https://maps.google.com/?q=Chateau+Balac+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-medium text-[#8b5a7d] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
+          <a href="https://maps.google.com/?q=Chateau+Balac+Saint-Laurent-Medoc" target="_blank" rel="noopener" class="custom-button inline-flex items-center gap-2 text-sm font-medium text-[#8b5a7d] hover:opacity-70 transition mb-4">Voir sur Google Maps &rarr;</a>
         </div>
         <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))">
           <img loading="lazy" class="w-full h-48 object-cover rounded-sm mt-2" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Château Balac">
@@ -365,7 +429,7 @@ Réception &amp; soirée dès 18h00</p>
     </div>
   </section>
 
-  <!-- Le Jour J (Countdown + Cartes + Nuancier) -->
+  <!-- Le Jour J -->
   <section id="jourj" class="w-full py-24 px-6 scroll-mt-16">
     <div class="max-w-5xl mx-auto text-center reveal mb-16">
       <h2 class="editable-text display-font text-4xl md:text-5xl font-medium mb-4">Le Jour J, c'est dans...</h2>
@@ -479,7 +543,7 @@ Réception &amp; soirée dès 18h00</p>
 
       <p id="rsvp-error" class="hidden text-sm text-[#a3564f]" role="alert">Merci de compléter les champs requis.</p>
 
-      <button type="submit" id="rsvp-submit" class="w-full py-4 rounded-sm bg-[#4a3f35] text-[#faf6f0] uppercase tracking-widest text-sm font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
+      <button type="submit" id="rsvp-submit" class="custom-button w-full py-4 rounded-sm bg-[#4a3f35] text-[#faf6f0] uppercase tracking-widest text-sm font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
         <i id="rsvp-spinner" data-lucide="loader-2" class="spin hidden w-5 h-5"></i>
         <span>Envoyer ma réponse</span>
       </button>
@@ -526,20 +590,6 @@ Réception &amp; soirée dès 18h00</p>
             <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Maison de charme au <strong>cœur des vignobles</strong>, à 10 minutes. Idéale pour les familles.</p>
           </div>
         </article>
-        <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/33963275/pexels-photo-33963275.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Gîte"></div>
-          <div class="p-5">
-            <h4 class="editable-text display-font text-2xl font-medium mb-2">Gîte Le Magnolia</h4>
-            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Maison d'hôtes de charme avec <strong>terrasse ombragée</strong> et <strong>jardin verdoyant</strong>, à 12 minutes.</p>
-          </div>
-        </article>
-        <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/26647501/pexels-photo-26647501.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Ferme"></div>
-          <div class="p-5">
-            <h4 class="editable-text display-font text-2xl font-medium mb-2">Ferme du Vignoble</h4>
-            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Havre de paix rustique entouré de ceps de vigne. <strong>Petit-déjeuner fermier</strong> inclus.</p>
-          </div>
-        </article>
       </div>
     </div>
 
@@ -559,27 +609,6 @@ Réception &amp; soirée dès 18h00</p>
           <div class="p-5">
             <h4 class="editable-text display-font text-2xl font-medium mb-2">Route des vins</h4>
             <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Visites de <strong>châteaux</strong> et <strong>dégustations</strong> dans les plus beaux domaines de la région.</p>
-          </div>
-        </article>
-        <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/34799291/pexels-photo-34799291.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Médiéval"></div>
-          <div class="p-5">
-            <h4 class="editable-text display-font text-2xl font-medium mb-2">Villages médiévaux</h4>
-            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Flânez dans les ruelles de <strong>Saint-Émilion</strong> et des villages alentour.</p>
-          </div>
-        </article>
-        <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/9722064/pexels-photo-9722064.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Plage"></div>
-          <div class="p-5">
-            <h4 class="editable-text display-font text-2xl font-medium mb-2">Plages du Bassin</h4>
-            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Escapade vers les <strong>plages de sable fin</strong> du Bassin d'Arcachon.</p>
-          </div>
-        </article>
-        <article class="bg-[#f1e9dd] rounded-sm shadow-sm overflow-hidden flex-none w-[280px] sm:w-[320px] snap-start">
-          <div class="img-wrapper" onclick="changeImage(this.querySelector('img'))"><img loading="lazy" class="w-full h-48 object-cover" src="https://images.pexels.com/photos/30732698/pexels-photo-30732698.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Vélo"></div>
-          <div class="p-5">
-            <h4 class="editable-text display-font text-2xl font-medium mb-2">Balades à vélo</h4>
-            <p class="editable-text text-xs leading-relaxed text-[#6b5d4f]">Sillonnez les <strong>chemins de vigne</strong> du Médoc lors d'une balade guidée.</p>
           </div>
         </article>
       </div>
@@ -675,7 +704,7 @@ Réception &amp; soirée dès 18h00</p>
           <textarea id="contact-form-message" rows="4" class="rsvp-input resize-none w-full" placeholder="Écrivez votre message ici…"></textarea>
         </div>
         <p id="contact-error" class="hidden text-sm text-[#a3564f]">Erreur lors de l'envoi.</p>
-        <button type="submit" id="contact-submit" class="w-full py-4 rounded-sm bg-[#4a3f35] text-[#faf6f0] uppercase tracking-widest text-sm font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
+        <button type="submit" id="contact-submit" class="custom-button w-full py-4 rounded-sm bg-[#4a3f35] text-[#faf6f0] uppercase tracking-widest text-sm font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
           <i id="contact-spinner" data-lucide="loader-2" class="spin hidden w-5 h-5"></i>
           <span>Envoyer</span>
         </button>
@@ -683,9 +712,11 @@ Réception &amp; soirée dès 18h00</p>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- Footer Personnalisable + Logo Footer -->
   <footer class="w-full py-16 px-6 bg-[#4a3f35] text-center text-white">
-    <i data-lucide="flower" class="mx-auto mb-4 text-[#d4a95f] w-11 h-11"></i>
+    <div class="img-wrapper mx-auto mb-4 w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-[#d4a95f]/20" onclick="changeImage(this.querySelector('img'))">
+      <img id="footer-logo-img" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=100" class="w-full h-full object-cover" alt="Logo Footer">
+    </div>
     <p class="editable-text display-font italic text-2xl text-[#f1e9dd] mb-2">Nous avons hâte de célébrer ce jour avec vous</p>
     <p class="editable-text uppercase tracking-[0.3em] text-sm text-[#b89a6d]">Magalie &amp; Sébastien</p>
   </footer>
@@ -938,11 +969,12 @@ Réception &amp; soirée dès 18h00</p>
     });
 
     // =========================================================================
-    // 6. MODE ÉDITION, TAILLE EN PIXELS, POLICES MULTIPLES & IMAGES LIBRES
+    // 6. MODE ÉDITION ENRICHIE (DÉGRADÉS, BOUTONS, MENU & IMAGES)
     // =========================================================================
     let clickCount = 0;
     let targetImgElement = null;
     let activeWrapperContainer = null;
+    let activeCustomButton = null;
     let savedRange = null;
 
     document.getElementById('logo-trigger').addEventListener('click', (e) => {
@@ -982,12 +1014,21 @@ Réception &amp; soirée dès 18h00</p>
       document.getElementById('admin-bar').classList.remove('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
       document.querySelectorAll('.editable-text').forEach(el => el.setAttribute('contenteditable', 'true'));
+
+      // Attacher gestionnaire de clic pour styliser les boutons
+      document.querySelectorAll('button, .custom-button').forEach(btn => {
+        if (!btn.closest('#admin-bar') && !btn.closest('#image-adjust-toolbar') && !btn.closest('#divider-panel') && !btn.closest('#button-style-panel')) {
+          btn.addEventListener('click', handleButtonClickInEditMode);
+        }
+      });
     }
 
     function disableEditMode() {
       document.body.classList.remove('edit-mode');
       document.getElementById('admin-bar').classList.add('hidden');
       document.getElementById('image-adjust-toolbar').classList.add('hidden');
+      document.getElementById('divider-panel').classList.add('hidden');
+      document.getElementById('button-style-panel').classList.add('hidden');
       document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
     }
@@ -1002,7 +1043,6 @@ Réception &amp; soirée dès 18h00</p>
       document.execCommand('foreColor', false, hexColor);
     }
 
-    // Réglage Taille de police en Pixels
     function applyFontSizePx(pxValue) {
       document.getElementById('font-size-val').textContent = pxValue + 'px';
       restoreSelection();
@@ -1027,7 +1067,55 @@ Réception &amp; soirée dès 18h00</p>
       document.execCommand('fontName', false, fontName);
     }
 
-    // Fonction d'Ajout d'une NOUVELLE IMAGE LIBRE positionnable
+    // Gestion du Dégradé des Séparateurs
+    function toggleDividerPanel() {
+      document.getElementById('divider-panel').classList.toggle('hidden');
+    }
+
+    function updateDividerGradient() {
+      const c1 = document.getElementById('div-col-1').value;
+      const c2 = document.getElementById('div-col-2').value;
+      const c3 = document.getElementById('div-col-3').value;
+      const c4 = document.getElementById('div-col-4').value;
+
+      document.documentElement.style.setProperty('--divider-color-1', c1);
+      document.documentElement.style.setProperty('--divider-color-2', c2);
+      document.documentElement.style.setProperty('--divider-color-3', c3);
+      document.documentElement.style.setProperty('--divider-color-4', c4);
+    }
+
+    // Personnalisation des Boutons
+    function handleButtonClickInEditMode(e) {
+      if (!document.body.classList.contains('edit-mode')) return;
+      e.preventDefault();
+      activeCustomButton = e.currentTarget;
+
+      document.getElementById('button-style-panel').classList.remove('hidden');
+      document.getElementById('btn-radius').value = parseInt(window.getComputedStyle(activeCustomButton).borderRadius) || 4;
+      document.getElementById('btn-radius-val').textContent = document.getElementById('btn-radius').value + 'px';
+    }
+
+    function applyButtonStyle() {
+      if (!activeCustomButton) return;
+      const bgCol = document.getElementById('btn-bg-col').value;
+      const txtCol = document.getElementById('btn-txt-col').value;
+      const radius = document.getElementById('btn-radius').value;
+      const font = document.getElementById('btn-font-family').value;
+
+      document.getElementById('btn-radius-val').textContent = radius + 'px';
+      
+      if (bgCol) activeCustomButton.style.backgroundColor = bgCol;
+      if (txtCol) activeCustomButton.style.color = txtCol;
+      activeCustomButton.style.borderRadius = radius + 'px';
+      activeCustomButton.style.fontFamily = font;
+    }
+
+    function closeButtonStylePanel() {
+      document.getElementById('button-style-panel').classList.add('hidden');
+      activeCustomButton = null;
+    }
+
+    // Images Libres & Remplacement
     function addNewFreeImage() {
       if (!document.body.classList.contains('edit-mode')) return;
       const picker = document.getElementById('local-file-picker');
@@ -1052,7 +1140,7 @@ Réception &amp; soirée dès 18h00</p>
       container.style.position = 'absolute';
       container.style.left = '10%';
       container.style.top = currentScrollY + 'px';
-      container.style.width = '250px';
+      container.style.width = '200px';
       container.style.zIndex = '35';
       container.onclick = function(e) {
         e.stopPropagation();
@@ -1070,7 +1158,6 @@ Réception &amp; soirée dès 18h00</p>
       changeImage(img, container);
     }
 
-    // Remplacement & Ajustement des Images
     function changeImage(imgEl, wrapperContainer = null) {
       if (!document.body.classList.contains('edit-mode')) return;
       targetImgElement = imgEl;
@@ -1096,16 +1183,14 @@ Réception &amp; soirée dès 18h00</p>
       document.getElementById('image-adjust-toolbar').classList.remove('hidden');
 
       if (activeWrapperContainer) {
-        // Image flottante libre
         document.getElementById('inline-img-controls').classList.add('hidden');
         document.getElementById('floating-img-controls').classList.remove('hidden');
 
         document.getElementById('float-pos-x').value = parseInt(activeWrapperContainer.style.left) || 10;
         document.getElementById('float-pos-y').value = parseInt(activeWrapperContainer.style.top) || 300;
-        document.getElementById('float-width').value = parseInt(activeWrapperContainer.style.width) || 250;
+        document.getElementById('float-width').value = parseInt(activeWrapperContainer.style.width) || 200;
         document.getElementById('float-zindex').value = parseInt(activeWrapperContainer.style.zIndex) || 35;
       } else {
-        // Image classique de section
         document.getElementById('floating-img-controls').classList.add('hidden');
         document.getElementById('inline-img-controls').classList.remove('hidden');
 
@@ -1160,7 +1245,7 @@ Réception &amp; soirée dès 18h00</p>
       
       try {
         await navigator.clipboard.writeText(htmlContent);
-        alert("✅ Code HTML copié dans le presse-papier ! Vous pouvez le coller dans GitHub.");
+        alert("✅ Code HTML copié avec succès dans le presse-papier ! Vous pouvez le coller directement dans votre fichier index.html sur GitHub.");
       } catch (err) {
         const textarea = document.createElement('textarea');
         textarea.value = htmlContent;
