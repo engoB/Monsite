@@ -25,6 +25,7 @@
   "pwHint": "La réponse que Magalie a donnée (3 lettres)",
   "scriptUrl": "",
   "contactEmail": "maglaville@gmail.com",
+  "publish": { "owner": "", "repo": "", "branch": "main", "path": "index.html" },
   "theme": {
     "bg": "#faf6f0",
     "bg2": "#f2eae0",
@@ -152,7 +153,7 @@ strong{font-weight:700; color:var(--ink)}
 }
 .card:hover{transform:translateY(-3px); box-shadow:var(--sh-2)}
 .section.tinted .card{background:var(--white)}
-.ph{position:relative; overflow:hidden; border-radius:3px; background:transparent}
+.ph{display:block; position:relative; overflow:hidden; border-radius:3px; background:transparent}
 .ph img{width:100%; height:100%; object-fit:cover; object-position:50% 50%; transition:transform .9s var(--ease)}
 .ph.zoomable:hover img{transform:scale(1.04)}
 .ph.round{border-radius:50%}
@@ -261,6 +262,24 @@ textarea.inp{resize:vertical; min-height:110px}
 .rail .card{padding:0; overflow:hidden}
 .rail .card .ph{height:200px; border-radius:0}
 .rail .card .body{padding:1.5rem}
+.meta{display:flex; flex-wrap:wrap; gap:.4rem; margin:.7rem 0 0}
+.pill{font-size:.66rem; letter-spacing:.06em; text-transform:uppercase; font-weight:600; padding:.2rem .6rem;
+  border-radius:99px; background:var(--bg2); color:var(--ink2); border:1px solid var(--line)}
+.pill.b1{background:#e6f1e8; color:#2f6b3c; border-color:#c9e2cf}
+.pill.b2{background:#fbf0d6; color:#8a6a1f; border-color:#efdfb4}
+.pill.b3{background:#f6e2dc; color:#8e3b2c; border-color:#e8cabf}
+.more{margin-top:.9rem; font-size:.78rem; font-weight:600; color:var(--terra); border-bottom:1px solid currentColor; padding-bottom:1px}
+.more:hover{opacity:.7}
+.rail-sort{display:flex; gap:.3rem; align-items:center; font-size:.66rem}
+.rail-sort button{padding:.32rem .7rem; border-radius:99px; border:1px solid var(--line); background:var(--white); font-size:.66rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em}
+.rail-sort button:hover{border-color:var(--ink)}
+.rail-sort button.on{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+#modal-detail{position:fixed; inset:0; z-index:130; background:rgba(30,24,18,.82); backdrop-filter:blur(6px); display:none; place-items:center; padding:1.2rem}
+#modal-detail.open{display:grid}
+.detail-card{background:var(--bg); width:min(100%,620px); max-height:88vh; overflow-y:auto; border-radius:8px; box-shadow:0 40px 90px -30px rgba(0,0,0,.6)}
+.detail-card .ph{height:250px; border-radius:0}
+.detail-body{padding:2rem}
+.detail-close{position:absolute; top:1.2rem; right:1.2rem; color:#fff; padding:.6rem}
 
 /* ============================ GALERIE ============================ */
 .gal{display:flex; gap:1rem; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:1rem; scrollbar-width:none}
@@ -348,6 +367,8 @@ body.editing .to-top{display:none}
 .e-btn.primary{background:var(--teal); color:#fff}
 .e-btn.danger{background:#8e3b2c; color:#fff}
 .e-btn.gold{background:var(--gold); color:#2b241c}
+.e-btn.publish{background:#2f7d4f; color:#fff}
+.e-btn.publish:hover{background:#37955e}
 .e-badge{background:rgba(0,0,0,.28); border-radius:99px; padding:.05rem .45rem; font-size:.65rem; margin-left:.1rem}
 .e-btn .ic{font-size:15px}
 .e-status{font-size:.66rem; color:#a99e8f; white-space:nowrap; padding:0 .4rem}
@@ -493,6 +514,13 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
 .toast.ok{border-left:3px solid var(--teal)}
 .toast.warn{border-left:3px solid var(--gold)}
 .toast.bad{border-left:3px solid #b5503c}
+.tpl-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.7rem}
+.tpl{border:1px solid var(--line); background:var(--white); border-radius:8px; padding:1rem .8rem; text-align:center;
+  transition:all .18s var(--ease); display:flex; flex-direction:column; align-items:center; gap:.5rem}
+.tpl:hover{border-color:var(--terra); transform:translateY(-2px); box-shadow:var(--sh-1)}
+.tpl .ic{font-size:22px; color:var(--terra)}
+.tpl span.n{font-size:.76rem; font-weight:600}
+.tpl span.d{font-size:.66rem; color:var(--ink2); line-height:1.35}
 .fields2{display:grid; gap:1rem}
 @media(min-width:640px){.fields2{grid-template-columns:1fr 1fr}}
 </style>
@@ -503,6 +531,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
 <div id="lock">
   <div class="bgimg ph" data-img><img id="lock-img" alt="" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=1400"></div>
   <div class="veil" id="lock-veil"></div>
+  <button class="btn only-edit" id="lock-exit" style="position:absolute;top:1.1rem;right:1.1rem;z-index:6;background:var(--terra);color:#fff">Fermer l'aperçu</button>
   <div class="lock-card">
     <div class="mono ed" data-bind="initials">M &amp; S</div>
     <h1 class="ed"><span data-bind="bride">Magalie</span> <span class="script" style="color:var(--gold)">&amp;</span> <span data-bind="groom">Sébastien</span></h1>
@@ -822,6 +851,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     <div class="reveal" style="margin-bottom:3.5rem">
       <div class="rail-head">
         <h3 class="h-m ed">Où dormir</h3>
+        <div class="rail-sort"><span class="muted">Trier</span><button data-sort="lodging" data-mode="none" class="on">Ordre</button><button data-sort="lodging" data-mode="asc">Budget ↑</button><button data-sort="lodging" data-mode="desc">Budget ↓</button></div>
         <div class="rail-nav">
           <button data-rail="lodging" data-dir="-1" aria-label="Précédent"><span class="ic" data-icon="chevron-left" style="font-size:18px"></span></button>
           <button data-rail="lodging" data-dir="1" aria-label="Suivant"><span class="ic" data-icon="chevron-right" style="font-size:18px"></span></button>
@@ -829,27 +859,33 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
         </div>
       </div>
       <div class="rail" id="lodging">
-        <article class="card" data-block>
+        <article class="card" data-block data-detail="Chambres doubles avec petit-déjeuner. Un tarif préférentiel « Mariage M&S » est appliqué en précisant notre nom à la réservation. Parking gratuit sur place et navette possible en fin de soirée.">
           <span class="ph" data-img><img alt="Hôtel du Domaine" src="https://images.pexels.com/photos/2952663/pexels-photo-2952663.jpeg?auto=compress&cs=tinysrgb&w=800"></span>
           <div class="body">
             <h4 class="h-s ed">Hôtel du Domaine ★★★</h4>
             <p class="ed xs muted" style="margin-top:.5rem">À 5 minutes du château. Petit-déjeuner compris et tarif préférentiel « Mariage M&amp;S » sur réservation.</p>
+            <p class="meta"><span class="pill b2" data-budget="2">€€</span><span class="pill" data-dist>À 5 minutes</span></p>
+            <button class="more" data-more>Plus de détails &rarr;</button>
             <p style="margin-top:.9rem"><a class="link ed" href="https://www.google.com/search?q=Hôtel+du+Domaine" target="_blank" rel="noopener">Voir le site &rarr;</a></p>
           </div>
         </article>
-        <article class="card" data-block>
+        <article class="card" data-block data-detail="Maison d'hôtes familiale au milieu des vignes, cinq chambres dont deux familiales. Petit-déjeuner maison servi dans le jardin.">
           <span class="ph" data-img><img alt="Chambres Les Vignes" src="https://images.pexels.com/photos/32289746/pexels-photo-32289746.jpeg?auto=compress&cs=tinysrgb&w=800"></span>
           <div class="body">
             <h4 class="h-s ed">Chambres Les Vignes</h4>
             <p class="ed xs muted" style="margin-top:.5rem">Maison de charme au cœur des vignobles, à 10 minutes. Idéale pour les familles.</p>
+            <p class="meta"><span class="pill b1" data-budget="1">€</span><span class="pill" data-dist>À 10 minutes</span></p>
+            <button class="more" data-more>Plus de détails &rarr;</button>
             <p style="margin-top:.9rem"><a class="link ed" href="https://www.google.com/search?q=Chambres+Les+Vignes" target="_blank" rel="noopener">Voir le site &rarr;</a></p>
           </div>
         </article>
-        <article class="card" data-block>
+        <article class="card" data-block data-detail="Grande maison à louer en entier, idéale à partager entre amis : six chambres, cuisine équipée et grand jardin.">
           <span class="ph" data-img><img alt="Gîte du Médoc" src="https://images.pexels.com/photos/2079246/pexels-photo-2079246.jpeg?auto=compress&cs=tinysrgb&w=800"></span>
           <div class="body">
             <h4 class="h-s ed">Gîte du Médoc</h4>
             <p class="ed xs muted" style="margin-top:.5rem">Grande maison à partager entre amis, à 15 minutes du château.</p>
+            <p class="meta"><span class="pill b1" data-budget="1">€</span><span class="pill" data-dist>À 15 minutes</span></p>
+            <button class="more" data-more>Plus de détails &rarr;</button>
             <p style="margin-top:.9rem"><a class="link ed" href="https://www.google.com/search?q=Gîte+du+Médoc" target="_blank" rel="noopener">Voir le site &rarr;</a></p>
           </div>
         </article>
@@ -859,6 +895,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     <div class="reveal">
       <div class="rail-head">
         <h3 class="h-m ed">Que faire dans la région</h3>
+        <div class="rail-sort"><span class="muted">Trier</span><button data-sort="activity" data-mode="none" class="on">Ordre</button><button data-sort="activity" data-mode="asc">Budget ↑</button><button data-sort="activity" data-mode="desc">Budget ↓</button></div>
         <div class="rail-nav">
           <button data-rail="activity" data-dir="-1" aria-label="Précédent"><span class="ic" data-icon="chevron-left" style="font-size:18px"></span></button>
           <button data-rail="activity" data-dir="1" aria-label="Suivant"><span class="ic" data-icon="chevron-right" style="font-size:18px"></span></button>
@@ -866,27 +903,33 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
         </div>
       </div>
       <div class="rail" id="activity">
-        <article class="card" data-block>
+        <article class="card" data-block data-detail="Les grands crus du Médoc se visitent sur rendez-vous. Comptez deux heures par château, dégustation comprise.">
           <span class="ph" data-img><img alt="Route des vins" src="https://images.pexels.com/photos/30557600/pexels-photo-30557600.jpeg?auto=compress&cs=tinysrgb&w=800"></span>
           <div class="body">
             <h4 class="h-s ed">Route des vins</h4>
             <p class="ed xs muted" style="margin-top:.5rem">Visites de châteaux et dégustations dans les plus beaux domaines du Médoc.</p>
+            <p class="meta"><span class="pill b2" data-budget="2">€€</span><span class="pill" data-dist>30 minutes</span></p>
+            <button class="more" data-more>Plus de détails &rarr;</button>
             <p style="margin-top:.9rem"><a class="link ed" href="https://www.google.com/search?q=Route+des+vins" target="_blank" rel="noopener">En savoir plus &rarr;</a></p>
           </div>
         </article>
-        <article class="card" data-block>
+        <article class="card" data-block data-detail="Lacanau et Carcans offrent de longues plages surveillées en été, des dunes et des couchers de soleil superbes.">
           <span class="ph" data-img><img alt="Plages du Médoc" src="https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=800"></span>
           <div class="body">
             <h4 class="h-s ed">Les plages océanes</h4>
             <p class="ed xs muted" style="margin-top:.5rem">Lacanau et Carcans à 40 minutes : océan, dunes et couchers de soleil.</p>
+            <p class="meta"><span class="pill b1" data-budget="1">€</span><span class="pill" data-dist>40 minutes</span></p>
+            <button class="more" data-more>Plus de détails &rarr;</button>
             <p style="margin-top:.9rem"><a class="link ed" href="https://www.google.com/search?q=Les+plages+océanes" target="_blank" rel="noopener">En savoir plus &rarr;</a></p>
           </div>
         </article>
-        <article class="card" data-block>
+        <article class="card" data-block data-detail="Le miroir d'eau, la Cité du Vin, les quais et le vieux Bordeaux se parcourent facilement à pied ou en tramway.">
           <span class="ph" data-img><img alt="Bordeaux" src="https://images.pexels.com/photos/2363807/pexels-photo-2363807.jpeg?auto=compress&cs=tinysrgb&w=800"></span>
           <div class="body">
             <h4 class="h-s ed">Bordeaux</h4>
             <p class="ed xs muted" style="margin-top:.5rem">À 1 heure : le miroir d'eau, la Cité du Vin et les quais de la Garonne.</p>
+            <p class="meta"><span class="pill b2" data-budget="2">€€</span><span class="pill" data-dist>1 heure</span></p>
+            <button class="more" data-more>Plus de détails &rarr;</button>
             <p style="margin-top:.9rem"><a class="link ed" href="https://www.google.com/search?q=Bordeaux" target="_blank" rel="noopener">En savoir plus &rarr;</a></p>
           </div>
         </article>
@@ -1017,12 +1060,14 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     <button class="e-btn" data-tool="theme"><span class="ic" data-icon="palette"></span> Thème</button>
     <button class="e-btn" data-tool="settings"><span class="ic" data-icon="settings"></span> Réglages</button>
     <button class="e-btn gold" data-tool="rsvp"><span class="ic" data-icon="users"></span> Réponses <span class="e-badge" id="rsvp-count">0</span></button>
+    <button class="e-btn" data-tool="add"><span class="ic" data-icon="plus"></span> Ajouter</button>
     <button class="e-btn" data-tool="lock"><span class="ic" data-icon="lock"></span> Écran d'accès</button>
     <button class="e-btn" data-tool="freeimg"><span class="ic" data-icon="image"></span> Image libre</button>
     <button class="e-btn" data-tool="undo"><span class="ic" data-icon="undo"></span> Annuler</button>
     <button class="e-btn" data-tool="redo"><span class="ic" data-icon="redo"></span> Refaire</button>
     <span class="e-spacer"></span>
     <span class="e-status" id="e-status">Prêt</span>
+    <button class="e-btn publish" data-tool="publish"><span class="ic" data-icon="upload"></span> Publier</button>
     <button class="e-btn primary" data-tool="download"><span class="ic" data-icon="download"></span> Télécharger index.html</button>
     <button class="e-btn" data-tool="copy"><span class="ic" data-icon="copy"></span> Copier</button>
     <button class="e-btn" data-tool="quit">Quitter</button>
@@ -1067,7 +1112,20 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
             <input class="inp" id="s-script" placeholder="https://script.google.com/macros/s/…/exec">
             <span class="xs muted">Pour tout centraliser dans un Google Sheet.</span></label>
         </div>
-        <p style="margin-top:1.4rem"><button class="btn" id="s-save">Enregistrer les réglages</button></p>
+        <hr style="border:0;border-top:1px solid var(--line);margin:1.6rem 0">
+        <h4 class="h-s" style="margin-bottom:.4rem">Publication automatique sur GitHub</h4>
+        <p class="xs muted" style="margin-bottom:1.2rem">Une fois rempli, le bouton <b>Publier</b> envoie directement vos modifications sur GitHub Pages : plus besoin de télécharger ni de copier de fichier. Le jeton reste uniquement dans ce navigateur et n'est jamais inclus dans le site publié.</p>
+        <div class="fields2">
+          <label class="field"><span class="lbl">Votre compte GitHub</span><input class="inp" id="s-owner" placeholder="magalie-seb"></label>
+          <label class="field"><span class="lbl">Nom du dépôt</span><input class="inp" id="s-repo" placeholder="mariage"></label>
+          <label class="field"><span class="lbl">Branche</span><input class="inp" id="s-branch" placeholder="main"></label>
+          <label class="field"><span class="lbl">Fichier à mettre à jour</span><input class="inp" id="s-path" placeholder="index.html"></label>
+          <label class="field" style="grid-column:1/-1"><span class="lbl">Jeton d'accès GitHub</span>
+            <input class="inp" id="s-token" type="password" placeholder="github_pat_…">
+            <span class="xs muted">GitHub → Settings → Developer settings → Fine-grained tokens → accès au seul dépôt, permission <b>Contents : Read and write</b>.</span></label>
+        </div>
+        <p style="margin-top:1.4rem"><button class="btn" id="s-save">Enregistrer les réglages</button>
+        <button class="btn ghost" id="s-test" style="margin-left:.6rem">Tester la connexion GitHub</button></p>
       </div>
     </div>
   </div>
@@ -1112,8 +1170,38 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     </div>
   </div>
 
+  <div class="e-modal" id="modal-add">
+    <div class="e-modal-card" style="max-width:820px">
+      <div class="e-modal-head">
+        <div><h3 class="h-m" style="font-family:var(--f-display)">Ajouter au site</h3>
+        <p class="xs" style="opacity:.7;margin:0">Les sections s'insèrent après celle sélectionnée, les éléments à l'intérieur.</p></div>
+        <button class="e-close" data-close="modal-add"><span class="ic" data-icon="x" style="font-size:14px"></span></button>
+      </div>
+      <div class="e-modal-body">
+        <h4 class="lbl">Nouvelle section</h4>
+        <div class="tpl-grid" id="tpl-sections"></div>
+        <h4 class="lbl" style="margin-top:1.8rem">Élément à insérer</h4>
+        <div class="tpl-grid" id="tpl-blocks"></div>
+      </div>
+    </div>
+  </div>
+
   <input type="file" id="file-picker" accept="image/*" class="hidden">
   <input type="file" id="json-picker" accept="application/json,.json" class="hidden">
+</div>
+
+<div id="modal-detail">
+  <button class="detail-close" aria-label="Fermer"><span class="ic" data-icon="x" style="font-size:26px"></span></button>
+  <div class="detail-card">
+    <span class="ph"><img id="dt-img" alt=""></span>
+    <div class="detail-body">
+      <h3 class="h-l" id="dt-title" style="font-size:2rem"></h3>
+      <p class="meta" id="dt-meta"></p>
+      <p class="muted" id="dt-desc" style="margin-top:1.2rem"></p>
+      <p id="dt-detail" style="margin-top:1rem"></p>
+      <p style="margin-top:1.6rem"><a class="btn" id="dt-link" target="_blank" rel="noopener">Voir le site</a></p>
+    </div>
+  </div>
 </div>
 
 <button id="drag-handle" title="Glissez pour déplacer cet élément"><span class="ic" data-icon="move"></span></button>
@@ -1382,6 +1470,7 @@ function initCountdown(){
   tick(); cdTimer=setInterval(tick,1000);
 }
 window.__initCountdown = initCountdown;
+window.__mountOrder = function(){ try{ markOrder(); }catch(e){} };
 
 /* ---------------------------- Agenda (.ics) ---------------------------- */
 function downloadFile(name, content, mime){
@@ -1433,6 +1522,57 @@ on(document,'keydown',function(e){
   if(e.key==='ArrowLeft') openLB(lbIndex-1);
   if(e.key==='ArrowRight') openLB(lbIndex+1);
 });
+
+/* ---------------------------- Fiches détaillées & tri ---------------------------- */
+function markOrder(){
+  $$('.rail').forEach(function(r){
+    Array.prototype.slice.call(r.children).forEach(function(c,i){ if(!c.dataset.ord) c.dataset.ord=i; });
+  });
+}
+function openDetail(card){
+  if(!card) return;
+  const img=card.querySelector('.ph img');
+  const t=card.querySelector('h4,h3');
+  const d=card.querySelector('p.ed');
+  const a=card.querySelector('a.link');
+  const meta=card.querySelector('.meta');
+  $('#dt-img').src = img? img.src : '';
+  $('#dt-img').parentElement.style.display = img? 'block':'none';
+  $('#dt-title').textContent = t? t.textContent.trim():'';
+  $('#dt-meta').innerHTML = meta? meta.innerHTML : '';
+  $('#dt-desc').textContent = d? d.textContent.trim():'';
+  $('#dt-detail').textContent = card.getAttribute('data-detail')||'';
+  const lk=$('#dt-link');
+  if(a && a.getAttribute('href') && a.getAttribute('href')!=='https://'){
+    lk.href=a.getAttribute('href'); lk.textContent=a.textContent.trim()||'Voir le site'; lk.style.display='';
+  } else lk.style.display='none';
+  $('#modal-detail').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDetail(){ $('#modal-detail').classList.remove('open'); document.body.style.overflow=''; }
+on(document,'click',function(e){
+  const more=e.target.closest('[data-more]');
+  if(more && !document.body.classList.contains('editing')){ e.preventDefault(); openDetail(more.closest('[data-block]')); return; }
+  if(e.target.closest('.detail-close') || e.target.id==='modal-detail'){ closeDetail(); return; }
+  const so=e.target.closest('[data-sort]');
+  if(so){
+    e.preventDefault();
+    const rail=document.getElementById(so.getAttribute('data-sort'));
+    const mode=so.getAttribute('data-mode');
+    so.parentElement.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on',b===so); });
+    markOrder();
+    const items=Array.prototype.slice.call(rail.children);
+    const bud=function(c){ const p=c.querySelector('[data-budget]'); return p? +p.getAttribute('data-budget')||0 : 0; };
+    items.sort(function(x,y){
+      if(mode==='none') return (+x.dataset.ord)-(+y.dataset.ord);
+      return mode==='asc' ? bud(x)-bud(y) || (+x.dataset.ord)-(+y.dataset.ord)
+                          : bud(y)-bud(x) || (+x.dataset.ord)-(+y.dataset.ord);
+    });
+    items.forEach(function(i){ rail.appendChild(i); });
+    if(rail.scrollTo) rail.scrollTo({left:0,behavior:'smooth'});
+  }
+});
+on(document,'keydown',function(e){ if(e.key==='Escape' && $('#modal-detail').classList.contains('open')) closeDetail(); });
 
 /* ---------------------------- RSVP ---------------------------- */
 function guestFields(){
@@ -1540,7 +1680,7 @@ on(document,'submit',async function(e){
 
 /* ---------------------------- Démarrage ---------------------------- */
 function mount(){
-  [paintIcons,applyTheme,renderBindings,initReveal,initSpy,initCountdown,guestFields,onScroll]
+  [paintIcons,applyTheme,renderBindings,initReveal,initSpy,initCountdown,guestFields,markOrder,onScroll]
     .forEach(function(fn){ try{ fn(); }catch(e){ if(window.console) console.warn('mount:',e); } });
 }
 window.__mount = mount;
@@ -1811,6 +1951,7 @@ on(document,'click',function(e){
   if(!editing) return;
   if(e.target.closest('#editor')) return;
   if(e.target.closest('#drag-handle')){ e.preventDefault(); e.stopPropagation(); return; }
+  if(e.target.closest('#lock-exit')){ e.preventDefault(); e.stopPropagation(); toggleLockPreview(false); return; }
 
   const blkBtn=e.target.closest('[data-blk]');
   if(blkBtn){
@@ -2334,13 +2475,46 @@ function bindDivider(){
 
 /* --------- Carte (séjour, activités…) --------- */
 function cardParts(el){
+  const bp=el.querySelector('[data-budget]'), dp=el.querySelector('[data-dist]');
   return {
     t: el.querySelector('h4.ed, h3.ed'),
     d: el.querySelector('p.ed'),
     a: el.querySelector('a.link'),
     ph: el.querySelector('.ph'),
+    meta: el.querySelector('.meta'),
+    bud: bp? (bp.getAttribute('data-budget')||'0') : '0',
+    dist: dp? dp.textContent.trim() : '',
     body: el.querySelector('.body') || el
   };
+}
+const EURO={'0':'','1':'€','2':'€€','3':'€€€'};
+function ensureMeta(el){
+  let m=el.querySelector('.meta');
+  if(!m){
+    m=document.createElement('p'); m.className='meta';
+    m.innerHTML='<span class="pill" data-budget="0"></span><span class="pill" data-dist></span>';
+    const p=cardParts(el);
+    (p.a? p.a.parentElement : p.body).insertAdjacentElement(p.a?'beforebegin':'beforeend', m);
+  }
+  return m;
+}
+function syncMeta(el,bud,dist){
+  const m=ensureMeta(el);
+  const bp=m.querySelector('[data-budget]'), dp=m.querySelector('[data-dist]');
+  bp.setAttribute('data-budget',bud);
+  bp.className='pill'+(bud!=='0'?' b'+bud:'');
+  bp.textContent=EURO[bud]||'';
+  bp.style.display=bud==='0'?'none':'';
+  dp.textContent=dist; dp.style.display=dist?'':'none';
+  if(!bud.replace('0','') && !dist) m.style.display='none'; else m.style.display='';
+}
+function syncMore(el,detail){
+  el.setAttribute('data-detail',detail);
+  let b=el.querySelector('[data-more]');
+  if(detail){
+    if(!b){ b=document.createElement('button'); b.className='more'; b.setAttribute('data-more',''); b.innerHTML='Plus de détails &rarr;'; cardParts(el).body.appendChild(b); }
+  }else if(b) b.remove();
+  if(!detail) el.removeAttribute('data-detail');
 }
 function uiCard(){
   const el=selEl, p=cardParts(el);
@@ -2351,6 +2525,14 @@ function uiCard(){
     '<div class="e-group"><span class="e-lab">Texte du lien</span><input class="e-in" id="cd-lt" value="'+esc(p.a? p.a.textContent.trim():'Voir le site →')+'"></div>'+
     '<div class="e-group"><span class="e-lab">Adresse du lien</span><input class="e-in" id="cd-lh" placeholder="https://…" value="'+esc(p.a? (p.a.getAttribute('href')||''):'')+'">'+
     '<p class="e-help">Laissez vide pour retirer le lien.</p></div>'+
+    '<div class="e-group"><span class="e-lab">Budget</span><select id="cd-b">'+
+      ['0|Non précisé','1|€ — économique','2|€€ — intermédiaire','3|€€€ — haut de gamme'].map(function(o){
+        const v=o.split('|')[0];
+        return '<option value="'+v+'"'+(v===(p.bud||'0')?' selected':'')+'>'+o.split('|')[1]+'</option>';
+      }).join('')+'</select></div>'+
+    '<div class="e-group"><span class="e-lab">Distance ou durée</span><input class="e-in" id="cd-dist" placeholder="À 10 minutes" value="'+esc(p.dist)+'"></div>'+
+    '<div class="e-group"><span class="e-lab">Fiche détaillée</span><textarea id="cd-det" rows="5" placeholder="Texte affiché dans la fenêtre « Plus de détails »">'+esc(el.getAttribute('data-detail')||'')+'</textarea>'+
+    '<p class="e-help">Si ce champ est rempli, un bouton « Plus de détails » apparaît sur la carte.</p></div>'+
     '<div class="e-row"><button class="e-btn" id="cd-dup" style="flex:1;justify-content:center">Dupliquer</button>'+
     '<button class="e-btn danger" id="cd-del" style="flex:1;justify-content:center">Supprimer</button></div>';
 }
@@ -2376,6 +2558,9 @@ function bindCard(){
     a.setAttribute('href',href); a.textContent=txt;
   };
   $('#cd-lt').oninput=sync; $('#cd-lh').onchange=sync;
+  $('#cd-b').onchange=function(){ syncMeta(el,this.value,$('#cd-dist').value.trim()); };
+  $('#cd-dist').oninput=function(){ syncMeta(el,$('#cd-b').value,this.value.trim()); };
+  $('#cd-det').oninput=function(){ syncMore(el,this.value.trim()); };
   $('#cd-dup').onclick=function(){ snapshot(); const c=el.cloneNode(true); el.after(c); paintIcons(c); injectTools(); applyEditables(); toast('Carte dupliquée'); };
   $('#cd-del').onclick=function(){ snapshot(); el.remove(); deselect(); closeInspector(); toast('Carte supprimée','warn',[{label:'Annuler',fn:undo}]); };
 }
@@ -2413,7 +2598,9 @@ function toggleLockPreview(force){
   const on = force===undefined ? !l.classList.contains('preview') : force;
   l.classList.toggle('preview',on);
   l.classList.toggle('gone',!on);
-  if(on){ applyEditables(); select(l,'lock'); hideHandle(); }
+  const btn=document.querySelector('[data-tool="lock"]');
+  if(btn) btn.classList.toggle('on',on);
+  if(on){ applyEditables(); select(l,'lock'); hideHandle(); toast("Aperçu de l'écran d'accès — Échap ou « Fermer l'aperçu » pour revenir au site"); }
   else { deselect(); closeInspector(); }
 }
 
@@ -2517,8 +2704,8 @@ function bindSection(){
   const el=selEl;
   bindColor('sec-bg',function(v){ el.style.backgroundColor=v; });
   bindRange('sec-pad',function(v){ el.style.paddingTop=v+'px'; el.style.paddingBottom=v+'px'; });
-  $('#sec-up').onclick=function(){ snapshot(); const p=el.previousElementSibling; if(p&&p.hasAttribute('data-sec')) p.before(el); el.scrollIntoView({block:'center'}); };
-  $('#sec-down').onclick=function(){ snapshot(); const n=el.nextElementSibling; if(n&&n.hasAttribute('data-sec')) n.after(el); el.scrollIntoView({block:'center'}); };
+  $('#sec-up').onclick=function(){ snapshot(); const p=el.previousElementSibling; if(p&&p.hasAttribute('data-sec')) p.before(el); if(el.scrollIntoView) el.scrollIntoView({block:'center'}); };
+  $('#sec-down').onclick=function(){ snapshot(); const n=el.nextElementSibling; if(n&&n.hasAttribute('data-sec')) n.after(el); if(el.scrollIntoView) el.scrollIntoView({block:'center'}); };
   $('#sec-hide').onclick=function(){ el.classList.toggle('hide-sec'); renderInspector(); };
   const sb=$('#sec-bg');
   if(sb) sb.onclick=function(){ select(el.querySelector(':scope > .ph'),'image'); };
@@ -2555,6 +2742,130 @@ function bindTheme(){
   bindRange('th-sh',function(v){ t.sepH=+v; window.__applyTheme(); saveCFG(); });
 }
 
+
+/* ---------------------------- Bibliothèque de gabarits ---------------------------- */
+const IMGP='https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=900';
+function secWrap(id,tinted,inner){
+  return '<section class="section'+(tinted?' tinted':'')+'" id="'+id+'" data-sec><div class="wrap">'+inner+'</div></section>';
+}
+function secHead(eyebrow,title){
+  return '<div class="head reveal in"><p class="eyebrow ed">'+eyebrow+'</p><h2 class="h-l ed">'+title+'</h2><p class="sep"><span class="dot"></span></p></div>';
+}
+const SECTIONS=[
+  {k:'texte', ic:'type', n:'Texte', d:'Un titre et un paragraphe', html:function(id){
+    return secWrap(id,false, secHead('Sous-titre','Nouvelle section')+
+      '<div class="wrap-n reveal in"><p class="ed lead" style="text-align:center">Écrivez ici votre texte. Cliquez pour le modifier, sélectionnez des mots pour les mettre en forme.</p></div>'); }},
+  {k:'texte-photo', ic:'image', n:'Texte + photo', d:'Une photo à côté du texte', html:function(id){
+    return secWrap(id,true, secHead('Sous-titre','Titre de la section')+
+      '<div class="grid g2"><div class="reveal in" data-block><span class="ph zoomable" data-img style="height:340px"><img alt="" src="'+IMGP+'"></span></div>'+
+      '<div class="reveal in" data-block style="align-self:center"><h3 class="h-m ed" style="margin-bottom:.8rem">Un titre</h3>'+
+      '<p class="ed muted">Décrivez ici ce que vous souhaitez raconter à vos invités.</p></div></div>'); }},
+  {k:'trois', ic:'grid', n:'Trois cartes', d:'Trois blocs côte à côte', html:function(id){
+    var c='<div class="card reveal in" data-block style="text-align:center"><span class="ic" data-icon="heart" style="color:var(--gold)"></span>'+
+          '<h3 class="h-m ed" style="margin:1rem 0 .5rem">Titre</h3><p class="ed muted small">Quelques mots d\'explication.</p></div>';
+    return secWrap(id,false, secHead('Sous-titre','Trois informations')+'<div class="grid g3">'+c+c+c+'</div>'); }},
+  {k:'carrousel', ic:'camera', n:'Carrousel', d:'Cartes défilantes avec photos', html:function(id){
+    var card='<article class="card" data-block><span class="ph" data-img><img alt="" src="'+IMGP+'"></span>'+
+      '<div class="body"><h4 class="h-s ed">Titre</h4><p class="ed xs muted" style="margin-top:.5rem">Description.</p></div></article>';
+    return secWrap(id,true, secHead('Sous-titre','Nouveau carrousel')+
+      '<div class="rail-head"><h3 class="h-m ed">À découvrir</h3><div class="rail-nav">'+
+      '<button data-rail="'+id+'-rail" data-dir="-1" aria-label="Précédent"><span class="ic" data-icon="chevron-left" style="font-size:18px"></span></button>'+
+      '<button data-rail="'+id+'-rail" data-dir="1" aria-label="Suivant"><span class="ic" data-icon="chevron-right" style="font-size:18px"></span></button></div></div>'+
+      '<div class="rail" id="'+id+'-rail">'+card+card+card+'</div>'); }},
+  {k:'bandeau', ic:'image', n:'Bandeau photo', d:'Grande photo pleine largeur', html:function(id){
+    return '<section class="section" id="'+id+'" data-sec style="padding:0"><span class="ph" data-img style="height:420px;border-radius:0"><img alt="" src="'+IMGP+'"></span></section>'; }},
+  {k:'citation', ic:'sparkles', n:'Citation', d:'Une phrase mise en valeur', html:function(id){
+    return secWrap(id,true,'<div class="wrap-n reveal in" style="text-align:center">'+
+      '<p class="script ed" style="font-size:2.4rem;color:var(--terra);line-height:1.3">Une phrase qui vous ressemble</p>'+
+      '<p class="eyebrow ed" style="margin-top:1rem">Auteur</p></div>'); }},
+  {k:'cta', ic:'send', n:'Appel à l\'action', d:'Un texte et un bouton', html:function(id){
+    return secWrap(id,false,'<div class="wrap-n reveal in" style="text-align:center">'+
+      '<h2 class="h-l ed">Un mot pour finir</h2><p class="lead ed" style="margin:1rem auto 2rem">Ajoutez ici une invitation, une consigne ou un rappel.</p>'+
+      '<a class="btn" href="#rsvp">Répondre à l\'invitation</a></div>'); }},
+  {k:'infos', ic:'box', n:'Liste d\'infos', d:'Suite de lignes titre + texte', html:function(id){
+    var it='<div class="tl-item reveal in" data-block><p class="tl-time ed">Titre</p><p class="ed muted small">Explication de cette ligne.</p></div>';
+    return secWrap(id,true, secHead('Sous-titre','Bon à savoir')+'<div class="wrap-n"><div class="tl">'+it+it+it+'</div></div>'); }}
+];
+const BLOCKS=[
+  {k:'h', ic:'type', n:'Titre', d:'Un grand titre', html:'<h3 class="h-m ed reveal in" style="margin:1.2rem 0 .6rem">Nouveau titre</h3>'},
+  {k:'p', ic:'type', n:'Paragraphe', d:'Un bloc de texte', html:'<p class="ed muted reveal in">Écrivez votre texte ici.</p>'},
+  {k:'img', ic:'image', n:'Photo', d:'Une image à remplacer', html:'<span class="ph zoomable reveal in" data-img data-block style="height:320px;margin:1.2rem 0"><img alt="" src="'+"'+IMGP+'"+'"></span>'},
+  {k:'btn', ic:'send', n:'Bouton', d:'Un bouton ou un lien', html:'<p style="margin:1.2rem 0"><a class="btn" href="#">Nouveau bouton</a></p>'},
+  {k:'ic', ic:'heart', n:'Icône', d:'Une icône décorative', html:'<p style="margin:1.2rem 0"><span class="ic" data-icon="heart" style="color:var(--gold)"></span></p>'},
+  {k:'sep', ic:'undo', n:'Séparateur', d:'Un trait en dégradé', html:'<p class="sep" style="margin:1.6rem 0"><span class="dot"></span></p>'},
+  {k:'card', ic:'box', n:'Carte', d:'Bloc encadré avec ombre', html:'<div class="card reveal in" data-block style="margin:1.2rem 0"><h3 class="h-m ed" style="margin-bottom:.6rem">Titre</h3><p class="ed muted small">Texte de la carte.</p></div>'},
+  {k:'space', ic:'box', n:'Espace', d:'Un espace vide', html:'<div style="height:60px"></div>'}
+];
+function openAdd(){
+  const gs=$('#tpl-sections'), gb=$('#tpl-blocks');
+  gs.innerHTML=SECTIONS.map(function(t){
+    return '<button class="tpl" data-sec-tpl="'+t.k+'"><span class="ic" data-icon="'+t.ic+'"></span><span class="n">'+t.n+'</span><span class="d">'+t.d+'</span></button>';
+  }).join('');
+  gb.innerHTML=BLOCKS.map(function(t){
+    return '<button class="tpl" data-blk-tpl="'+t.k+'"><span class="ic" data-icon="'+t.ic+'"></span><span class="n">'+t.n+'</span><span class="d">'+t.d+'</span></button>';
+  }).join('');
+  paintIcons($('#modal-add'));
+  $('#modal-add').classList.add('open');
+}
+function uniqueId(base){
+  let i=1, id=base;
+  while(document.getElementById(id)){ id=base+'-'+(++i); }
+  return id;
+}
+function addSection(kind){
+  const t=SECTIONS.filter(function(x){ return x.k===kind; })[0];
+  if(!t) return;
+  snapshot();
+  const id=uniqueId('sec-'+kind);
+  const host=document.createElement('div');
+  host.innerHTML=t.html(id);
+  const node=host.firstElementChild;
+  const cur=selEl && selEl.closest? selEl.closest('[data-sec]') : null;
+  const anchor=cur || document.querySelector('footer[data-sec]');
+  if(anchor && anchor.tagName==='FOOTER') anchor.before(node);
+  else if(anchor) anchor.after(node);
+  else document.body.appendChild(node);
+  applyEditables(); injectTools(); paintIcons(node); markOrderSafe();
+  $('#modal-add').classList.remove('open');
+  if(node.scrollIntoView) node.scrollIntoView({block:'center',behavior:'smooth'});
+  select(node,'section');
+  addNavLink(id,t.n);
+  toast('Section « '+t.n+' » ajoutée');
+}
+function markOrderSafe(){ try{ window.__mountOrder && window.__mountOrder(); }catch(e){} }
+function addNavLink(id,label){
+  const nav=$('#nav-links'); if(!nav) return;
+  const a=document.createElement('a');
+  a.href='#'+id; a.className='ed'; a.textContent=label;
+  nav.appendChild(a);
+  if(editing) a.setAttribute('contenteditable','true');
+}
+function addBlock(kind){
+  const t=BLOCKS.filter(function(x){ return x.k===kind; })[0];
+  if(!t) return;
+  snapshot();
+  const host=document.createElement('div');
+  host.innerHTML=t.html;
+  const node=host.firstElementChild;
+  let target=null;
+  if(selEl && selEl.isConnected && selType!=='section' && selEl.id!=='lock'){ selEl.after(node); target=node; }
+  else{
+    const sec=(selEl && selEl.closest? selEl.closest('[data-sec]'):null) || document.querySelector('#histoire');
+    const wrap=sec? (sec.querySelector('.wrap-n')||sec.querySelector('.wrap')||sec) : document.body;
+    wrap.appendChild(node); target=node;
+  }
+  applyEditables(); injectTools(); paintIcons(node);
+  $('#modal-add').classList.remove('open');
+  if(target.scrollIntoView) target.scrollIntoView({block:'center',behavior:'smooth'});
+  toast('« '+t.n+' » ajouté — cliquez dessus pour le régler');
+}
+on(document,'click',function(e){
+  const st=e.target.closest('[data-sec-tpl]');
+  if(st){ addSection(st.getAttribute('data-sec-tpl')); return; }
+  const bt=e.target.closest('[data-blk-tpl]');
+  if(bt){ addBlock(bt.getAttribute('data-blk-tpl')); return; }
+});
+
 /* ---------------------------- Barre d'outils ---------------------------- */
 on(document,'click',function(e){
   const t=e.target.closest('[data-tool]');
@@ -2563,10 +2874,12 @@ on(document,'click',function(e){
     if(a==='theme'){ deselect(); selType='theme'; renderInspector(); $('#inspector').classList.add('open'); document.body.classList.add('insp-open'); }
     if(a==='settings'){ openSettings(); }
     if(a==='rsvp'){ renderRsvp(); $('#modal-rsvp').classList.add('open'); }
+    if(a==='add'){ openAdd(); }
     if(a==='lock'){ toggleLockPreview(); }
     if(a==='freeimg'){ addFreeImage(); }
     if(a==='undo'){ undo(); }
     if(a==='redo'){ redo(); }
+    if(a==='publish'){ publish(); }
     if(a==='download'){ exportFile(); }
     if(a==='copy'){ copyHTML(); }
     if(a==='quit'){ exitEdit(); }
@@ -2586,12 +2899,17 @@ function openSettings(){
   $('#s-deadline').value=(CFG.rsvpDeadlineISO||'').slice(0,10);
   $('#s-hint').value=CFG.pwHint||''; $('#s-pw').value='';
   $('#s-script').value=CFG.scriptUrl||'';
+  const pb=CFG.publish||(CFG.publish={});
+  $('#s-owner').value=pb.owner||''; $('#s-repo').value=pb.repo||'';
+  $('#s-branch').value=pb.branch||'main'; $('#s-path').value=pb.path||'index.html';
+  $('#s-token').value=ghToken();
   $('#s-email').value=CFG.contactEmail||'';
   $('#modal-settings').classList.add('open');
 }
 function SSset(k,v){ try{ sessionStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 function hashPw(s){ let h=5381; s=String(s||'').trim().toLowerCase(); for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return h.toString(16); }
 on(document,'click',async function(e){
+  if(e.target.closest('#s-test')){ testGitHub(); return; }
   if(e.target.closest('#s-lockimg')){
     const files=await pickFiles(false);
     if(files[0]){
@@ -2613,6 +2931,12 @@ on(document,'click',async function(e){
   const np=$('#s-pw').value.trim();
   if(np){ CFG.pwHash=hashPw(np); LSet('ms_access',CFG.pwHash); }
   CFG.scriptUrl=$('#s-script').value.trim();
+  CFG.publish={owner:$('#s-owner').value.trim(), repo:$('#s-repo').value.trim(),
+               branch:$('#s-branch').value.trim()||'main', path:$('#s-path').value.trim()||'index.html'};
+  try{
+    const tk=$('#s-token').value.trim();
+    if(tk) localStorage.setItem('ms_gh_token',tk); else localStorage.removeItem('ms_gh_token');
+  }catch(e){}
   CFG.contactEmail=$('#s-email').value.trim();
   saveCFG(); window.__renderBindings(); window.__initCountdown();
   $('#modal-settings').classList.remove('open');
@@ -2697,6 +3021,74 @@ on(document,'click',function(e){
     p.click();
   }
 });
+
+/* ---------------------------- Publication GitHub ---------------------------- */
+function ghToken(){ try{ return localStorage.getItem('ms_gh_token')||''; }catch(e){ return ''; } }
+function b64utf8(str){
+  const bytes=new TextEncoder().encode(str);
+  let bin='', chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){ bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+chunk)); }
+  return btoa(bin);
+}
+function ghConf(){
+  const c=CFG.publish||{};
+  return {owner:(c.owner||'').trim(), repo:(c.repo||'').trim(), branch:(c.branch||'main').trim(), path:(c.path||'index.html').trim().replace(/^\//,'')};
+}
+async function ghFetch(url,opts){
+  opts=opts||{}; opts.headers=Object.assign({
+    Authorization:'Bearer '+ghToken(),
+    Accept:'application/vnd.github+json',
+    'X-GitHub-Api-Version':'2022-11-28'
+  },opts.headers||{});
+  return fetch(url,opts);
+}
+async function testGitHub(){
+  const c=ghConf();
+  if(!c.owner||!c.repo||!ghToken()){ toast('Renseignez le compte, le dépôt et le jeton','bad'); return; }
+  setStatus('Test de connexion…');
+  try{
+    const r=await ghFetch('https://api.github.com/repos/'+c.owner+'/'+c.repo);
+    if(r.status===404){ toast('Dépôt introuvable ou jeton sans accès à ce dépôt','bad'); }
+    else if(r.status===401){ toast('Jeton refusé — vérifiez ou régénérez-le','bad'); }
+    else if(r.ok){ const j=await r.json(); toast('Connexion réussie : '+j.full_name+(j.private?' (privé)':'')); }
+    else toast('Réponse inattendue de GitHub ('+r.status+')','bad');
+  }catch(e){ toast('Connexion impossible — vérifiez votre réseau','bad'); }
+  setStatus('Prêt');
+}
+async function publish(){
+  const c=ghConf(), token=ghToken();
+  if(!c.owner||!c.repo||!token){
+    toast('Configurez la publication dans Réglages','warn',[{label:'Ouvrir les réglages',fn:openSettings}]);
+    return;
+  }
+  const html=buildHTML();
+  if(token && html.indexOf(token)>-1){ toast('Publication annulée : le jeton apparaît dans la page','bad'); return; }
+  setStatus('Publication en cours…');
+  const btn=document.querySelector('[data-tool="publish"]');
+  if(btn) btn.style.opacity=.5;
+  const api='https://api.github.com/repos/'+c.owner+'/'+c.repo+'/contents/'+encodeURIComponent(c.path).replace(/%2F/g,'/');
+  try{
+    let sha=null;
+    const cur=await ghFetch(api+'?ref='+encodeURIComponent(c.branch));
+    if(cur.ok){ const j=await cur.json(); sha=j.sha; }
+    else if(cur.status===401){ toast('Jeton refusé — vérifiez-le dans Réglages','bad'); throw new Error('auth'); }
+    const body={ message:'Mise à jour du site — '+new Date().toLocaleString('fr-FR'), content:b64utf8(html), branch:c.branch };
+    if(sha) body.sha=sha;
+    const put=await ghFetch(api,{method:'PUT',body:JSON.stringify(body)});
+    if(put.ok){
+      try{ localStorage.removeItem('ms_draft'); }catch(e){}
+      toast('Site publié — il sera en ligne dans une à deux minutes');
+      setStatus('Publié à '+new Date().toLocaleTimeString('fr-FR').slice(0,5));
+    }else{
+      const j=await put.json().catch(function(){ return {}; });
+      toast('Publication refusée : '+(j.message||put.status),'bad');
+      setStatus('Échec de publication');
+    }
+  }catch(e){
+    if(e.message!=='auth') toast('Publication impossible — vérifiez votre connexion','bad');
+    setStatus('Échec de publication');
+  }finally{ if(btn) btn.style.opacity=1; }
+}
 
 /* ---------------------------- Export ---------------------------- */
 function buildHTML(){
@@ -2788,7 +3180,10 @@ on(document,'click',function(e){
 on(document,'keydown',function(e){
   if((e.ctrlKey||e.metaKey) && e.shiftKey && (e.key==='E'||e.key==='e')){ e.preventDefault(); editing?exitEdit():enterEdit(); return; }
   if(!editing) return;
-  if(e.key==='Escape'){ deselect(); closeInspector(); $$('.e-modal').forEach(function(m){ m.classList.remove('open'); }); }
+  if(e.key==='Escape'){
+    if($('#lock').classList.contains('preview')){ toggleLockPreview(false); return; }
+    deselect(); closeInspector(); $$('.e-modal').forEach(function(m){ m.classList.remove('open'); });
+  }
   if((e.ctrlKey||e.metaKey) && (e.key==='z'||e.key==='Z') && e.shiftKey){ e.preventDefault(); redo(); return; }
   if((e.ctrlKey||e.metaKey) && (e.key==='y'||e.key==='Y')){ e.preventDefault(); redo(); return; }
   if((e.ctrlKey||e.metaKey) && (e.key==='z'||e.key==='Z')){ e.preventDefault(); undo(); return; }
