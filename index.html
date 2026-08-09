@@ -870,9 +870,9 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
 
     <div id="rsvp-ok" class="card hidden reveal in" style="text-align:center;padding:3rem 2rem">
       <span class="ic" data-icon="heart" style="color:var(--terra);font-size:40px"></span>
-      <h3 class="h-m ed" style="margin:1.2rem 0 .6rem">Merci du fond du cœur</h3>
+      <h3 class="h-m ed" id="rsvp-ok-title" style="margin:1.2rem 0 .6rem">Merci du fond du cœur</h3>
       <p class="ed muted" id="rsvp-ok-text">Votre réponse est bien enregistrée. Nous avons hâte de partager ce moment avec vous.</p>
-      <p class="ed xs muted" style="margin-top:1.4rem">Une erreur ? Renvoyez le formulaire avec le même email : votre nouvelle réponse remplacera celle-ci.</p>
+      <p class="ed xs muted" id="rsvp-ok-note" style="margin-top:1.4rem">Une erreur ? Renvoyez le formulaire avec le même email : votre nouvelle réponse remplacera celle-ci.</p>
       <p style="margin-top:1rem"><button class="btn ghost" id="rsvp-again">Corriger ma réponse</button></p>
     </div>
   </div>
@@ -1782,7 +1782,21 @@ on(document,'submit',async function(e){
   const list=rsvpList(); list.push(data); saveRsvp(list);
 
   await sendToScript(data);
-  $('#rsvp-ok-text').textContent='Votre réponse est bien enregistrée. Nous avons hâte de partager ce moment avec vous.';
+  const MSG={
+    oui:['Merci du fond du cœur',
+         'Quelle joie de vous compter parmi nous ! Votre réponse est bien enregistrée, nous avons hâte de partager ce moment avec vous.'],
+    temps:['Merci, nous notons votre réponse',
+         'Nous comprenons qu\'il vous faille un peu de temps. Revenez sur le site dès que vous serez fixés, idéalement avant le '+frDate(new Date(CFG.rsvpDeadlineISO||'2027-05-01'))+'.'],
+    non:['Merci de nous avoir prévenus',
+         'Nous sommes tristes de ne pas vous voir ce jour-là, vous nous manquerez. Merci d\'avoir pris le temps de nous répondre.']
+  };
+  const m=MSG[resp.value]||MSG.oui;
+  const okT=$('#rsvp-ok-title'); if(okT) okT.textContent=m[0];
+  $('#rsvp-ok-text').textContent=m[1];
+  const note=$('#rsvp-ok-note');
+  if(note) note.textContent = resp.value==='temps'
+    ? 'Pour confirmer plus tard, renvoyez simplement ce formulaire avec le même email.'
+    : 'Une erreur ? Renvoyez le formulaire avec le même email : votre nouvelle réponse remplacera celle-ci.';
   btn.disabled=false; spin.classList.add('hidden');
   $('#rsvp-form').classList.add('hidden');
   $('#rsvp-ok').classList.remove('hidden');
@@ -1987,7 +2001,8 @@ function injectTools(){
     t.innerHTML='<button data-sec-act="up" title="Monter"><span class="ic" data-icon="chevron-up"></span></button>'+
                 '<button data-sec-act="down" title="Descendre"><span class="ic" data-icon="chevron-down"></span></button>'+
                 '<button data-sec-act="hide" title="Masquer ou afficher"><span class="ic" data-icon="eye"></span></button>'+
-                '<button data-sec-act="style" title="Style de la section"><span class="ic" data-icon="palette"></span></button>';
+                '<button data-sec-act="style" title="Style de la section"><span class="ic" data-icon="palette"></span></button>'+
+                '<button data-sec-act="del" title="Supprimer la section"><span class="ic" data-icon="trash"></span></button>';
     s.prepend(t);
   });
   paintIcons();
@@ -2156,6 +2171,7 @@ on(document,'click',function(e){
     else if(act==='down'){ snapshot(); const n=sec.nextElementSibling; if(n && n.hasAttribute('data-sec')) n.after(sec); }
     else if(act==='hide'){ sec.classList.toggle('hide-sec'); toast(sec.classList.contains('hide-sec')?'Section masquée pour les invités':'Section visible'); }
     else if(act==='style'){ select(sec,'section'); }
+    else if(act==='del'){ removeSection(sec); }
     return;
   }
 
@@ -2209,6 +2225,14 @@ on(document,'drop',function(e){
   e.preventDefault();
   setPhotoFromFile(ph, e.dataTransfer.files[0]);
 });
+
+function removeSection(sec){
+  snapshot();
+  const id=sec.id;
+  if(id){ const a=document.querySelector('#nav-links a[href="#'+id+'"]'); if(a) a.remove(); }
+  sec.remove(); deselect(); closeInspector();
+  toast('Section supprimée','warn',[{label:'Annuler',fn:undo}]);
+}
 
 /* ---------------------------- Photos ---------------------------- */
 function pickFiles(multiple){
@@ -2269,6 +2293,15 @@ async function replacePhoto(ph){
 }
 
 /* ---------------------------- Ajouts ---------------------------- */
+/* Un élément ajouté doit toujours être visible à l'écran et prêt à être réglé. */
+function revealNew(node,type){
+  if(!node) return;
+  try{ node.scrollIntoView({behavior:'smooth', block:'center', inline:'center'}); }catch(e){}
+  setTimeout(function(){
+    try{ select(node, type||'element'); }catch(e){}
+    placeHandle();
+  },260);
+}
 const IMG_PLACEHOLDER='https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=900';
 const TPL={
   gallery:'<span class="ph zoomable in" data-img data-block><img alt="Photo" src="'+IMG_PLACEHOLDER+'"></span>',
@@ -2296,14 +2329,22 @@ async function addItem(kind,btn){
       }
     }
     injectTools(); paintIcons();
+    if(grid.scrollTo) grid.scrollTo({left:grid.scrollWidth,behavior:'smooth'});
+    revealNew(grid.lastElementChild,'image');
     toast(files.length? files.length+' photo(s) ajoutée(s)':'Photo ajoutée — cliquez dessus pour la remplacer');
     return;
   }
-  if(kind==='team'){ $('#team-grid').insertAdjacentHTML('beforeend',TPL.team); }
-  if(kind==='timeline'){ $('#timeline').insertAdjacentHTML('beforeend',TPL.timeline); }
-  if(kind==='lodging'||kind==='activity'){ $('#'+kind).insertAdjacentHTML('beforeend',TPL.card); }
+  let host=null;
+  if(kind==='team'){ host=$('#team-grid'); host.insertAdjacentHTML('beforeend',TPL.team); }
+  if(kind==='timeline'){ host=$('#timeline'); host.insertAdjacentHTML('beforeend',TPL.timeline); }
+  if(kind==='lodging'||kind==='activity'){ host=$('#'+kind); host.insertAdjacentHTML('beforeend',TPL.card); }
   applyEditables(); injectTools(); paintIcons();
-  toast('Bloc ajouté');
+  if(host){
+    const node=host.lastElementChild;
+    if(host.scrollTo) host.scrollTo({left:host.scrollWidth,behavior:'smooth'});
+    revealNew(node);
+  }
+  toast('Bloc ajouté — réglez-le dans le panneau de droite');
 }
 
 /* ---------------------------- Image libre ---------------------------- */
@@ -2561,15 +2602,49 @@ function wrapSelection(styler){
 }
 
 /* --------- Position (partagé) --------- */
+function uiOrder(el){
+  const cs=getComputedStyle(el);
+  const z=parseInt(cs.zIndex,10);
+  return '<div class="e-group"><span class="e-lab">Ordre dans la page</span>'+
+    '<div class="e-row"><button class="e-btn" id="ord-up" style="flex:1;justify-content:center">↑ Monter</button>'+
+    '<button class="e-btn" id="ord-down" style="flex:1;justify-content:center">↓ Descendre</button></div>'+
+    '<p class="e-help">Change la place réelle de l\'élément parmi ses voisins. À utiliser plutôt que le décalage quand un élément passe derrière un autre.</p></div>'+
+    ctlRange('ord-z','Superposition (passer devant)',0,60,isNaN(z)?0:z,'');
+}
+function bindOrder(el){
+  const skip=function(n){ return n && (n.classList.contains('blk-tools')||n.classList.contains('sec-tools')); };
+  $('#ord-up').onclick=function(){
+    snapshot();
+    let p=el.previousElementSibling;
+    while(skip(p)) p=p.previousElementSibling;
+    if(p){ p.before(el); revealNew(el,selType); }
+    else toast('Déjà en première position de ce bloc','warn');
+  };
+  $('#ord-down').onclick=function(){
+    snapshot();
+    let n=el.nextElementSibling;
+    while(skip(n)) n=n.nextElementSibling;
+    if(n){ n.after(el); revealNew(el,selType); }
+    else toast('Déjà en dernière position de ce bloc','warn');
+  };
+  bindRange('ord-z',function(v){
+    if(+v>0){
+      if(getComputedStyle(el).position==='static') el.style.position='relative';
+      el.style.zIndex=v;
+    }else el.style.zIndex='';
+  });
+}
 function uiOffset(el){
   const o=offsetOf(el);
-  return '<div class="e-group"><span class="e-lab">Position</span>'+
+  return uiOrder(el)+
+    '<div class="e-group"><span class="e-lab">Position</span>'+
     '<p class="e-help" style="margin:0 0 .5rem">Glissez la pastille <b>✥</b> à côté de l\'élément, ou maintenez <b>Alt</b> et faites glisser l\'élément. Alt + flèches pour ajuster au pixel.</p></div>'+
     ctlRange('off-x','Décalage horizontal',-400,400,o.x,'px')+
     ctlRange('off-y','Décalage vertical',-400,400,o.y,'px')+
     '<button class="e-btn" id="off-reset" style="width:100%;justify-content:center;margin-bottom:1rem">Remettre à sa place d\'origine</button>';
 }
 function bindOffset(el){
+  bindOrder(el);
   const move=function(){ setOffset(el, +$('#off-x').value, +$('#off-y').value); placeHandle(); };
   bindRange('off-x',move); bindRange('off-y',move);
   const r=$('#off-reset');
@@ -2874,6 +2949,7 @@ function uiSection(){
     '<button class="e-btn '+(el.classList.contains('hide-sec')?'on':'')+'" id="sec-hide" style="width:100%;justify-content:center">'+
       (el.classList.contains('hide-sec')?'Réafficher pour les invités':'Masquer pour les invités')+'</button>'+
     '<p class="e-help">Une section masquée reste visible en mode édition, en grisé, mais disparaît pour vos invités.</p>'+
+    '<button class="e-btn danger" id="sec-del" style="width:100%;justify-content:center;margin-top:.8rem">Supprimer définitivement cette section</button>'+
     (el.querySelector(':scope > .ph')? '<button class="e-btn primary" id="sec-bg" style="width:100%;justify-content:center;margin-top:.8rem">Régler la photo de fond</button>':'');
 }
 function bindSection(){
@@ -2883,6 +2959,8 @@ function bindSection(){
   $('#sec-up').onclick=function(){ snapshot(); const p=el.previousElementSibling; if(p&&p.hasAttribute('data-sec')) p.before(el); if(el.scrollIntoView) el.scrollIntoView({block:'center'}); };
   $('#sec-down').onclick=function(){ snapshot(); const n=el.nextElementSibling; if(n&&n.hasAttribute('data-sec')) n.after(el); if(el.scrollIntoView) el.scrollIntoView({block:'center'}); };
   $('#sec-hide').onclick=function(){ el.classList.toggle('hide-sec'); renderInspector(); };
+  const sd=$('#sec-del');
+  if(sd) sd.onclick=function(){ removeSection(el); };
   const sb=$('#sec-bg');
   if(sb) sb.onclick=function(){ select(el.querySelector(':scope > .ph'),'image'); };
 }
@@ -3032,8 +3110,8 @@ function addBlock(kind){
   }
   applyEditables(); injectTools(); paintIcons(node);
   $('#modal-add').classList.remove('open');
-  if(target.scrollIntoView) target.scrollIntoView({block:'center',behavior:'smooth'});
-  toast('« '+t.n+' » ajouté — cliquez dessus pour le régler');
+  revealNew(target);
+  toast('« '+t.n+' » ajouté — utilisez « Monter » et « Descendre » pour le placer');
 }
 on(document,'click',function(e){
   const st=e.target.closest('[data-sec-tpl]');
