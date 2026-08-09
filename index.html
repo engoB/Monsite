@@ -115,10 +115,10 @@ strong{font-weight:700; color:var(--ink)}
 .sep{display:flex; align-items:center; justify-content:center; gap:.9rem; margin:1.2rem 0 0}
 .sep::before,.sep::after{
   content:""; width:var(--sep-w); height:var(--sep-h); border-radius:99px;
-  background:linear-gradient(90deg,var(--gold),var(--plum),var(--terra),var(--teal));
+  background:var(--sep-grad, linear-gradient(90deg,var(--gold),var(--plum),var(--terra),var(--teal)));
 }
-.sep::after{background:linear-gradient(90deg,var(--teal),var(--terra),var(--plum),var(--gold))}
-.sep .dot{width:5px; height:5px; border-radius:50%; background:var(--gold)}
+.sep::after{background:var(--sep-grad2, linear-gradient(90deg,var(--teal),var(--terra),var(--plum),var(--gold)))}
+.sep .dot{width:var(--sep-dot,5px); height:var(--sep-dot,5px); border-radius:50%; background:var(--sep-dotc,var(--gold))}
 
 /* ============================ ICONS ============================ */
 .ic{display:inline-flex; align-items:center; justify-content:center; width:1em; height:1em; font-size:34px; flex:none; line-height:0}
@@ -299,6 +299,8 @@ footer .sep::before,footer .sep::after{opacity:.85}
 /* ============================ LOCK SCREEN ============================ */
 #lock{position:fixed; inset:0; z-index:200; display:grid; place-items:center; background:var(--ink); overflow:hidden}
 #lock.gone{display:none}
+body.editing #lock.preview{z-index:120}
+body.editing #lock.preview .lock-card{animation:none}
 #lock .bgimg{position:absolute; inset:0}
 #lock .bgimg img{width:100%; height:100%; object-fit:cover; opacity:.45; filter:saturate(.8)}
 #lock .veil{position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(40,32,24,.35) 0%, rgba(30,24,18,.9) 78%)}
@@ -499,19 +501,19 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
 
 <!-- ============================ ÉCRAN D'ACCÈS ============================ -->
 <div id="lock">
-  <div class="bgimg"><img id="lock-img" alt="" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=1400"></div>
-  <div class="veil"></div>
+  <div class="bgimg ph" data-img><img id="lock-img" alt="" src="https://images.pexels.com/photos/1694360/pexels-photo-1694360.jpeg?auto=compress&cs=tinysrgb&w=1400"></div>
+  <div class="veil" id="lock-veil"></div>
   <div class="lock-card">
-    <div class="mono" data-bind="initials">M &amp; S</div>
-    <h1><span data-bind="bride">Magalie</span> <span class="script" style="color:var(--gold)">&amp;</span> <span data-bind="groom">Sébastien</span></h1>
-    <p class="d" data-bind="dateShort">31 juillet 2027</p>
+    <div class="mono ed" data-bind="initials">M &amp; S</div>
+    <h1 class="ed"><span data-bind="bride">Magalie</span> <span class="script" style="color:var(--gold)">&amp;</span> <span data-bind="groom">Sébastien</span></h1>
+    <p class="d ed" data-bind="dateShort">31 juillet 2027</p>
     <form class="lock-form" id="lock-form" autocomplete="off">
-      <p style="font-size:.9rem;color:rgba(255,255,255,.75);margin:0 0 .4rem">Ce site est réservé à nos invités.</p>
+      <p class="ed" style="font-size:.9rem;color:rgba(255,255,255,.75);margin:0 0 .4rem">Ce site est réservé à nos invités.</p>
       <input type="password" id="lock-input" placeholder="Mot de passe" aria-label="Mot de passe" autocomplete="off">
-      <button class="btn" type="submit">Entrer</button>
+      <button class="btn" type="submit"><span class="ed">Entrer</span></button>
       <p class="lock-err" id="lock-err" role="alert"></p>
     </form>
-    <p class="lock-hint">Indice : <b data-bind="pwHint">La réponse que Magalie a donnée (3 lettres)</b></p>
+    <p class="lock-hint ed">Indice : <b data-bind="pwHint">La réponse que Magalie a donnée (3 lettres)</b></p>
   </div>
 </div>
 
@@ -1015,6 +1017,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     <button class="e-btn" data-tool="theme"><span class="ic" data-icon="palette"></span> Thème</button>
     <button class="e-btn" data-tool="settings"><span class="ic" data-icon="settings"></span> Réglages</button>
     <button class="e-btn gold" data-tool="rsvp"><span class="ic" data-icon="users"></span> Réponses <span class="e-badge" id="rsvp-count">0</span></button>
+    <button class="e-btn" data-tool="lock"><span class="ic" data-icon="lock"></span> Écran d'accès</button>
     <button class="e-btn" data-tool="freeimg"><span class="ic" data-icon="image"></span> Image libre</button>
     <button class="e-btn" data-tool="undo"><span class="ic" data-icon="undo"></span> Annuler</button>
     <button class="e-btn" data-tool="redo"><span class="ic" data-icon="redo"></span> Refaire</button>
@@ -1247,6 +1250,10 @@ function applyTheme(){
   if(t.fontScript) r.setProperty('--f-script','"'+t.fontScript+'",cursive');
   if(t.sepW) r.setProperty('--sep-w',t.sepW+'px');
   if(t.sepH) r.setProperty('--sep-h',t.sepH+'px');
+  if(t.sepGrad) r.setProperty('--sep-grad',t.sepGrad);
+  if(t.sepGrad2) r.setProperty('--sep-grad2',t.sepGrad2);
+  if(t.sepDot) r.setProperty('--sep-dot',t.sepDot+'px');
+  if(t.sepDotC) r.setProperty('--sep-dotc',t.sepDotC);
 }
 window.__applyTheme = applyTheme;
 
@@ -1657,7 +1664,8 @@ function injectTools(){
     if(b.querySelector(':scope > .blk-tools')) return;
     const t=document.createElement('span');
     t.className='blk-tools'; t.setAttribute('contenteditable','false');
-    t.innerHTML='<button data-blk="dup" title="Dupliquer"><span class="ic" data-icon="copy"></span></button>'+
+    t.innerHTML='<button data-blk="edit" title="Réglages du bloc"><span class="ic" data-icon="settings"></span></button>'+
+                '<button data-blk="dup" title="Dupliquer"><span class="ic" data-icon="copy"></span></button>'+
                 '<button data-blk="del" title="Supprimer"><span class="ic" data-icon="trash"></span></button>';
     b.appendChild(t);
   });
@@ -1693,6 +1701,7 @@ function exitEdit(){
   deselect(); closeInspector();
   $$('.e-modal').forEach(function(m){ m.classList.remove('open'); });
   removeTools();
+  const lk=$('#lock'); if(lk){ lk.classList.remove('preview'); lk.classList.add('gone'); }
   document.body.classList.remove('editing','insp-open');
   applyEditables();
 }
@@ -1700,7 +1709,7 @@ function exitEdit(){
 /* ---------------------------- Déplacement à la souris ---------------------------- */
 let handleOn=false, drag=null;
 function handleEl(){ return document.getElementById('drag-handle'); }
-function movable(el,type){ return !!el && type!=='section' && el.tagName!=='BODY'; }
+function movable(el,type){ return !!el && type!=='section' && type!=='lock' && el.tagName!=='BODY' && el.id!=='lock'; }
 function hideHandle(){ handleOn=false; const h=handleEl(); if(h) h.classList.remove('show'); }
 function showHandle(){
   const h=handleEl(); if(!h||!selEl) return;
@@ -1708,9 +1717,12 @@ function showHandle(){
 }
 function placeHandle(){
   const h=handleEl(); if(!h||!handleOn||!selEl) return;
+  if(!selEl.isConnected){ hideHandle(); return; }
   const r=selEl.getBoundingClientRect();
-  h.style.left=Math.max(4,r.left-16)+'px';
-  h.style.top=Math.max(58,r.top-16)+'px';
+  let x=r.left-16, y=r.top-16;
+  if(y<58) y=r.top+6;
+  if(x<2) x=r.left+6;
+  h.style.left=x+'px'; h.style.top=y+'px';
 }
 on(window,'scroll',placeHandle,{passive:true});
 on(window,'resize',placeHandle);
@@ -1766,6 +1778,7 @@ function deselect(){
   selEl=null; selType=null; hideHandle();
 }
 function select(el,type){
+  if(type==='element' && el.hasAttribute('data-block') && el.querySelector('h4.ed,h3.ed')) type='card';
   deselect();
   selEl=el; selType=type;
   el.classList.add('is-sel');
@@ -1797,11 +1810,13 @@ function hasTextSelection(){ return savedRange && !savedRange.collapsed; }
 on(document,'click',function(e){
   if(!editing) return;
   if(e.target.closest('#editor')) return;
+  if(e.target.closest('#drag-handle')){ e.preventDefault(); e.stopPropagation(); return; }
 
   const blkBtn=e.target.closest('[data-blk]');
   if(blkBtn){
     e.preventDefault(); e.stopPropagation();
     const block=blkBtn.closest('[data-block]');
+    if(blkBtn.getAttribute('data-blk')==='edit'){ select(block,'element'); return; }
     snapshot();
     if(blkBtn.getAttribute('data-blk')==='dup'){
       const c=block.cloneNode(true);
@@ -1847,6 +1862,9 @@ on(document,'click',function(e){
 
   const btn=e.target.closest('.btn,.link');
   if(btn){ e.preventDefault(); e.stopPropagation(); select(btn,'button'); return; }
+
+  const sp=e.target.closest('.sep');
+  if(sp){ e.preventDefault(); e.stopPropagation(); select(sp,'divider'); return; }
 
   const ed=e.target.closest('.ed');
   if(ed){ select(ed,'text'); return; }
@@ -2014,9 +2032,13 @@ function renderInspector(){
   else if(selType==='text'){ title.textContent='Texte'; body.innerHTML=uiText(); bindText(); }
   else if(selType==='button'){ title.textContent='Bouton'; body.innerHTML=uiButton(); bindButton(); }
   else if(selType==='section'){ title.textContent='Section'; body.innerHTML=uiSection(); bindSection(); }
+  else if(selType==='divider'){ title.textContent='Séparateur'; body.innerHTML=uiDivider(); bindDivider(); }
+  else if(selType==='card'){ title.textContent='Carte'; body.innerHTML=uiCard(); bindCard(); }
+  else if(selType==='lock'){ title.textContent="Écran d'accès"; body.innerHTML=uiLock(); bindLock(); }
   else if(selType==='element'){ title.textContent='Bloc'; body.innerHTML=uiElement(); bindElement(); }
   else if(selType==='theme'){ title.textContent='Thème du site'; body.innerHTML=uiTheme(); bindTheme(); }
   paintIcons(body);
+  placeHandle();
 }
 
 /* --------- Photo --------- */
@@ -2237,6 +2259,164 @@ function bindOffset(el){
   if(r) r.onclick=function(){ snapshot(); setOffset(el,0,0); renderInspector(); };
 }
 
+/* --------- Séparateur en dégradé --------- */
+function sepColors(el){
+  const t=CFG.theme||{}, d=['gold','plum','terra','teal'];
+  return d.map(function(k,i){
+    return {c: el.dataset['c'+i] || t[k] || '#c39a55', a: el.dataset['a'+i]!==undefined? +el.dataset['a'+i] : 1};
+  });
+}
+function sepGrad(list,rev){
+  const l=rev? list.slice().reverse():list;
+  return 'linear-gradient(90deg,'+l.map(function(o){ return hex2rgba(o.c,o.a); }).join(',')+')';
+}
+function sepApply(el){
+  const list=sepColors(el);
+  el.style.setProperty('--sep-grad',sepGrad(list,false));
+  el.style.setProperty('--sep-grad2',sepGrad(list,true));
+}
+function uiDivider(){
+  const el=selEl, cs=getComputedStyle(el);
+  const list=sepColors(el);
+  let h='<p class="e-help" style="margin-bottom:1rem">Réglez ce séparateur en direct, puis appliquez-le à tout le site si le résultat vous plaît.</p>';
+  list.forEach(function(o,i){
+    h+='<div class="e-group"><span class="e-lab">Couleur '+(i+1)+'</span><div class="e-row">'+
+       '<input type="color" id="sp-c'+i+'" value="'+o.c+'">'+
+       '<input type="range" id="sp-a'+i+'" min="0" max="1" step="0.05" value="'+o.a+'" title="Opacité">'+
+       '<span class="e-val">'+Math.round(o.a*100)+'%</span></div></div>';
+  });
+  h+=ctlRange('sp-w','Longueur',10,220,px(cs.getPropertyValue('--sep-w'),64),'px');
+  h+=ctlRange('sp-h','Épaisseur',1,24,px(cs.getPropertyValue('--sep-h'),3),'px');
+  h+=ctlRange('sp-g','Écart central',0,60,px(cs.gap,14),'px');
+  h+=ctlRange('sp-d','Taille du point',0,26,px(cs.getPropertyValue('--sep-dot'),5),'px');
+  h+=ctlColor('sp-dc','Couleur du point',rgb2hex((cs.getPropertyValue('--sep-dotc')||'').trim()||(CFG.theme||{}).gold||'#c39a55'));
+  h+=uiOffset(el);
+  h+='<button class="e-btn primary" id="sp-all" style="width:100%;justify-content:center">Appliquer à tous les séparateurs</button>';
+  return h;
+}
+function bindDivider(){
+  const el=selEl;
+  [0,1,2,3].forEach(function(i){
+    const c=$('#sp-c'+i), a=$('#sp-a'+i);
+    const go=function(){
+      el.dataset['c'+i]=c.value; el.dataset['a'+i]=a.value;
+      a.nextElementSibling.textContent=Math.round(a.value*100)+'%';
+      sepApply(el);
+    };
+    c.oninput=go; a.oninput=go;
+  });
+  bindRange('sp-w',function(v){ el.style.setProperty('--sep-w',v+'px'); });
+  bindRange('sp-h',function(v){ el.style.setProperty('--sep-h',v+'px'); });
+  bindRange('sp-g',function(v){ el.style.gap=v+'px'; });
+  bindRange('sp-d',function(v){ el.style.setProperty('--sep-dot',v+'px'); });
+  bindColor('sp-dc',function(v){ el.style.setProperty('--sep-dotc',v); });
+  bindOffset(el);
+  $('#sp-all').onclick=function(){
+    snapshot();
+    const list=sepColors(el), r=document.documentElement.style;
+    r.setProperty('--sep-grad',sepGrad(list,false));
+    r.setProperty('--sep-grad2',sepGrad(list,true));
+    r.setProperty('--sep-w',el.style.getPropertyValue('--sep-w')||getComputedStyle(el).getPropertyValue('--sep-w'));
+    r.setProperty('--sep-h',el.style.getPropertyValue('--sep-h')||getComputedStyle(el).getPropertyValue('--sep-h'));
+    r.setProperty('--sep-dot',el.style.getPropertyValue('--sep-dot')||'5px');
+    r.setProperty('--sep-dotc',el.style.getPropertyValue('--sep-dotc')||'');
+    const t=CFG.theme||(CFG.theme={});
+    t.sepGrad=sepGrad(list,false); t.sepGrad2=sepGrad(list,true);
+    t.sepW=px(el.style.getPropertyValue('--sep-w'),t.sepW||64);
+    t.sepH=px(el.style.getPropertyValue('--sep-h'),t.sepH||3);
+    t.sepDot=px(el.style.getPropertyValue('--sep-dot'),5);
+    t.sepDotC=el.style.getPropertyValue('--sep-dotc')||'';
+    saveCFG();
+    $$('.sep').forEach(function(x){ if(x!==el){ x.removeAttribute('style'); ['c0','c1','c2','c3','a0','a1','a2','a3'].forEach(function(k){ delete x.dataset[k]; }); } });
+    toast('Style appliqué à tous les séparateurs');
+  };
+}
+
+/* --------- Carte (séjour, activités…) --------- */
+function cardParts(el){
+  return {
+    t: el.querySelector('h4.ed, h3.ed'),
+    d: el.querySelector('p.ed'),
+    a: el.querySelector('a.link'),
+    ph: el.querySelector('.ph'),
+    body: el.querySelector('.body') || el
+  };
+}
+function uiCard(){
+  const el=selEl, p=cardParts(el);
+  return '<p class="e-help" style="margin-bottom:1rem">Renseignez le titre, la description et le lien de cette carte. Vous pouvez aussi écrire directement dans la page.</p>'+
+    (p.ph? '<button class="e-btn primary" id="cd-photo" style="width:100%;justify-content:center;margin-bottom:1rem"><span class="ic" data-icon="image"></span> Changer la photo</button>':'')+
+    '<div class="e-group"><span class="e-lab">Titre</span><input class="e-in" id="cd-t" value="'+esc(p.t? p.t.textContent.trim():'')+'"></div>'+
+    '<div class="e-group"><span class="e-lab">Description</span><textarea id="cd-d" rows="4">'+esc(p.d? p.d.textContent.trim():'')+'</textarea></div>'+
+    '<div class="e-group"><span class="e-lab">Texte du lien</span><input class="e-in" id="cd-lt" value="'+esc(p.a? p.a.textContent.trim():'Voir le site →')+'"></div>'+
+    '<div class="e-group"><span class="e-lab">Adresse du lien</span><input class="e-in" id="cd-lh" placeholder="https://…" value="'+esc(p.a? (p.a.getAttribute('href')||''):'')+'">'+
+    '<p class="e-help">Laissez vide pour retirer le lien.</p></div>'+
+    '<div class="e-row"><button class="e-btn" id="cd-dup" style="flex:1;justify-content:center">Dupliquer</button>'+
+    '<button class="e-btn danger" id="cd-del" style="flex:1;justify-content:center">Supprimer</button></div>';
+}
+function bindCard(){
+  const el=selEl;
+  const ph=$('#cd-photo');
+  if(ph) ph.onclick=function(){ replacePhoto(cardParts(el).ph); };
+  $('#cd-t').oninput=function(){ const p=cardParts(el); if(p.t) p.t.textContent=this.value; };
+  $('#cd-d').oninput=function(){ const p=cardParts(el); if(p.d) p.d.textContent=this.value; };
+  const sync=function(){
+    const p=cardParts(el);
+    const href=$('#cd-lh').value.trim(), txt=$('#cd-lt').value.trim()||'Voir le site →';
+    let a=p.a;
+    if(!href){ if(a && a.parentElement) a.parentElement.remove(); return; }
+    if(!a){
+      const wrap=document.createElement('p');
+      wrap.style.marginTop='.9rem';
+      wrap.innerHTML='<a class="link ed" target="_blank" rel="noopener"></a>';
+      p.body.appendChild(wrap);
+      a=wrap.querySelector('a');
+      if(editing) a.setAttribute('contenteditable','true');
+    }
+    a.setAttribute('href',href); a.textContent=txt;
+  };
+  $('#cd-lt').oninput=sync; $('#cd-lh').onchange=sync;
+  $('#cd-dup').onclick=function(){ snapshot(); const c=el.cloneNode(true); el.after(c); paintIcons(c); injectTools(); applyEditables(); toast('Carte dupliquée'); };
+  $('#cd-del').onclick=function(){ snapshot(); el.remove(); deselect(); closeInspector(); toast('Carte supprimée','warn',[{label:'Annuler',fn:undo}]); };
+}
+
+/* --------- Écran d'accès --------- */
+function uiLock(){
+  const l=$('#lock'), v=$('#lock-veil'), im=$('#lock-img');
+  return '<p class="e-help" style="margin-bottom:1rem">Cet aperçu est celui que verront vos invités. Cliquez directement sur les textes pour les modifier.</p>'+
+    '<button class="e-btn primary" id="lk-photo" style="width:100%;justify-content:center;margin-bottom:.6rem"><span class="ic" data-icon="image"></span> Changer la photo de fond</button>'+
+    ctlRange('lk-img','Luminosité de la photo',5,100,Math.round((parseFloat(im.style.opacity||.45))*100),'%')+
+    ctlRange('lk-veil','Assombrissement',0,100,Math.round((v.style.opacity===''?1:parseFloat(v.style.opacity))*100),'%')+
+    ctlColor('lk-mono','Couleur du monogramme',rgb2hex(getComputedStyle($('#lock .mono')).color))+
+    ctlRange('lk-monos','Taille du monogramme',20,110,Math.round(parseFloat(getComputedStyle($('#lock .mono')).fontSize)),'px')+
+    '<div class="e-group"><span class="e-lab">Mot de passe</span><input class="e-in" id="lk-pw" placeholder="Nouveau mot de passe">'+
+    '<p class="e-help">Laissez vide pour conserver celui en place. L\'indice affiché se modifie directement dans la page.</p></div>'+
+    '<button class="e-btn" id="lk-close" style="width:100%;justify-content:center">Fermer l\'aperçu</button>';
+}
+function bindLock(){
+  const v=$('#lock-veil'), im=$('#lock-img'), mono=$('#lock .mono');
+  $('#lk-photo').onclick=function(){ replacePhoto($('#lock .bgimg')); };
+  bindRange('lk-img',function(x){ im.style.opacity=x/100; });
+  bindRange('lk-veil',function(x){ v.style.opacity=x/100; });
+  bindColor('lk-mono',function(c){ mono.style.color=c; });
+  bindRange('lk-monos',function(x){ mono.style.fontSize=x+'px'; });
+  $('#lk-pw').onchange=function(){
+    const val=this.value.trim();
+    if(!val) return;
+    CFG.pwHash=hashPw(val); saveCFG(); SSset('ms_access',CFG.pwHash);
+    toast('Nouveau mot de passe enregistré');
+  };
+  $('#lk-close').onclick=function(){ toggleLockPreview(false); };
+}
+function toggleLockPreview(force){
+  const l=$('#lock');
+  const on = force===undefined ? !l.classList.contains('preview') : force;
+  l.classList.toggle('preview',on);
+  l.classList.toggle('gone',!on);
+  if(on){ applyEditables(); select(l,'lock'); hideHandle(); }
+  else { deselect(); closeInspector(); }
+}
+
 /* --------- Élément quelconque --------- */
 function uiElement(){
   const el=selEl, cs=getComputedStyle(el);
@@ -2383,6 +2563,7 @@ on(document,'click',function(e){
     if(a==='theme'){ deselect(); selType='theme'; renderInspector(); $('#inspector').classList.add('open'); document.body.classList.add('insp-open'); }
     if(a==='settings'){ openSettings(); }
     if(a==='rsvp'){ renderRsvp(); $('#modal-rsvp').classList.add('open'); }
+    if(a==='lock'){ toggleLockPreview(); }
     if(a==='freeimg'){ addFreeImage(); }
     if(a==='undo'){ undo(); }
     if(a==='redo'){ redo(); }
@@ -2408,6 +2589,7 @@ function openSettings(){
   $('#s-email').value=CFG.contactEmail||'';
   $('#modal-settings').classList.add('open');
 }
+function SSset(k,v){ try{ sessionStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 function hashPw(s){ let h=5381; s=String(s||'').trim().toLowerCase(); for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return h.toString(16); }
 on(document,'click',async function(e){
   if(e.target.closest('#s-lockimg')){
@@ -2531,7 +2713,7 @@ function buildHTML(){
   q('#toast').forEach(function(e){ e.className='toast'; });
   q('#drag-handle').forEach(function(e){ e.className=''; e.removeAttribute('style'); });
   q('#lightbox').forEach(function(e){ e.classList.remove('open'); });
-  q('#lock').forEach(function(e){ e.classList.remove('gone','wrong'); });
+  q('#lock').forEach(function(e){ e.classList.remove('gone','wrong','preview'); });
   q('#rsvp-form').forEach(function(e){ e.classList.remove('hidden'); });
   q('#rsvp-ok').forEach(function(e){ e.classList.add('hidden'); });
   q('#guest-names').forEach(function(e){ e.innerHTML=''; });
@@ -2576,7 +2758,7 @@ function saveDraft(){
               : 'Brouillon trop lourd — pensez à télécharger index.html');
 }
 function scheduleDraft(){ clearTimeout(draftTimer); draftTimer=setTimeout(saveDraft,4000); }
-on(document,'input',function(){ if(editing) scheduleDraft(); });
+on(document,'input',function(){ if(editing){ scheduleDraft(); placeHandle(); } });
 on(document,'change',function(){ if(editing) scheduleDraft(); });
 
 function offerDraft(){
