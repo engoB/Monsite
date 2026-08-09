@@ -202,6 +202,14 @@ nav.up{transform:translateY(-102%)}
 .jourj-date .dow{font-size:.72rem; text-transform:uppercase; letter-spacing:.35em; color:var(--ink2)}
 .jourj-date .big{font-family:var(--f-display); font-size:clamp(2.4rem,6vw,4rem); line-height:1.1; margin:.4rem 0 .2rem}
 .jourj-date .time{font-family:var(--f-script); font-size:1.6rem; color:var(--terra)}
+.cal-wrap{position:relative; display:inline-block}
+.cal-menu{position:absolute; left:50%; transform:translateX(-50%); top:calc(100% + .6rem); z-index:45;
+  background:var(--white); border:1px solid var(--line); border-radius:6px; box-shadow:var(--sh-2);
+  min-width:250px; display:none; overflow:hidden; text-align:left}
+.cal-menu.open{display:block}
+.cal-menu button{display:block; width:100%; text-align:left; padding:.8rem 1.1rem; font-size:.88rem; border-bottom:1px solid var(--line)}
+.cal-menu button:last-child{border-bottom:0}
+.cal-menu button:hover{background:var(--bg2); color:var(--terra)}
 .count{display:grid; grid-template-columns:repeat(4,1fr); gap:.7rem; max-width:660px; margin:0 auto}
 .count .u{background:var(--white); border:1px solid var(--line); border-radius:4px; padding:1.3rem .4rem 1rem; text-align:center; box-shadow:var(--sh-1)}
 .count .u:nth-child(1){border-top:2px solid var(--gold)}
@@ -245,6 +253,8 @@ textarea.inp{resize:vertical; min-height:110px}
 .choice input:checked + span{border-color:var(--terra); background:color-mix(in srgb,var(--terra) 8%,var(--white)); box-shadow:inset 0 0 0 1px var(--terra); font-weight:600}
 .choice input:focus-visible + span{outline:2px solid var(--terra); outline-offset:2px}
 .form-note{font-size:.82rem; color:var(--ink2); text-align:center; margin-top:1rem}
+.contact-side{display:flex; flex-direction:column; gap:1.4rem}
+.contact-side .card{flex:1; display:flex; flex-direction:column; justify-content:center}
 .err{color:#a3564f; font-size:.9rem; margin:.4rem 0 0}
 .hidden{display:none !important}
 .spin{animation:spin .9s linear infinite}
@@ -621,7 +631,14 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
       <p class="big ed" data-bind="dateLong">31 juillet 2027</p>
       <p class="time ed"><span data-bind="timeText">11h00</span> · <span class="ed">Saint-Laurent-Médoc</span></p>
       <p style="margin-top:1.6rem">
-        <button class="btn ghost" id="ics-btn"><span class="ic" data-icon="calendar" style="font-size:16px"></span> Ajouter à mon agenda</button>
+        <span class="cal-wrap">
+          <button class="btn ghost" id="ics-btn" aria-haspopup="true" aria-expanded="false"><span class="ic" data-icon="calendar" style="font-size:16px"></span> Ajouter à mon agenda</button>
+          <span class="cal-menu" id="cal-menu">
+            <button type="button" data-cal="google">Google Agenda</button>
+            <button type="button" data-cal="outlook">Outlook.com</button>
+            <button type="button" data-cal="ics">Apple Calendrier, Outlook installé…</button>
+          </span>
+        </span>
       </p>
     </div>
 
@@ -999,8 +1016,8 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     </div>
 
     <div class="grid g2">
-      <div class="reveal">
-        <div class="card" data-block style="margin-bottom:1.4rem">
+      <div class="reveal contact-side">
+        <div class="card" data-block>
           <span class="ic" data-icon="mail" style="color:var(--gold);font-size:26px"></span>
           <h3 class="h-s ed" style="margin:.7rem 0 .4rem">Par email</h3>
           <p class="ed small muted" style="word-break:break-word">maglaville@gmail.com<br>sebastienkhai@gmail.com</p>
@@ -1102,16 +1119,12 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
         </div>
         <p><button class="btn ghost" id="s-lockimg">Changer la photo de l'écran d'accès</button></p>
         <hr style="border:0;border-top:1px solid var(--line);margin:1.6rem 0">
-        <h4 class="h-s" style="margin-bottom:.4rem">Recevoir les réponses</h4>
-        <p class="xs muted" style="margin-bottom:1.2rem">Chaque réponse s'affiche dans l'écran <b>Réponses</b> et s'exporte en CSV ou JSON. Pour les recevoir aussi à distance, indiquez votre email : la messagerie de l'invité s'ouvre avec sa réponse pré-remplie. Tout est gratuit, aucun service tiers.</p>
-        <div class="fields2">
-          <label class="field"><span class="lbl">Votre email (envoi des réponses)</span>
-            <input class="inp" id="s-email" placeholder="vous@exemple.com">
-            <span class="xs muted">Laissez vide pour ne rien envoyer : les réponses restent alors uniquement sur l'appareil de l'invité.</span></label>
-          <label class="field"><span class="lbl">Google Apps Script (facultatif, gratuit)</span>
-            <input class="inp" id="s-script" placeholder="https://script.google.com/macros/s/…/exec">
-            <span class="xs muted">Pour tout centraliser dans un Google Sheet.</span></label>
-        </div>
+        <h4 class="h-s" style="margin-bottom:.4rem">Recevoir les réponses (Google Sheet)</h4>
+        <p class="xs muted" style="margin-bottom:1.2rem">L'invité clique sur « Envoyer » et c'est tout : la réponse part directement dans votre Google Sheet et vous recevez un email. Suivez le guide de connexion pour créer le script, puis collez ici l'adresse qui finit par <b>/exec</b>.</p>
+        <label class="field"><span class="lbl">Adresse du Google Apps Script</span>
+          <input class="inp" id="s-script" placeholder="https://script.google.com/macros/s/…/exec"></label>
+        <p><button class="btn ghost" id="s-script-test">Envoyer une réponse de test</button>
+        <span class="xs" id="s-script-state" style="margin-left:.8rem"></span></p>
         <hr style="border:0;border-top:1px solid var(--line);margin:1.6rem 0">
         <h4 class="h-s" style="margin-bottom:.4rem">Publication automatique sur GitHub</h4>
         <p class="xs muted" style="margin-bottom:1.2rem">Une fois rempli, le bouton <b>Publier</b> envoie directement vos modifications sur GitHub Pages : plus besoin de télécharger ni de copier de fichier. Le jeton reste uniquement dans ce navigateur et n'est jamais inclus dans le site publié.</p>
@@ -1126,6 +1139,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
         </div>
         <p style="margin-top:1.4rem"><button class="btn" id="s-save">Enregistrer les réglages</button>
         <button class="btn ghost" id="s-test" style="margin-left:.6rem">Tester la connexion GitHub</button></p>
+        <p class="xs" id="s-gh-state" style="margin-top:.6rem;min-height:1.2em"></p>
       </div>
     </div>
   </div>
@@ -1482,18 +1496,55 @@ function downloadFile(name, content, mime){
 }
 window.__downloadFile = downloadFile;
 
-on(document,'click',function(e){
-  if(!e.target.closest('#ics-btn')) return;
-  if(document.body.classList.contains('editing')) return;
-  const st = new Date(CFG.dateISO);
-  const en = CFG.endISO? new Date(CFG.endISO) : new Date(st.getTime()+12*36e5);
-  const z = function(d){ return d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'; };
-  const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mariage//FR','CALSCALE:GREGORIAN','BEGIN:VEVENT',
-    'UID:'+Date.now()+'@mariage','DTSTAMP:'+z(new Date()),'DTSTART:'+z(st),'DTEND:'+z(en),
-    'SUMMARY:Mariage de '+CFG.bride+' et '+CFG.groom,
-    'LOCATION:'+(CFG.venue||'')+', '+(CFG.venueAddress||''),
-    'DESCRIPTION:Nous avons hâte de vous y retrouver.','END:VEVENT','END:VCALENDAR'].join('\r\n');
+function eventInfo(){
+  const st=new Date(CFG.dateISO);
+  const en=CFG.endISO? new Date(CFG.endISO) : new Date(st.getTime()+12*36e5);
+  return {
+    st:st, en:en,
+    title:'Mariage de '+(CFG.bride||'')+' et '+(CFG.groom||''),
+    loc:((CFG.venue||'')+(CFG.venueAddress? ', '+CFG.venueAddress:'')).replace(/^, /,''),
+    desc:'Nous avons hâte de vous y retrouver.'
+  };
+}
+function addToCalendar(kind){
+  const v=eventInfo();
+  const z=function(d){ return d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z'; };
+  const q=encodeURIComponent;
+  if(kind==='google'){
+    window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text='+q(v.title)+
+      '&dates='+z(v.st)+'/'+z(v.en)+'&details='+q(v.desc)+'&location='+q(v.loc),'_blank','noopener');
+    return;
+  }
+  if(kind==='outlook'){
+    window.open('https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent'+
+      '&subject='+q(v.title)+'&startdt='+v.st.toISOString()+'&enddt='+v.en.toISOString()+
+      '&location='+q(v.loc)+'&body='+q(v.desc),'_blank','noopener');
+    return;
+  }
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Mariage//FR','CALSCALE:GREGORIAN','BEGIN:VEVENT',
+    'UID:'+Date.now()+'@mariage','DTSTAMP:'+z(new Date()),'DTSTART:'+z(v.st),'DTEND:'+z(v.en),
+    'SUMMARY:'+v.title,'LOCATION:'+v.loc,'DESCRIPTION:'+v.desc,'END:VEVENT','END:VCALENDAR'].join('\r\n');
   downloadFile('mariage-'+(CFG.bride||'')+'-'+(CFG.groom||'')+'.ics', ics, 'text/calendar;charset=utf-8');
+}
+on(document,'click',function(e){
+  const menu=$('#cal-menu');
+  if(!menu) return;
+  if(e.target.closest('#ics-btn')){
+    if(document.body.classList.contains('editing')) return;
+    e.preventDefault();
+    const open=menu.classList.toggle('open');
+    $('#ics-btn').setAttribute('aria-expanded',open);
+    return;
+  }
+  const c=e.target.closest('[data-cal]');
+  if(c){
+    if(document.body.classList.contains('editing')) return;
+    e.preventDefault();
+    menu.classList.remove('open');
+    addToCalendar(c.getAttribute('data-cal'));
+    return;
+  }
+  menu.classList.remove('open');
 });
 
 /* ---------------------------- Galerie (lightbox) ---------------------------- */
@@ -1600,6 +1651,19 @@ on(document,'input',function(e){
   }
 });
 
+async function sendToScript(data){
+  if(!CFG.scriptUrl) return false;
+  const body=JSON.stringify(data);
+  try{
+    await fetch(CFG.scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body});
+    return true;
+  }catch(e){
+    try{
+      await fetch(CFG.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body});
+      return true;
+    }catch(e2){ return false; }
+  }
+}
 function rsvpList(){ return LS.get('ms_rsvp',[]); }
 function saveRsvp(list){ LS.set('ms_rsvp',list); }
 
@@ -1635,23 +1699,12 @@ on(document,'submit',async function(e){
   btn.disabled=true; spin.classList.remove('hidden');
   const list=rsvpList(); list.push(data); saveRsvp(list);
 
-  let note='Votre réponse est bien enregistrée. Nous avons hâte de partager ce moment avec vous.';
-  try{
-    if(CFG.scriptUrl){
-      await fetch(CFG.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});
-    }else if(CFG.contactEmail){
-      const body=Object.keys(data).map(function(k){ return k+' : '+data[k]; }).join('\n');
-      window.location.href='mailto:'+CFG.contactEmail+'?subject='+encodeURIComponent('RSVP mariage — '+data.famille)+'&body='+encodeURIComponent(body);
-      note='Votre messagerie vient de s\'ouvrir avec votre réponse : il ne reste qu\'à l\'envoyer.';
-    }
-  }catch(ex){
-    note='Votre réponse est enregistrée. Si vous ne recevez pas de nouvelles, écrivez-nous directement.';
-  }
-  $('#rsvp-ok-text').textContent=note;
+  await sendToScript(data);
+  $('#rsvp-ok-text').textContent='Votre réponse est bien enregistrée. Nous avons hâte de partager ce moment avec vous.';
   btn.disabled=false; spin.classList.add('hidden');
   $('#rsvp-form').classList.add('hidden');
   $('#rsvp-ok').classList.remove('hidden');
-  $('#rsvp-ok').scrollIntoView({behavior:'smooth',block:'center'});
+  if($('#rsvp-ok').scrollIntoView) $('#rsvp-ok').scrollIntoView({behavior:'smooth',block:'center'});
 });
 
 on(document,'submit',async function(e){
@@ -1665,8 +1718,7 @@ on(document,'submit',async function(e){
   const data={type:'contact',nom:n,email:m,message:t,date:new Date().toLocaleString('fr-FR')};
   btn.disabled=true; spin.classList.remove('hidden');
   try{
-    if(CFG.scriptUrl){ await fetch(CFG.scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)}); }
-    else{ window.location.href='mailto:'+(CFG.contactEmail||'')+'?subject='+encodeURIComponent('Message de '+n)+'&body='+encodeURIComponent(t); }
+    await sendToScript(data);
     e.target.reset();
     btn.querySelector('span:last-child').textContent='Message envoyé';
     setTimeout(function(){ btn.querySelector('span:last-child').textContent='Envoyer le message'; },3500);
@@ -1834,7 +1886,10 @@ function enterEdit(){
   applyEditables(); injectTools(); paintIcons();
   refreshHistory(); updateRsvpBadge();
   setStatus('Édition activée');
-  offerDraft();
+  if(!CFG.scriptUrl){
+    toast("Les réponses ne partent nulle part : configurez le Google Sheet.",'warn',[
+      {label:'Configurer',fn:openSettings},{label:'Plus tard',fn:function(){}}]);
+  } else offerDraft();
 }
 function exitEdit(){
   editing=false;
@@ -2903,13 +2958,13 @@ function openSettings(){
   $('#s-owner').value=pb.owner||''; $('#s-repo').value=pb.repo||'';
   $('#s-branch').value=pb.branch||'main'; $('#s-path').value=pb.path||'index.html';
   $('#s-token').value=ghToken();
-  $('#s-email').value=CFG.contactEmail||'';
   $('#modal-settings').classList.add('open');
 }
 function SSset(k,v){ try{ sessionStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 function hashPw(s){ let h=5381; s=String(s||'').trim().toLowerCase(); for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return h.toString(16); }
 on(document,'click',async function(e){
   if(e.target.closest('#s-test')){ testGitHub(); return; }
+  if(e.target.closest('#s-script-test')){ testScript(); return; }
   if(e.target.closest('#s-lockimg')){
     const files=await pickFiles(false);
     if(files[0]){
@@ -2931,17 +2986,31 @@ on(document,'click',async function(e){
   const np=$('#s-pw').value.trim();
   if(np){ CFG.pwHash=hashPw(np); LSet('ms_access',CFG.pwHash); }
   CFG.scriptUrl=$('#s-script').value.trim();
-  CFG.publish={owner:$('#s-owner').value.trim(), repo:$('#s-repo').value.trim(),
-               branch:$('#s-branch').value.trim()||'main', path:$('#s-path').value.trim()||'index.html'};
-  try{
-    const tk=$('#s-token').value.trim();
-    if(tk) localStorage.setItem('ms_gh_token',tk); else localStorage.removeItem('ms_gh_token');
-  }catch(e){}
-  CFG.contactEmail=$('#s-email').value.trim();
+  savePublishFields();
   saveCFG(); window.__renderBindings(); window.__initCountdown();
   $('#modal-settings').classList.remove('open');
   toast('Réglages enregistrés'+(np?' — nouveau mot de passe actif':''));
 });
+
+async function testScript(){
+  const url=liveVal('s-script')||CFG.scriptUrl||'';
+  const st=document.getElementById('s-script-state');
+  const say=function(m,c){ if(st){ st.textContent=m; st.style.color=c; } };
+  if(!url){ say("Aucune adresse : les réponses resteront sur l'appareil de l'invité.", '#8e3b2c'); return; }
+  if(url.indexOf('/exec')<0){ say("L'adresse doit se terminer par /exec.", '#8e3b2c'); return; }
+  CFG.scriptUrl=url; saveCFG();
+  say('Envoi du test…','var(--ink2)');
+  const data={type:'rsvp',reponse:'temps',famille:'TEST — à supprimer',adultes:'1',enfants:'0',
+    participants:'Test',email:'test@exemple.com',telephone:'',chanson:'',message:'Ligne de test envoyée depuis l\'éditeur',
+    date:new Date().toLocaleString('fr-FR')};
+  try{
+    await fetch(url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});
+    say('Test envoyé. Ouvrez votre Google Sheet : une ligne « TEST » doit apparaître.','#2f7d4f');
+    toast('Test envoyé au Google Sheet');
+  }catch(e){
+    say("L'envoi a échoué. Vérifiez l'adresse et que le déploiement est accessible à « Tout le monde ».",'#8e3b2c');
+  }
+}
 
 /* ---------------------------- Réponses RSVP ---------------------------- */
 let rsvpFilter='all';
@@ -3023,7 +3092,12 @@ on(document,'click',function(e){
 });
 
 /* ---------------------------- Publication GitHub ---------------------------- */
-function ghToken(){ try{ return localStorage.getItem('ms_gh_token')||''; }catch(e){ return ''; } }
+function settingsOpen(){ const m=document.getElementById('modal-settings'); return !!m && m.classList.contains('open'); }
+function liveVal(id){ const el=document.getElementById(id); return el? el.value.trim() : ''; }
+function ghToken(){
+  if(settingsOpen() && liveVal('s-token')) return liveVal('s-token');
+  try{ return localStorage.getItem('ms_gh_token')||''; }catch(e){ return ''; }
+}
 function b64utf8(str){
   const bytes=new TextEncoder().encode(str);
   let bin='', chunk=0x8000;
@@ -3032,7 +3106,13 @@ function b64utf8(str){
 }
 function ghConf(){
   const c=CFG.publish||{};
-  return {owner:(c.owner||'').trim(), repo:(c.repo||'').trim(), branch:(c.branch||'main').trim(), path:(c.path||'index.html').trim().replace(/^\//,'')};
+  const pick=function(id,fb){ const v=settingsOpen()? liveVal(id):''; return (v||fb||'').trim(); };
+  return {
+    owner: pick('s-owner', c.owner),
+    repo:  pick('s-repo',  c.repo),
+    branch:pick('s-branch',c.branch)||'main',
+    path: (pick('s-path',  c.path)||'index.html').replace(/^\//,'')
+  };
 }
 async function ghFetch(url,opts){
   opts=opts||{}; opts.headers=Object.assign({
@@ -3042,18 +3122,44 @@ async function ghFetch(url,opts){
   },opts.headers||{});
   return fetch(url,opts);
 }
+function ghSay(msg,kind){
+  const el=document.getElementById('s-gh-state');
+  if(el){ el.textContent=msg; el.style.color = kind==='bad'? '#8e3b2c' : (kind==='ok'? '#2f7d4f':'var(--ink2)'); }
+  toast(msg,kind==='ok'?'ok':(kind==='bad'?'bad':'warn'));
+}
 async function testGitHub(){
-  const c=ghConf();
-  if(!c.owner||!c.repo||!ghToken()){ toast('Renseignez le compte, le dépôt et le jeton','bad'); return; }
+  const c=ghConf(), tk=ghToken();
+  const manque=[];
+  if(!c.owner) manque.push('le compte');
+  if(!c.repo) manque.push('le dépôt');
+  if(!tk) manque.push('le jeton');
+  if(manque.length){ ghSay('Il manque '+manque.join(', ')+'.','bad'); return; }
+  ghSay('Test en cours…');
   setStatus('Test de connexion…');
   try{
     const r=await ghFetch('https://api.github.com/repos/'+c.owner+'/'+c.repo);
-    if(r.status===404){ toast('Dépôt introuvable ou jeton sans accès à ce dépôt','bad'); }
-    else if(r.status===401){ toast('Jeton refusé — vérifiez ou régénérez-le','bad'); }
-    else if(r.ok){ const j=await r.json(); toast('Connexion réussie : '+j.full_name+(j.private?' (privé)':'')); }
-    else toast('Réponse inattendue de GitHub ('+r.status+')','bad');
-  }catch(e){ toast('Connexion impossible — vérifiez votre réseau','bad'); }
+    if(r.status===401 || r.status===403){ ghSay('Jeton refusé. Vérifiez qu\'il n\'a pas expiré et qu\'il donne « Contents : Read and write ».','bad'); }
+    else if(r.status===404){ ghSay('Dépôt « '+c.owner+'/'+c.repo+' » introuvable, ou le jeton ne lui donne pas accès. Vérifiez l\'orthographe et le dépôt sélectionné dans le jeton.','bad'); }
+    else if(r.ok){
+      const j=await r.json();
+      let msg='Connexion réussie : '+j.full_name+(j.private?' (dépôt privé)':'');
+      const f=await ghFetch('https://api.github.com/repos/'+c.owner+'/'+c.repo+'/contents/'+encodeURIComponent(c.path).replace(/%2F/g,'/')+'?ref='+encodeURIComponent(c.branch));
+      if(f.status===404) msg+=' — attention : « '+c.path+' » n\'existe pas encore sur la branche '+c.branch+', il sera créé à la première publication.';
+      ghSay(msg,'ok');
+      savePublishFields();
+    }
+    else ghSay('Réponse inattendue de GitHub ('+r.status+').','bad');
+  }catch(e){ ghSay('Impossible de joindre GitHub. Vérifiez votre connexion internet.','bad'); }
   setStatus('Prêt');
+}
+function savePublishFields(){
+  CFG.publish={owner:liveVal('s-owner'), repo:liveVal('s-repo'),
+               branch:liveVal('s-branch')||'main', path:liveVal('s-path')||'index.html'};
+  try{
+    const tk=liveVal('s-token');
+    if(tk) localStorage.setItem('ms_gh_token',tk); else localStorage.removeItem('ms_gh_token');
+  }catch(e){}
+  saveCFG();
 }
 async function publish(){
   const c=ghConf(), token=ghToken();
