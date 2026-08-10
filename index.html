@@ -204,7 +204,18 @@ nav.up{transform:translateY(-102%)}
 .nav-links a.active{color:var(--ink); font-weight:700; letter-spacing:.16em}
 .nav-links a:hover::after,.nav-links a.active::after{width:100%}
 @media(min-width:1100px){ .nav-links{gap:1.6rem} }
-@media(max-width:760px){ .nav-links{gap:.85rem; justify-content:flex-start; padding-left:.4rem} .nav-links a{font-size:.6rem; letter-spacing:.13em} .brand span{font-size:1.25rem} }
+.burger{display:none; width:42px; height:42px; place-items:center; border-radius:50%; flex:none; transition:background .2s}
+.burger:hover{background:var(--bg2)}
+.mobile-menu{display:none; flex-direction:column; padding:.4rem 0 1.2rem; border-top:1px solid var(--line); background:var(--bg)}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:.8rem .2rem; font-size:.74rem; text-transform:uppercase; letter-spacing:.2em; border-bottom:1px solid var(--line)}
+.mobile-menu a:last-child{border:0}
+@media(max-width:760px){
+  .nav-links{display:none}
+  .burger{display:grid}
+  .brand span{font-size:1.25rem}
+  nav.menu-open{background:var(--bg)}
+}
 
 /* ============================ HERO ============================ */
 .hero{position:relative; min-height:100svh; display:grid; place-items:center; overflow:hidden; text-align:center}
@@ -468,15 +479,27 @@ body.editing nav{top:var(--bar-h,52px)}
 body.editing .to-top{display:none}
 
 .e-bar{
-  position:fixed; top:0; left:0; right:0; min-height:52px; z-index:150;
-  background:#2b241c; color:#f3ece1; display:flex; align-items:center; gap:.4rem;
-  padding:.35rem .6rem; box-shadow:0 6px 24px rgba(0,0,0,.3);
-  flex-wrap:wrap; row-gap:.35rem;
+  position:fixed; top:0; left:0; right:0; height:52px; z-index:150;
+  background:#2b241c; color:#f3ece1; display:flex; align-items:center; gap:.35rem;
+  padding:0 .55rem; box-shadow:0 6px 24px rgba(0,0,0,.3);
+  flex-wrap:nowrap; overflow:hidden;
 }
-.e-bar::-webkit-scrollbar{display:none}
 .e-spacer{flex:1 1 0; min-width:0}
-@media(max-width:1500px){ .e-btn{padding:.45rem .65rem; font-size:.68rem} .e-brand{font-size:.62rem} }
-@media(max-width:1180px){ .e-btn .ic{display:none} .e-brand .ic{display:inline-flex} }
+/* En dessous de 1560 px, les libellés s'effacent et seules les icônes restent :
+   la barre tient ainsi sur une seule ligne à toutes les résolutions. */
+@media(max-width:1810px){
+  .e-bar .e-brand{display:none}
+  .e-bar .e-btn{font-size:0; gap:0; padding:.5rem .5rem}
+  .e-bar .e-btn .ic{font-size:18px}
+  .e-bar .e-btn .e-badge{font-size:.55rem; padding:.05rem .3rem; margin-left:.25rem}
+  .e-bar .e-btn.keep{font-size:.68rem; gap:.3rem; padding:.5rem .75rem}
+  .e-bar .e-status{font-size:.6rem; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+}
+@media(max-width:900px){
+  .e-bar{overflow-x:auto; scrollbar-width:none}
+  .e-bar::-webkit-scrollbar{display:none}
+  .e-bar .e-status{display:none}
+}
 .e-brand{display:flex; align-items:center; gap:.45rem; font-size:.7rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); white-space:nowrap; padding-right:.4rem}
 .e-spacer{flex:1}
 .e-btn{
@@ -498,9 +521,12 @@ body.editing .to-top{display:none}
 
 /* Inspecteur */
 .e-panel{
-  position:fixed; top:var(--bar-h,52px); bottom:0; right:0; width:330px; z-index:149;
-  background:#2b241c; color:#e9e1d4; overflow-y:auto; padding:1.1rem 1.1rem 4rem;
-  transform:translateX(102%); transition:transform .3s var(--ease); box-shadow:-16px 0 40px rgba(0,0,0,.28);
+  position:fixed; top:calc(var(--bar-h,52px) + 14px); right:16px; width:330px; z-index:149;
+  max-height:calc(100vh - var(--bar-h,52px) - 34px);
+  background:#2b241c; color:#e9e1d4; overflow-y:auto; padding:0 1.1rem 1.4rem;
+  border-radius:12px; border:1px solid #453c31;
+  transform:translateX(calc(100% + 26px)); transition:transform .3s var(--ease);
+  box-shadow:0 24px 60px rgba(0,0,0,.45);
 }
 .e-panel.open{transform:none}
 /* Le panneau se superpose sans jamais rétrécir la page :
@@ -512,12 +538,16 @@ body.editing .to-top{display:none}
   display:grid; place-items:center; box-shadow:-6px 0 18px rgba(0,0,0,.25);
 }
 .e-collapse:hover{background:#3c332a}
-.e-panel.slim{transform:translateX(calc(100% - 30px))}
+.e-panel.slim{transform:translateX(calc(100% - 6px))}
 .e-panel.slim .e-panel-head, .e-panel.slim #insp-body{opacity:0; pointer-events:none}
 @media(max-width:900px){ .e-collapse{display:none} }
 @media(max-width:900px){ .e-panel{width:100%; top:auto; height:62vh; border-top-left-radius:14px; border-top-right-radius:14px; transform:translateY(102%)} .e-panel.open{transform:none} }
+.e-panel.moved{transition:none}
+.e-panel-head{cursor:grab}
+.e-panel-head:active{cursor:grabbing}
 .e-panel h3{font-size:.78rem; text-transform:uppercase; letter-spacing:.16em; color:var(--gold); font-family:'Montserrat',sans-serif; font-weight:600}
-.e-panel-head{display:flex; align-items:center; justify-content:space-between; padding-bottom:.9rem; border-bottom:1px solid #453c31; margin-bottom:1rem; position:sticky; top:-1.1rem; background:#2b241c; padding-top:1.1rem; margin-top:-1.1rem; z-index:2}
+.e-panel-head{display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding:1rem 0 .8rem; border-bottom:1px solid #453c31; margin-bottom:1rem; position:sticky; top:0; background:#2b241c; z-index:2; user-select:none}
+.e-grab{color:#a99e8f; font-size:.9rem; letter-spacing:.1em; flex:none}
 .e-close{width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:#3c332a}
 .e-close:hover{background:#5a4d3f}
 .e-group{margin-bottom:1.25rem}
@@ -574,7 +604,7 @@ body.editing .ph:hover::after{opacity:1}
 body.editing .ic{cursor:pointer; outline:1px dashed rgba(195,154,85,.6); outline-offset:4px; border-radius:3px}
 body.editing .ic:hover{outline-color:var(--terra); transform:scale(1.06)}
 body.editing .btn, body.editing .link{cursor:pointer}
-body.editing .is-sel{outline:2px solid var(--terra) !important; outline-offset:3px}
+body.editing .is-sel{outline:1.5px solid var(--terra) !important; outline-offset:1px}
 body.editing .ph.is-sel::after{opacity:1}
 body.editing [data-sec]{outline:1px dashed transparent; transition:outline-color .2s}
 body.editing [data-sec]:hover{outline-color:rgba(139,90,125,.35)}
@@ -759,6 +789,14 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
       <a href="#galerie" class="ed"><span style="font-size:16px">Galerie</span></a>
       <a href="#contact" class="ed"><span style="font-size:16px">Contact</span></a>
     </div>
+    <button class="burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false">
+      <span class="ic" data-icon="menu" style="font-size:22px"></span>
+    </button>
+  </div>
+  <div class="mobile-menu wrap" id="mobile-menu">
+    <a href="#histoire">Histoire</a><a href="#jourj">Jour J</a><a href="#lieux">Lieux</a>
+    <a href="#programme">Programme</a><a href="#team">Témoins</a><a href="#rsvp">RSVP</a>
+    <a href="#sejour">Séjour</a><a href="#galerie">Galerie</a><a href="#contact">Contact</a>
   </div>
 </nav>
 
@@ -1258,29 +1296,30 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
 <div id="editor">
   <div class="e-bar">
     <span class="e-brand"><span class="ic" data-icon="sparkles" style="font-size:15px"></span> Mode édition</span>
-    <button class="e-btn" data-tool="theme"><span class="ic" data-icon="palette"></span> Thème</button>
-    <button class="e-btn" data-tool="settings"><span class="ic" data-icon="settings"></span> Réglages</button>
-    <button class="e-btn gold" data-tool="rsvp"><span class="ic" data-icon="users"></span> Réponses <span class="e-badge" id="rsvp-count">0</span></button>
-    <button class="e-btn" data-tool="add"><span class="ic" data-icon="plus"></span> Ajouter</button>
-    <button class="e-btn" data-tool="lock"><span class="ic" data-icon="lock"></span> Écran d'accès</button>
-    <button class="e-btn" data-tool="guides"><span class="ic" data-icon="eye"></span> Aperçu</button>
-    <button class="e-btn" data-tool="layers"><span class="ic" data-icon="grid"></span> Calques</button>
-    <button class="e-btn" data-tool="shape"><span class="ic" data-icon="box"></span> Forme libre</button>
-    <button class="e-btn" data-tool="freeimg"><span class="ic" data-icon="image"></span> Image libre</button>
-    <button class="e-btn" data-tool="undo"><span class="ic" data-icon="undo"></span> Annuler</button>
-    <button class="e-btn" data-tool="redo"><span class="ic" data-icon="redo"></span> Refaire</button>
+    <button class="e-btn" title="Thème" data-tool="theme"><span class="ic" data-icon="palette"></span> Thème</button>
+    <button class="e-btn" title="Réglages" data-tool="settings"><span class="ic" data-icon="settings"></span> Réglages</button>
+    <button class="e-btn gold" title="Réponses" data-tool="rsvp"><span class="ic" data-icon="users"></span> Réponses <span class="e-badge" id="rsvp-count">0</span></button>
+    <button class="e-btn" title="Ajouter" data-tool="add"><span class="ic" data-icon="plus"></span> Ajouter</button>
+    <button class="e-btn" title="Écran d'accès" data-tool="lock"><span class="ic" data-icon="lock"></span> Écran d'accès</button>
+    <button class="e-btn" title="Aperçu" data-tool="guides"><span class="ic" data-icon="eye"></span> Aperçu</button>
+    <button class="e-btn" title="Calques" data-tool="layers"><span class="ic" data-icon="grid"></span> Calques</button>
+    <button class="e-btn" title="Forme libre" data-tool="shape"><span class="ic" data-icon="box"></span> Forme libre</button>
+    <button class="e-btn" title="Image libre" data-tool="freeimg"><span class="ic" data-icon="image"></span> Image libre</button>
+    <button class="e-btn" title="Annuler" data-tool="undo"><span class="ic" data-icon="undo"></span> Annuler</button>
+    <button class="e-btn" title="Refaire" data-tool="redo"><span class="ic" data-icon="redo"></span> Refaire</button>
     <span class="e-spacer"></span>
     <span class="e-status" id="e-status">Prêt</span>
-    <button class="e-btn publish" data-tool="publish"><span class="ic" data-icon="upload"></span> Publier</button>
-    <button class="e-btn primary" data-tool="download"><span class="ic" data-icon="download"></span> Télécharger</button>
-    <button class="e-btn" data-tool="copy"><span class="ic" data-icon="copy"></span> Copier</button>
-    <button class="e-btn" data-tool="quit">Quitter</button>
+    <button class="e-btn publish keep" title="Publier le site" data-tool="publish"><span class="ic" data-icon="upload"></span> Publier</button>
+    <button class="e-btn primary keep" title="Télécharger index.html" data-tool="download"><span class="ic" data-icon="download"></span> Télécharger</button>
+    <button class="e-btn" title="Copier" data-tool="copy"><span class="ic" data-icon="copy"></span> Copier</button>
+    <button class="e-btn keep" title="Quitter le mode édition" data-tool="quit">Quitter</button>
   </div>
 
   <aside class="e-panel" id="inspector">
     <button class="e-collapse" data-tool="slim" title="Écarter le panneau pour voir la page"><span class="ic" data-icon="chevron-right" style="font-size:16px"></span></button>
     <div class="e-panel-head">
-      <h3 id="insp-title">Inspecteur</h3>
+      <span class="e-grab" title="Glissez pour déplacer ce panneau">⠿</span>
+      <h3 id="insp-title" style="flex:1">Inspecteur</h3>
       <button class="e-close" data-tool="close-insp" aria-label="Fermer"><span class="ic" data-icon="x" style="font-size:14px"></span></button>
     </div>
     <div id="insp-body"></div>
@@ -1651,9 +1690,8 @@ function onScroll(){
   const y = window.scrollY;
   if(nav){
     nav.classList.toggle('scrolled', y>20);
-    if(!document.body.classList.contains('editing')){
-      nav.classList.toggle('up', y>lastY && y>320);
-    }
+    /* le menu ne se dérobe plus au défilement : il reste accessible en permanence */
+    nav.classList.remove('up');
   }
   if(prog){
     const h = document.documentElement.scrollHeight - innerHeight;
@@ -1666,6 +1704,21 @@ let ticking=false;
 on(window,'scroll',function(){ if(!ticking){ ticking=true; requestAnimationFrame(function(){ onScroll(); ticking=false; }); } },{passive:true});
 
 on(document,'click',function(e){
+  const bg = e.target.closest('#burger');
+  if(bg){
+    const m=$('#mobile-menu'); const on=m.classList.toggle('open');
+    bg.setAttribute('aria-expanded',on);
+    $('#nav').classList.toggle('menu-open',on);
+    const ic=bg.querySelector('.ic');
+    if(ic){ ic.setAttribute('data-icon', on?'x':'menu'); ic.__n=null; window.__paintIcons(); }
+    return;
+  }
+  const ml = e.target.closest('#mobile-menu a');
+  if(ml){
+    $('#mobile-menu').classList.remove('open');
+    $('#nav').classList.remove('menu-open');
+    const ic=$('#burger .ic'); if(ic){ ic.setAttribute('data-icon','menu'); ic.__n=null; window.__paintIcons(); }
+  }
   const tt = e.target.closest('#to-top');
   if(tt){ window.scrollTo({top:0,behavior:'smooth'}); }
   const rail = e.target.closest('[data-rail]');
@@ -2145,8 +2198,7 @@ function setStatus(t){ const s=$('#e-status'); if(s) s.textContent=t; }
 function syncBarHeight(){
   const bar=document.querySelector('.e-bar');
   if(!bar) return;
-  const h=Math.max(46, Math.round(bar.getBoundingClientRect().height));
-  document.documentElement.style.setProperty('--bar-h', h+'px');
+  document.documentElement.style.setProperty('--bar-h', Math.round(bar.getBoundingClientRect().height)+'px');
 }
 on(window,'resize',function(){ if(editing){ syncBarHeight(); placeHandle(); } });
 function markDirty(){
@@ -2433,6 +2485,31 @@ on(document,'pointerup',function(){
     {label:'Appliquer à toutes les sections',fn:function(){ spreadSpacing(sec); }},
     {label:'Garder ici',fn:function(){}}
   ]);
+});
+
+/* Le panneau se déplace à la souris : on peut le poser où il ne gêne pas. */
+let panDrag=null;
+on(document,'pointerdown',function(e){
+  const head=e.target.closest('.e-panel-head');
+  if(!head || e.target.closest('button')) return;
+  const pn=$('#inspector');
+  const r=pn.getBoundingClientRect();
+  panDrag={x:e.clientX-r.left, y:e.clientY-r.top, w:r.width, h:r.height};
+  pn.classList.add('moved');
+  document.body.classList.add('dragging');
+  e.preventDefault();
+});
+on(document,'pointermove',function(e){
+  if(!panDrag) return;
+  const pn=$('#inspector');
+  const left=Math.max(8, Math.min(innerWidth-panDrag.w-8, e.clientX-panDrag.x));
+  const top=Math.max(56, Math.min(innerHeight-60, e.clientY-panDrag.y));
+  pn.style.left=left+'px'; pn.style.top=top+'px'; pn.style.right='auto';
+  pn.style.maxHeight=(innerHeight-top-16)+'px';
+});
+on(document,'pointerup',function(){
+  if(!panDrag) return;
+  panDrag=null; document.body.classList.remove('dragging');
 });
 
 /* ---------------------------- Sélecteur d'élément ---------------------------- */
@@ -2998,10 +3075,8 @@ function applyRadiusChain(ph,v){
   if(+v>0) ph.style.background='transparent';
   const p=ph.parentElement;
   if(!p) return;
-  /* voile du hero et calques superposés */
-  Array.prototype.slice.call(p.children).forEach(function(sib){
-    if(sib!==ph && (sib.classList.contains('veil')||sib.classList.contains('hero-overlay'))) sib.style.borderRadius=r;
-  });
+  /* une image libre est indépendante : elle n'entraîne jamais son décor */
+  if(ph.classList.contains('freeimg')||ph.classList.contains('free')) return;
   const pr=p.getBoundingClientRect(), br=ph.getBoundingClientRect();
   const remplit = br.width >= pr.width-3 && br.top <= pr.top+3;
   const cadre = p.classList.contains('card') || p.classList.contains('hero') ||
@@ -3011,6 +3086,10 @@ function applyRadiusChain(ph,v){
   if(remplit && cadre){
     p.style.borderRadius=r;
     if(+v>0) p.style.overflow='hidden';
+    /* seul un fond de section entraîne son voile */
+    Array.prototype.slice.call(p.children).forEach(function(sib){
+      if(sib!==ph && sib.classList.contains('veil')) sib.style.borderRadius=r;
+    });
   }
 }
 
@@ -3584,10 +3663,12 @@ function uiElement(){
   const el=selEl, cs=getComputedStyle(el);
   const bg=el.style.backgroundColor||cs.backgroundColor;
   const alpha=Math.round((parseFloat((bg.match(/[\d.]+\)$/)||[1])[0])||1)*100);
-  const cls=String(el.className||'').split(' ').filter(function(c){
-    return c && c!=='is-sel' && c!=='in' && c!=='reveal' && c!=='pick-flash' && c!=='edge';
-  }).slice(0,2).join(' ');
-  return '<p class="e-help" style="margin-bottom:1rem">Bloc <b>&lt;'+el.tagName.toLowerCase()+'&gt;</b>'+(cls? ' · '+esc(cls):'')+'</p>'+
+  const sec=el.closest('[data-sec]');
+  const lien=document.querySelector('#nav-links a[href="#'+(sec?sec.id:'')+'"]');
+  const nomSec = lien? lien.textContent.trim() : (sec? (sec.id||'') : '');
+  const kids=el.children.length;
+  return '<p class="e-help" style="margin-bottom:1rem">Groupe de '+kids+' élément'+(kids>1?'s':'')+
+    (nomSec? ' — section <b>'+esc(nomSec)+'</b>':'')+'.<br>Réglez ici son fond, ses marges et sa place. Pour modifier un texte ou une photo à l\'intérieur, cliquez directement dessus.</p>'+
     ctlColor('el-bg','Couleur de fond',rgb2hex(bg))+
     ctlRange('el-alpha','Opacité du fond',0,100,alpha,'%')+
     ctlRange('el-r','Angles arrondis',0,80,px(cs.borderRadius,0),'px')+
@@ -4462,6 +4543,8 @@ function buildHTML(){
   q('#insp-body').forEach(function(e){ e.innerHTML=''; });
   q('#toast').forEach(function(e){ e.className='toast'; });
   q('#drag-handle').forEach(function(e){ e.className=''; e.removeAttribute('style'); });
+  q('#mobile-menu').forEach(function(e){ e.classList.remove('open'); });
+  q('nav').forEach(function(e){ e.classList.remove('menu-open'); });
   q('#new-version').forEach(function(e){ e.remove(); });
   q('.edge').forEach(function(e){ e.classList.remove('edge'); });
   q('.pick-flash').forEach(function(e){ e.classList.remove('pick-flash'); });
@@ -4477,7 +4560,7 @@ function buildHTML(){
   q('.ic').forEach(function(e){ e.innerHTML=''; });
   const b=clone.querySelector('body');
   b.className='locked';
-  q('#inspector').forEach(function(e){ e.classList.remove('slim'); });
+  q('#inspector').forEach(function(e){ e.classList.remove('slim','moved'); e.removeAttribute('style'); });
   return '<!doctype html>\n'+clone.outerHTML;
 }
 function exportFile(){
