@@ -2543,19 +2543,22 @@ function fileToDataURL(file,maxW){
     const fr=new FileReader();
     fr.onerror=function(){ rej(new Error('read')); };
     fr.onload=function(){
+      /* vectoriel et animé : conservés intacts */
+      if(/svg|gif/i.test(file.type||'')){ res(fr.result); return; }
       const img=new Image();
       img.onerror=function(){ res(fr.result); };
       img.onload=function(){
         try{
+          /* PNG, WebP et SVG gardent leur transparence : jamais d'aplat blanc */
+          const alpha = /png|webp|svg/i.test(file.type||'');
           const sc=Math.min(1, maxW/img.naturalWidth);
           const cw=Math.max(1,Math.round(img.naturalWidth*sc)), ch=Math.max(1,Math.round(img.naturalHeight*sc));
           const c=document.createElement('canvas'); c.width=cw; c.height=ch;
           const ctx=c.getContext('2d');
-          ctx.fillStyle='#ffffff';
-          const keepPng = file.type==='image/png' && file.size<400000;
-          if(!keepPng) ctx.fillRect(0,0,cw,ch);
+          if(!alpha){ ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cw,ch); }
           ctx.drawImage(img,0,0,cw,ch);
-          res(c.toDataURL(keepPng?'image/png':'image/jpeg', 0.82));
+          const out=c.toDataURL(alpha?'image/png':'image/jpeg', 0.82);
+          res(alpha && out.length>fr.result.length ? fr.result : out);
         }catch(err){ res(fr.result); }
       };
       img.src=fr.result;
@@ -2718,8 +2721,13 @@ function uiImage(){
   const scale=Math.round(parseFloat(img.dataset.zoom||100))||100;
   let h='';
   h+='<div class="e-group"><div class="e-drop" id="drop">Déposez une image ici<br><b>ou cliquez pour la choisir</b></div>'+
-     '<p class="e-help">Formats JPG, PNG ou HEIC. La photo est automatiquement optimisée pour que le site reste rapide.</p></div>';
+     '<p class="e-help">JPG, PNG, WebP, SVG ou GIF. La photo est optimisée automatiquement, et la <b>transparence des PNG est conservée</b>.</p></div>';
   h+='<div class="e-group"><span class="e-lab">Ou coller une adresse d\'image</span><input class="e-in" id="img-url" placeholder="https://…" value=""></div>';
+  h+='<button class="e-btn danger" id="img-remove" style="width:100%;justify-content:center;margin-bottom:.5rem"><span class="ic" data-icon="trash"></span> '+
+     (free? 'Supprimer cette image' : (abs? 'Retirer la photo (fond uni)' : 'Supprimer cette photo'))+'</button>';
+  if(abs) h+='<p class="e-help" style="margin-bottom:1rem">La photo disparaît mais reste récupérable : le bouton « Régler la photo de fond » du panneau Section vous y ramène.</p>';
+  h+=ctlColor('img-bg','Couleur derrière la photo',rgb2hex(ph.style.backgroundColor||'#f2eae0'));
+  h+='<p class="e-help" style="margin:-.8rem 0 1rem">Visible à travers les zones transparentes d\'un PNG.</p>';
   h+=ctlRange('img-zoom','Zoom',100,400,scale,'%');
   h+=ctlRange('img-x','Cadrage horizontal',0,100,px(img.dataset.fx,px(pos[0],50)),'%');
   h+=ctlRange('img-y','Cadrage vertical',0,100,px(img.dataset.fy,px(pos[1],50)),'%');
@@ -2748,16 +2756,33 @@ function uiImage(){
   h+='<div class="e-group"><span class="e-lab">Rendu</span><div class="e-seg" id="img-filter">'+
      '<button data-f="none">Naturel</button><button data-f="grayscale(1)">N&amp;B</button>'+
      '<button data-f="sepia(.45)">Sépia</button><button data-f="saturate(1.25) contrast(1.05)">Éclatant</button></div></div>';
-  if(free) h+='<button class="e-btn danger" id="img-del" style="width:100%;justify-content:center"><span class="ic" data-icon="trash"></span> Supprimer cette image</button>';
+  const masquee = ph.style.display==='none';
+  if(masquee){
+    h='<p class="e-help" style="margin-bottom:1rem">Cette photo est retirée : le fond de la section apparaît à sa place.</p>'+
+      '<button class="e-btn primary" id="img-back" style="width:100%;justify-content:center"><span class="ic" data-icon="eye"></span> Remettre la photo</button>';
+    return h;
+  }
   return h;
 }
 function bindImage(){
   const ph=selEl, img=ph.querySelector('img');
+  const back=$('#img-back');
+  if(back){
+    back.onclick=function(){
+      snapshot();
+      ph.style.display='';
+      const p=ph.parentElement;
+      if(p && p.dataset.bgSaved!==undefined){ p.style.background=p.dataset.bgSaved; delete p.dataset.bgSaved; }
+      renderInspector(); toast('Photo rétablie');
+    };
+    return;
+  }
   const drop=$('#drop');
   drop.onclick=function(){ replacePhoto(ph); };
   drop.ondragover=function(e){ e.preventDefault(); drop.classList.add('over'); };
   drop.ondragleave=function(){ drop.classList.remove('over'); };
   drop.ondrop=function(e){ e.preventDefault(); drop.classList.remove('over'); if(e.dataTransfer.files[0]) setPhotoFromFile(ph,e.dataTransfer.files[0]); };
+  bindColor('img-bg',function(v){ ph.style.backgroundColor=v; });
   $('#img-url').onchange=function(){ if(this.value.trim()){ snapshot(); img.src=this.value.trim(); toast('Image mise à jour'); } };
   const frame=function(){
     frameImage(img, +$('#img-zoom').value, +$('#img-x').value, +$('#img-y').value);
@@ -2787,8 +2812,28 @@ function bindImage(){
         img.style.filter=b.getAttribute('data-f'); };
     });
   }
-  const del=$('#img-del');
-  if(del) del.onclick=function(){ snapshot(); ph.remove(); deselect(); closeInspector(); toast('Image supprimée','warn',[{label:'Annuler',fn:undo}]); };
+  const del=$('#img-remove');
+  if(del) del.onclick=function(){
+    snapshot();
+    const free=ph.classList.contains('freeimg');
+    const abs=!free && getComputedStyle(ph).position==='absolute';
+    if(abs){
+      const p=ph.parentElement;
+      if(p){
+        p.dataset.bgSaved=p.style.background||'';
+        if(!p.style.background && !p.style.backgroundColor) p.style.background='var(--ink)';
+      }
+      ph.style.display='none';
+      renderInspector();
+      toast('Photo retirée — le fond uni prend sa place','warn',[{label:'Annuler',fn:undo}]);
+    }else{
+      const host=ph.parentElement;
+      ph.remove();
+      if(host && host.classList.contains('card') && !host.querySelector('.ph')) host.style.overflow='';
+      deselect(); closeInspector();
+      toast('Photo supprimée','warn',[{label:'Annuler',fn:undo}]);
+    }
+  };
 }
 
 /* L'arrondi doit suivre jusqu'au cadre qui entoure la photo,
@@ -4076,7 +4121,9 @@ async function externalizeImages(c){
   for(const src in map){
     const m=/^data:(image\/[a-z+]+);base64,(.*)$/i.exec(src);
     if(!m) continue;
-    const ext=m[1].indexOf('png')>-1?'png':(m[1].indexOf('webp')>-1?'webp':'jpg');
+    const t=m[1];
+    const ext = t.indexOf('svg')>-1?'svg' : t.indexOf('png')>-1?'png'
+              : t.indexOf('webp')>-1?'webp' : t.indexOf('gif')>-1?'gif' : 'jpg';
     const name='photos/img-'+shortHash(m[2])+'.'+ext;
     const repoPath=dir+name;
     done++;
@@ -4156,7 +4203,7 @@ function buildHTML(){
   saveCFG();
   const clone=document.documentElement.cloneNode(true);
   const q=function(s){ return Array.prototype.slice.call(clone.querySelectorAll(s)); };
-  q('.blk-tools,.sec-tools,.toast-act').forEach(function(e){ e.remove(); });
+  q('.blk-tools,.sec-tools,.sec-grip,.toast-act').forEach(function(e){ e.remove(); });
   q('[contenteditable]').forEach(function(e){ e.removeAttribute('contenteditable'); });
   q('.is-sel').forEach(function(e){ e.classList.remove('is-sel'); });
   q('.reveal').forEach(function(e){ e.classList.remove('in'); e.style.transitionDelay=''; });
@@ -4208,7 +4255,7 @@ function saveDraft(){
   if(!editing) return;
   saveCFG();
   const tmp=document.body.cloneNode(true);
-  Array.prototype.slice.call(tmp.querySelectorAll('.blk-tools,.sec-tools,.toast-act')).forEach(function(e){ e.remove(); });
+  Array.prototype.slice.call(tmp.querySelectorAll('.blk-tools,.sec-tools,.sec-grip,.toast-act')).forEach(function(e){ e.remove(); });
   const ok=LSet('ms_draft',{at:Date.now(),html:tmp.innerHTML,cfg:CFG});
   if(!ok) setStatus('Brouillon trop lourd — publiez ou téléchargez sans tarder');
 }
