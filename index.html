@@ -570,6 +570,22 @@ body.editing .only-edit{display:inline-flex !important}
 }
 .blk-tools button:hover{background:var(--terra)}
 .blk-tools .ic{font-size:13px}
+.sec-grip{
+  position:absolute; left:0; right:0; height:18px; z-index:19; cursor:ns-resize;
+  opacity:0; transition:opacity .18s; display:flex; align-items:center; justify-content:center;
+}
+.sec-grip.top{top:0} .sec-grip.bottom{bottom:0}
+[data-sec]:hover > .sec-grip, .sec-grip.on{opacity:1}
+.sec-grip::before{
+  content:''; position:absolute; left:0; right:0; height:3px; border-radius:2px;
+  background:repeating-linear-gradient(90deg,var(--plum) 0 10px,transparent 10px 20px);
+}
+.sec-grip span{
+  position:relative; background:var(--plum); color:#fff; font-size:.6rem; font-weight:700;
+  padding:.12rem .55rem; border-radius:99px; font-family:'Montserrat',sans-serif; letter-spacing:.04em;
+  box-shadow:0 2px 8px rgba(0,0,0,.25); white-space:nowrap;
+}
+.sec-grip.on span{background:var(--terra)}
 .sec-tools{
   position:absolute; top:8px; left:8px; z-index:21; display:flex; gap:3px; opacity:0; transition:opacity .18s;
 }
@@ -2191,6 +2207,13 @@ function injectTools(){
     if(s.querySelector(':scope > .sec-tools')) return;
     const t=document.createElement('div');
     t.className='sec-tools'; t.setAttribute('contenteditable','false');
+    const gt=document.createElement('div');
+    gt.className='sec-grip top'; gt.setAttribute('data-grip','top'); gt.setAttribute('contenteditable','false');
+    gt.innerHTML='<span></span>';
+    const gb=document.createElement('div');
+    gb.className='sec-grip bottom'; gb.setAttribute('data-grip','bottom'); gb.setAttribute('contenteditable','false');
+    gb.innerHTML='<span></span>';
+    s.appendChild(gt); s.appendChild(gb);
     t.innerHTML='<button data-sec-act="up" title="Monter"><span class="ic" data-icon="chevron-up"></span></button>'+
                 '<button data-sec-act="down" title="Descendre"><span class="ic" data-icon="chevron-down"></span></button>'+
                 '<button data-sec-act="hide" title="Masquer ou afficher"><span class="ic" data-icon="eye"></span></button>'+
@@ -2201,7 +2224,7 @@ function injectTools(){
   paintIcons();
 }
 function removeTools(root){
-  $$('.blk-tools,.sec-tools',root||document).forEach(function(e){ e.remove(); });
+  $$('.blk-tools,.sec-tools,.sec-grip',root||document).forEach(function(e){ e.remove(); });
 }
 function enterEdit(){
   if(editing) return;
@@ -2297,6 +2320,7 @@ on(document,'pointerup',function(){
 });
 on(document,'pointerdown',function(e){
   if(!editing) return;
+  if(e.target.closest('.sec-grip')) return;
   if(e.target.closest('#drag-handle')){ if(selEl) startDrag(e,selEl); return; }
   if(!selEl || !movable(selEl,selType)) return;
   if(!selEl.contains(e.target)) return;
@@ -2304,6 +2328,53 @@ on(document,'pointerdown',function(e){
   const editable=e.target.isContentEditable;
   if(editable && !e.altKey) return;
   startDrag(e,selEl);
+});
+
+/* Poignées d'espacement : on tire le haut ou le bas d'une section. */
+let gripDrag=null;
+on(document,'pointerdown',function(e){
+  if(!editing) return;
+  const g=e.target.closest('.sec-grip');
+  if(!g) return;
+  e.preventDefault(); e.stopPropagation();
+  const sec=g.closest('[data-sec]');
+  const cs=getComputedStyle(sec);
+  snapshot();
+  gripDrag={
+    g:g, sec:sec, side:g.getAttribute('data-grip'), y:e.clientY,
+    pad: parseFloat(cs[g.getAttribute('data-grip')==='top'?'paddingTop':'paddingBottom'])||0,
+    mar: parseFloat(cs[g.getAttribute('data-grip')==='top'?'marginTop':'marginBottom'])||0
+  };
+  g.classList.add('on');
+  document.body.classList.add('dragging');
+  try{ g.setPointerCapture(e.pointerId); }catch(err){}
+},true);
+
+on(document,'pointermove',function(e){
+  if(!gripDrag) return;
+  const d=e.clientY-gripDrag.y;
+  /* la poignée suit le doigt : vers le bas elle agrandit, vers le haut elle resserre */
+  const delta = d;
+  let pad=Math.round(gripDrag.pad+delta), mar=gripDrag.mar;
+  if(pad<0){ mar=Math.round(gripDrag.mar+pad); pad=0; }
+  const sec=gripDrag.sec;
+  if(gripDrag.side==='top'){ sec.style.paddingTop=pad+'px'; sec.style.marginTop=mar+'px'; }
+  else { sec.style.paddingBottom=pad+'px'; sec.style.marginBottom=mar+'px'; }
+  gripDrag.g.querySelector('span').textContent =
+    (gripDrag.side==='top'?'Haut ':'Bas ')+pad+' px'+(mar? ' · marge '+mar+' px':'');
+});
+on(document,'pointerup',function(){
+  if(!gripDrag) return;
+  gripDrag.g.classList.remove('on');
+  gripDrag.g.querySelector('span').textContent='';
+  document.body.classList.remove('dragging');
+  const sec=gripDrag.sec;
+  gripDrag=null;
+  if(selEl) renderInspector();
+  toast('Espacement ajusté','ok',[
+    {label:'Appliquer à toutes les sections',fn:function(){ spreadSpacing(sec); }},
+    {label:'Garder ici',fn:function(){}}
+  ]);
 });
 
 /* ---------------------------- Sélection ---------------------------- */
@@ -2435,6 +2506,21 @@ on(document,'drop',function(e){
   setPhotoFromFile(ph, e.dataTransfer.files[0]);
 });
 
+/* Recopie les espacements d'une section sur toutes les autres. */
+function spreadSpacing(src){
+  snapshot();
+  const cs=getComputedStyle(src);
+  const v={pt:cs.paddingTop, pb:cs.paddingBottom, mt:src.style.marginTop||'', mb:src.style.marginBottom||''};
+  let n=0;
+  $$('[data-sec]').forEach(function(sec){
+    if(sec===src) return;
+    if(sec.classList.contains('hero') || sec.tagName==='HEADER' || sec.tagName==='FOOTER') return;
+    sec.style.paddingTop=v.pt; sec.style.paddingBottom=v.pb;
+    sec.style.marginTop=v.mt; sec.style.marginBottom=v.mb;
+    n++;
+  });
+  toast(n+' section(s) alignée(s) sur ces espacements','ok',[{label:'Annuler',fn:undo}]);
+}
 function removeSection(sec){
   snapshot();
   const id=sec.id;
@@ -2476,6 +2562,19 @@ function fileToDataURL(file,maxW){
     };
     fr.readAsDataURL(file);
   });
+}
+/* object-position ne recadre que ce que le cadrage « cover » a réellement coupé.
+   Dès qu'on zoome, on décale en plus l'image pour retrouver la maîtrise des deux axes. */
+function frameImage(img,zoom,x,y){
+  img.dataset.zoom=zoom; img.dataset.fx=x; img.dataset.fy=y;
+  img.style.objectPosition=x+'% '+y+'%';
+  const s=zoom/100;
+  const amp=Math.max(0,(s-1)/2*100);
+  const tx=(-(x-50)/50)*amp/s;
+  const ty=(-(y-50)/50)*amp/s;
+  img.style.transform = (s!==1 || tx || ty)
+    ? 'scale('+s+') translate('+tx.toFixed(2)+'%,'+ty.toFixed(2)+'%)'
+    : '';
 }
 function targetWidthFor(ph){
   const w = ph.getBoundingClientRect().width || 800;
@@ -2616,14 +2715,15 @@ function uiImage(){
   const abs=!free && getComputedStyle(ph).position==='absolute';
   const round=ph.classList.contains('round');
   const pos=(img.style.objectPosition||'50% 50%').split(' ');
-  const scale=Math.round((parseFloat((img.style.transform||'').replace(/[^\d.]/g,''))||1)*100);
+  const scale=Math.round(parseFloat(img.dataset.zoom||100))||100;
   let h='';
   h+='<div class="e-group"><div class="e-drop" id="drop">Déposez une image ici<br><b>ou cliquez pour la choisir</b></div>'+
      '<p class="e-help">Formats JPG, PNG ou HEIC. La photo est automatiquement optimisée pour que le site reste rapide.</p></div>';
   h+='<div class="e-group"><span class="e-lab">Ou coller une adresse d\'image</span><input class="e-in" id="img-url" placeholder="https://…" value=""></div>';
-  h+=ctlRange('img-zoom','Zoom',100,260,scale,'%');
-  h+=ctlRange('img-x','Cadrage horizontal',0,100,px(pos[0],50),'%');
-  h+=ctlRange('img-y','Cadrage vertical',0,100,px(pos[1],50),'%');
+  h+=ctlRange('img-zoom','Zoom',100,400,scale,'%');
+  h+=ctlRange('img-x','Cadrage horizontal',0,100,px(img.dataset.fx,px(pos[0],50)),'%');
+  h+=ctlRange('img-y','Cadrage vertical',0,100,px(img.dataset.fy,px(pos[1],50)),'%');
+  h+='<p class="e-help" style="margin:-.8rem 0 1rem">Sur une photo qui remplit tout l\'écran, zoomez un peu : le cadrage vertical devient alors pleinement utilisable.</p>';
   if(free){
     h+=ctlRange('f-w','Largeur',60,1200,px(ph.style.width,220),'px');
     h+=ctlRange('f-x','Position horizontale',0,95,px(ph.style.left,8),'%');
@@ -2659,9 +2759,10 @@ function bindImage(){
   drop.ondragleave=function(){ drop.classList.remove('over'); };
   drop.ondrop=function(e){ e.preventDefault(); drop.classList.remove('over'); if(e.dataTransfer.files[0]) setPhotoFromFile(ph,e.dataTransfer.files[0]); };
   $('#img-url').onchange=function(){ if(this.value.trim()){ snapshot(); img.src=this.value.trim(); toast('Image mise à jour'); } };
-  bindRange('img-zoom',function(v){ img.style.transform='scale('+(v/100)+')'; });
-  const setPos=function(){ img.style.objectPosition=$('#img-x').value+'% '+$('#img-y').value+'%'; };
-  bindRange('img-x',setPos); bindRange('img-y',setPos);
+  const frame=function(){
+    frameImage(img, +$('#img-zoom').value, +$('#img-x').value, +$('#img-y').value);
+  };
+  bindRange('img-zoom',frame); bindRange('img-x',frame); bindRange('img-y',frame);
   bindRange('img-h',function(v){ ph.style.height=v+'px'; });
   bindRange('img-size',function(v){ ph.style.width=v+'px'; ph.style.height=v+'px'; });
   bindRange('gal-size',function(v){
@@ -3287,13 +3388,17 @@ function uiSection(){
     ctlColor('sec-bg','Couleur de fond',rgb2hex(el.style.backgroundColor||cs.backgroundColor))+
     ctlRange('sec-pt','Espacement en haut',0,220,px(cs.paddingTop,110),'px')+
     ctlRange('sec-pb','Espacement en bas',0,220,px(cs.paddingBottom,110),'px')+
-    ctlRange('sec-mt','Marge au-dessus',-120,160,px(cs.marginTop,0),'px')+
+    ctlRange('sec-mt','Marge au-dessus',-200,200,px(cs.marginTop,0),'px')+
+    ctlRange('sec-mb','Marge en dessous',-200,200,px(cs.marginBottom,0),'px')+
     '<div class="e-group"><div class="e-row">'+
       '<button class="e-btn" id="sec-up" style="flex:1;justify-content:center">Monter</button>'+
       '<button class="e-btn" id="sec-down" style="flex:1;justify-content:center">Descendre</button></div></div>'+
     '<button class="e-btn '+(el.classList.contains('hide-sec')?'on':'')+'" id="sec-hide" style="width:100%;justify-content:center">'+
       (el.classList.contains('hide-sec')?'Réafficher pour les invités':'Masquer pour les invités')+'</button>'+
     '<p class="e-help">Une section masquée reste visible en mode édition, en grisé, mais disparaît pour vos invités.</p>'+
+    '<button class="e-btn primary" id="sec-all" style="width:100%;justify-content:center;margin-bottom:.5rem">Appliquer ces espacements à toutes les sections</button>'+
+    '<button class="e-btn" id="sec-reset" style="width:100%;justify-content:center;margin-bottom:.6rem">Réinitialiser les espacements</button>'+
+    '<p class="e-help" style="margin-top:-.3rem">Vous pouvez aussi tirer directement les poignées violettes en haut et en bas de la section.</p>'+
     '<button class="e-btn danger" id="sec-del" style="width:100%;justify-content:center;margin-top:.8rem">Supprimer définitivement cette section</button>'+
     (el.querySelector(':scope > .ph')? '<button class="e-btn primary" id="sec-bg" style="width:100%;justify-content:center;margin-top:.8rem">Régler la photo de fond</button>':'');
 }
@@ -3303,9 +3408,18 @@ function bindSection(){
   bindRange('sec-pt',function(v){ el.style.paddingTop=v+'px'; });
   bindRange('sec-pb',function(v){ el.style.paddingBottom=v+'px'; });
   bindRange('sec-mt',function(v){ el.style.marginTop=v+'px'; });
+  bindRange('sec-mb',function(v){ el.style.marginBottom=v+'px'; });
   $('#sec-up').onclick=function(){ snapshot(); const p=el.previousElementSibling; if(p&&p.hasAttribute('data-sec')) p.before(el); if(el.scrollIntoView) el.scrollIntoView({block:'center'}); };
   $('#sec-down').onclick=function(){ snapshot(); const n=el.nextElementSibling; if(n&&n.hasAttribute('data-sec')) n.after(el); if(el.scrollIntoView) el.scrollIntoView({block:'center'}); };
   $('#sec-hide').onclick=function(){ el.classList.toggle('hide-sec'); renderInspector(); };
+  const sa=$('#sec-all');
+  if(sa) sa.onclick=function(){ spreadSpacing(el); };
+  const sr=$('#sec-reset');
+  if(sr) sr.onclick=function(){
+    snapshot();
+    ['paddingTop','paddingBottom','marginTop','marginBottom'].forEach(function(k){ el.style[k]=''; });
+    renderInspector(); toast('Espacements remis par défaut');
+  };
   const sd=$('#sec-del');
   if(sd) sd.onclick=function(){ removeSection(el); };
   const sb=$('#sec-bg');
