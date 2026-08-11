@@ -457,29 +457,30 @@ body.editing .shape{outline:1px dashed rgba(139,90,125,.45); outline-offset:2px;
 /* ============================ MOBILE ============================ */
 @media(max-width:760px){
   /* les décalages et positions libres, réglés sur grand écran, se réduisent d'autant */
-  :root{--om:.36}
-  /* Un élément posé librement se recentre plutôt que de déborder du petit écran. */
-  .shape.free, .freeimg{max-width:92vw !important; left:50% !important; transform:translateX(-50%) !important}
-  /* Sur l'accueil et l'écran d'accès, tout se recentre : les décalages pensés
-     pour un grand écran n'ont plus de sens sur 390 px de large. */
-  .hero-in [data-ox], .hero-in [data-oy], #lock [data-ox], #lock [data-oy]{--om:0}
-  .hero .shape.free, .hero .freeimg,
-  #lock .shape.free, #lock .freeimg{
-    top:50% !important; left:50% !important; transform:translate(-50%,-50%) !important;
-    max-width:92vw !important;
+  :root{--om:var(--omBase,.36)}
+  /* Un élément posé librement se recentre plutôt que de déborder du petit écran… */
+  .shape.free:not(.lock-free), .freeimg:not(.lock-free){max-width:92vw !important; left:50% !important; transform:translateX(-50%) !important}
+  /* …sur l'accueil, décalages annulés et décor recentré sur le bloc de titre… */
+  .hero-in [data-ox], .hero-in [data-oy]{--om:0}
+  .hero .shape.free, .hero .freeimg{
+    top:50% !important; left:50% !important; transform:translate(-50%,-50%) !important; max-width:92vw !important;
   }
-  #lock .freeimg{max-width:64vw !important}
+  /* …mais l'écran d'accès conserve exactement la composition réglée sur ordinateur. */
+  .lock-free{max-width:58vw !important}
   .no-mobile{display:none !important}
   body{font-size:16px}
   .hero-in{padding:5.5rem 1.1rem 5.5rem}
-  /* une taille saisie en pixels sur grand écran ne doit pas casser la mise en page ici */
-  .hero-in span[style*="font-size"], .lock-card span[style*="font-size"]{font-size:1em !important}
-  .hero-in [style*="letter-spacing"]{letter-spacing:.08em !important}
+  /* les tailles sont devenues fluides : plus besoin de les écraser, on les laisse respirer */
+  .hero-in [style*="letter-spacing"]{letter-spacing:.1em !important}
   .lock-card .mono{font-size:2.4rem !important}
   .lock-card h1{font-size:clamp(1.7rem,8vw,2.4rem)}
-  .hero-names{font-size:clamp(2.4rem,13vw,3.6rem); line-height:1.06; margin:.1rem 0 .7rem}
-  .hero-in .eyebrow{font-size:.58rem; letter-spacing:.2em; margin-bottom:.6rem}
-  .hero-date{font-size:.95rem; letter-spacing:.1em}
+  .hero-names{font-size:clamp(calc(2.3rem * var(--mt,1)), 13.5vw, 4rem); line-height:1.07; margin:.1rem 0 .7rem}
+  .hero-in .eyebrow{font-size:calc(.7rem * var(--mt,1)); letter-spacing:.18em; margin-bottom:.7rem}
+  .hero-date{font-size:calc(1.15rem * var(--mt,1)); letter-spacing:.1em}
+  .hero-in .ed{line-height:1.5}
+  .lock-card h1{font-size:clamp(calc(1.9rem * var(--mt,1)), 9vw, 2.6rem)}
+  .lock-card .d{font-size:calc(.68rem * var(--mt,1))}
+  .lock-hint{font-size:calc(.82rem * var(--mt,1))}
   .hero-in .ed[style*="letter-spacing"]{font-size:.66rem !important; letter-spacing:.1em !important; line-height:1.6}
   .hero-rule{height:34px; margin-top:1.2rem}
   .scroll-cue{bottom:1.1rem}
@@ -1981,6 +1982,8 @@ function applyTheme(){
   if(t.sepGrad2) r.setProperty('--sep-grad2',t.sepGrad2);
   if(t.sepDot) r.setProperty('--sep-dot',t.sepDot+'px');
   if(t.sepDotC) r.setProperty('--sep-dotc',t.sepDotC);
+  r.setProperty('--mt', t.mobText || 1);
+  r.setProperty('--omBase', t.mobPos===undefined ? .36 : t.mobPos);
 }
 window.__applyTheme = applyTheme;
 
@@ -2515,8 +2518,31 @@ function startVersionWatch(){
 }
 window.__checkVersion=checkVersion;
 
+/* Une taille fluide : identique sur grand écran, réduite mais lisible sur mobile.
+   Le plancher est multiplié par --mt, réglable depuis le panneau Thème. */
+function fluidSize(v){
+  v=+v||16;
+  const mini=Math.max(12,Math.round(v*0.62));
+  return 'clamp(calc('+mini+'px * var(--mt,1)), '+(v/14.4).toFixed(2)+'vw, '+v+'px)';
+}
+window.__fluid=fluidSize;
+
+/* Rend adaptatives les tailles saisies avant cette version. */
+function normalizeSizes(){
+  $$('[style*="font-size"]').forEach(function(el){
+    if(el.closest('#editor')||el.closest('#picker')||el.closest('#toast')) return;
+    const fs=el.style.fontSize;
+    if(!fs || fs.indexOf('var(--mt')>-1) return;
+    let m=/^clamp\(\s*([\d.]+)px\s*,([^,]+),\s*([\d.]+)px\s*\)$/.exec(fs);
+    if(m){ el.style.fontSize='clamp(calc('+m[1]+'px * var(--mt,1)),'+m[2]+', '+m[3]+'px)'; return; }
+    m=/^([\d.]+)px$/.exec(fs);
+    if(m && +m[1]>19) el.style.fontSize=fluidSize(+m[1]);
+  });
+}
+
 /* Convertit les positions posées avant cette version vers le format adaptatif. */
 function normalizePositions(){
+  $$('#lock .freeimg, #lock .shape').forEach(function(el){ el.classList.add('lock-free'); });
   $$('[data-ox],[data-oy]').forEach(function(el){
     const x=parseFloat(el.dataset.ox||0)||0, y=parseFloat(el.dataset.oy||0)||0;
     if(!x && !y) return;
@@ -2538,7 +2564,7 @@ function normalizePositions(){
 
 /* ---------------------------- Démarrage ---------------------------- */
 function mount(){
-  [paintIcons,applyTheme,renderBindings,applyFavicon,normalizePositions,initReveal,initSpy,initCountdown,guestFields,markOrder,applyInviteCode,watchEdges,onScroll]
+  [paintIcons,applyTheme,renderBindings,applyFavicon,normalizeSizes,normalizePositions,initReveal,initSpy,initCountdown,guestFields,markOrder,applyInviteCode,watchEdges,onScroll]
     .forEach(function(fn){ try{ fn(); }catch(e){ if(window.console) console.warn('mount:',e); } });
 }
 window.__mount = mount;
@@ -3352,7 +3378,7 @@ function anchorFree(el,host){
   el.style.left='10%';
   el.style.top=Math.max(10,Math.round(innerHeight/2-hr.top))+'px';
   /* sur l'écran d'accès, l'élément doit passer au-dessus du voile sombre */
-  if(host.id==='lock') el.style.zIndex='3';
+  if(host.id==='lock'){ el.style.zIndex='3'; el.classList.add('lock-free'); }
   host.appendChild(el);
 }
 async function addFreeImage(){
@@ -3438,6 +3464,7 @@ function uiImage(){
     h+=ctlRange('f-y','Position verticale',0,Math.max(2000,document.body.scrollHeight),Math.round(freeTop(ph))||200,'px',10);
     h+=ctlRange('f-z','Superposition',-5,60,px(ph.style.zIndex,2),'');
     h+='<p class="e-help" style="margin:-.8rem 0 1rem">En dessous de 0, l\'image passe <b>derrière les textes</b> de la section, tout en restant au-dessus de son fond.</p>';
+    h+=uiPack(ph)+uiMobile(ph);
     h+=ctlRange('f-r','Rotation',-30,30,px((ph.style.transform||'').replace(/[^\d.\-]/g,''),0),'°');
   }else if(!abs){
     const box=ph.getBoundingClientRect();
@@ -3525,6 +3552,7 @@ function bindImage(){
         img.style.filter=b.getAttribute('data-f'); };
     });
   }
+  if(ph.classList.contains('freeimg')){ bindPack(ph); bindMobile(ph); }
   const del=$('#img-remove');
   if(del) del.onclick=function(){
     snapshot();
@@ -3693,12 +3721,7 @@ function bindText(){
     toast(n? n+' habillage(s) inutile(s) retiré(s)' : 'Rien à nettoyer ici','ok');
   };
 }
-/* Une taille fluide : identique sur grand écran, réduite proportionnellement sur mobile. */
-function fluidSize(v){
-  v=+v||16;
-  const mini=Math.max(11,Math.round(v*0.5));
-  return 'clamp('+mini+'px, '+(v/14.4).toFixed(2)+'vw, '+v+'px)';
-}
+function fluidSize(v){ return window.__fluid(v); }
 function wrapSelection(styler){
   if(!restoreSel()) return;
   const s=window.getSelection(); if(!s.rangeCount || s.isCollapsed) return;
@@ -4099,6 +4122,7 @@ function uiShape(){
     h+=ctlRange('sh-y','Position verticale',0,Math.max(2000,document.body.scrollHeight),Math.round(freeTop(el))||200,'px',10);
     h+=ctlRange('sh-z','Superposition',-5,60,px(el.style.zIndex,2),'');
     h+='<p class="e-help" style="margin:-.8rem 0 1rem">En dessous de 0, la forme passe <b>derrière les textes</b> ; au-dessus de 40, elle passe devant tout.</p>';
+    h+=uiPack(el)+uiMobile(el);
   }else{
     h+=uiOffset(el);
   }
@@ -4153,6 +4177,7 @@ function bindShape(){
   bindRange('sh-y',function(v){ setFreeTop(el,+v); placeHandle(); });
   bindRange('sh-z',function(v){ el.style.zIndex=v; });
   if(!el.classList.contains('free')) bindOffset(el);
+  else { bindPack(el); bindMobile(el); }
   bindDelete(el);
 }
 
@@ -4341,6 +4366,10 @@ function uiTheme(){
       FONTS.map(function(f){ return '<option'+(f===t.fontBody?' selected':'')+'>'+f+'</option>'; }).join('')+'</select></div>'+
     '<div class="e-group"><span class="e-lab">Police manuscrite</span><select id="th-fs">'+
       FONTS.map(function(f){ return '<option'+(f===t.fontScript?' selected':'')+'>'+f+'</option>'; }).join('')+'</select></div>'+
+    '<div class="e-group"><span class="e-lab">Affichage mobile</span>'+
+    '<p class="e-help" style="margin:0 0 .5rem">Deux réglages qui n\'agissent que sur les petits écrans.</p></div>'+
+    ctlRange('th-mt','Lisibilité des textes',80,190,Math.round((t.mobText||1)*100),'%')+
+    ctlRange('th-mp','Ampleur des décalages',0,100,Math.round((t.mobPos===undefined?.36:t.mobPos)*100),'%')+
     ctlRange('th-sw','Largeur des séparateurs',16,140,t.sepW||64,'px')+
     ctlRange('th-sh','Épaisseur des séparateurs',1,14,t.sepH||3,'px');
 }
@@ -4353,6 +4382,8 @@ function bindTheme(){
   $('#th-fd').onchange=function(){ t.fontDisplay=this.value; window.__applyTheme(); saveCFG(); };
   $('#th-fb').onchange=function(){ t.fontBody=this.value; window.__applyTheme(); saveCFG(); };
   $('#th-fs').onchange=function(){ t.fontScript=this.value; window.__applyTheme(); saveCFG(); };
+  bindRange('th-mt',function(v){ t.mobText=+v/100; window.__applyTheme(); saveCFG(); });
+  bindRange('th-mp',function(v){ t.mobPos=+v/100; window.__applyTheme(); saveCFG(); });
   bindRange('th-sw',function(v){ t.sepW=+v; window.__applyTheme(); saveCFG(); });
   bindRange('th-sh',function(v){ t.sepH=+v; window.__applyTheme(); saveCFG(); });
 }
