@@ -537,6 +537,8 @@ body.editing .shape{outline:1px dashed rgba(139,90,125,.45); outline-offset:2px;
   .detail-body{padding:1.4rem}
   .cal-menu{min-width:min(86vw,260px)}
   .lock-card{width:min(100% - 2rem, 460px)}
+  /* les barres du navigateur amputent la hauteur : on se cale sur la zone visible */
+  #lock{bottom:auto; height:100svh}
   .btn{padding:.9rem 1.3rem; font-size:.74rem}
   footer{padding:3.2rem 0 2.4rem}
 }
@@ -810,19 +812,19 @@ body.dragging, body.dragging *{user-select:none !important; cursor:grabbing !imp
   --mp-k:.68;
   position:fixed; right:20px; bottom:20px; z-index:151;
   width:calc(390px * var(--mp-k) + 20px);
-  height:calc(844px * var(--mp-k) + 46px);
+  height:calc(740px * var(--mp-k) + 46px);
   background:#2b241c; border-radius:16px; box-shadow:0 30px 70px rgba(0,0,0,.5);
   display:none; flex-direction:column; overflow:hidden; border:1px solid #453c31;
 }
 @media(min-height:1000px){ #mob-preview{--mp-k:.82} }
-.mp-scale{width:390px; height:844px; transform:scale(var(--mp-k)); transform-origin:top left;
+.mp-scale{width:390px; height:740px; transform:scale(var(--mp-k)); transform-origin:top left;
   margin-left:10px; border-radius:12px; overflow:hidden; background:#fff}
 #mob-preview.open{display:flex}
 .mp-head{display:flex; align-items:center; justify-content:space-between; padding:.55rem .8rem;
   color:var(--gold); font-size:.66rem; text-transform:uppercase; letter-spacing:.12em; font-family:'Montserrat',sans-serif}
 .mp-head button{color:#e9e1d4; font-size:.6rem; padding:.22rem .5rem; border-radius:99px; letter-spacing:.06em}
 .mp-head button.on{background:var(--gold); color:#2b241c}
-#mob-frame{width:390px; height:844px; border:0; background:#fff; display:block}
+#mob-frame{width:390px; height:740px; border:0; background:#fff; display:block}
 @media(max-width:900px){ #mob-preview{display:none !important} }
 
 #picker{
@@ -1440,7 +1442,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     </form>
     <p class="lock-hint ed">Indice : <b data-bind="pwHint">La réponse que Magalie doit donner (3 lettres)</b></p>
   </div>
-<span class="ph freeimg lock-free" data-anc="center" data-ancx="center" data-fy="87" data-fx="660" style="position: absolute; width: 128px; z-index: 15; display: block; left: calc(50% - 60px); right: auto; top: calc(50% - 363px); bottom: auto; border-radius: 200px; background: transparent;"><img alt="" style="width:100%;height:auto" src="photos/img-1tzl5kxas26g.png"></span></div>
+<span class="ph freeimg lock-free" data-anc="center" data-ancx="center" data-fy="87" data-fx="660" data-uid="ulogo" data-m='{"y":3,"w":98}' style="position: absolute; width: 128px; z-index: 15; display: block; left: calc(50% - 60px); right: auto; top: calc(50% - 363px); bottom: auto; border-radius: 200px; background: transparent;"><img alt="" style="width:100%;height:auto" src="photos/img-1tzl5kxas26g.png"></span></div>
 
 <div class="progress" id="progress" style=""></div>
 
@@ -2162,7 +2164,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
 </div>
 
 <div id="mob-preview" class="">
-  <div class="mp-head"><span>Aperçu — 390 px</span>
+  <div class="mp-head"><span>Aperçu — 390 × 740 (zone visible)</span>
     <span style="display:flex;gap:.3rem;align-items:center">
       <button id="mp-site" class="on">Site</button>
       <button id="mp-lock">Écran d'accès</button>
