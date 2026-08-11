@@ -804,17 +804,25 @@ body.editing .only-edit{display:inline-flex !important}
 body.dragging, body.dragging *{user-select:none !important; cursor:grabbing !important}
 
 /* Sélecteur d'élément sous le curseur */
+/* Aperçu à la vraie taille d'un téléphone (390 × 844), réduit à l'échelle
+   pour tenir à l'écran : le rendu reste rigoureusement fidèle. */
 #mob-preview{
-  position:fixed; right:20px; bottom:20px; z-index:151; width:410px; height:min(74vh,780px);
+  --mp-k:.68;
+  position:fixed; right:20px; bottom:20px; z-index:151;
+  width:calc(390px * var(--mp-k) + 20px);
+  height:calc(844px * var(--mp-k) + 46px);
   background:#2b241c; border-radius:16px; box-shadow:0 30px 70px rgba(0,0,0,.5);
   display:none; flex-direction:column; overflow:hidden; border:1px solid #453c31;
 }
+@media(min-height:1000px){ #mob-preview{--mp-k:.82} }
+.mp-scale{width:390px; height:844px; transform:scale(var(--mp-k)); transform-origin:top left;
+  margin-left:10px; border-radius:12px; overflow:hidden; background:#fff}
 #mob-preview.open{display:flex}
 .mp-head{display:flex; align-items:center; justify-content:space-between; padding:.55rem .8rem;
   color:var(--gold); font-size:.66rem; text-transform:uppercase; letter-spacing:.12em; font-family:'Montserrat',sans-serif}
 .mp-head button{color:#e9e1d4; font-size:.6rem; padding:.22rem .5rem; border-radius:99px; letter-spacing:.06em}
 .mp-head button.on{background:var(--gold); color:#2b241c}
-#mob-frame{flex:1; width:390px; margin:0 auto 10px; border:0; border-radius:10px; background:#fff}
+#mob-frame{width:390px; height:844px; border:0; background:#fff; display:block}
 @media(max-width:900px){ #mob-preview{display:none !important} }
 
 #picker{
@@ -1432,7 +1440,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     </form>
     <p class="lock-hint ed">Indice : <b data-bind="pwHint">La réponse que Magalie doit donner (3 lettres)</b></p>
   </div>
-<span class="ph freeimg lock-free" data-anc="center" data-fy="26" style="position: absolute; width: 128px; z-index: 15; display: block; left: calc(50% - 60px); right: auto; top: 87px; bottom: auto; border-radius: 200px; background: transparent;"><img alt="" style="width:100%;height:auto" src="photos/img-1tzl5kxas26g.png"></span></div>
+<span class="ph freeimg lock-free" data-anc="center" data-ancx="center" data-fy="87" data-fx="660" style="position: absolute; width: 128px; z-index: 15; display: block; left: calc(50% - 60px); right: auto; top: calc(50% - 363px); bottom: auto; border-radius: 200px; background: transparent;"><img alt="" style="width:100%;height:auto" src="photos/img-1tzl5kxas26g.png"></span></div>
 
 <div class="progress" id="progress" style=""></div>
 
@@ -2160,7 +2168,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
       <button id="mp-lock">Écran d'accès</button>
       <button data-tool="preview" title="Fermer">✕</button>
     </span></div>
-  <iframe id="mob-frame" title="Aperçu mobile"></iframe>
+  <div class="mp-scale"><iframe id="mob-frame" title="Aperçu mobile"></iframe></div>
 </div>
 <div id="picker" class=""></div>
 <button id="drag-handle" title="Glissez pour déplacer cet élément" class=""><span class="ic" data-icon="move"></span></button>
@@ -2341,6 +2349,7 @@ function unlock(){
   const l = $('#lock'); if(l) l.classList.add('gone');
 }
 function initLock(){
+  if(document.documentElement.hasAttribute('data-force-lock')) return;
   const editing = new URLSearchParams(location.search).get('edit')==='1';
   if(editing || SS.get('ms_access')===CFG.pwHash){ unlock(); return; }
   const inp = $('#lock-input');
@@ -2928,8 +2937,11 @@ function normalizePositions(){
     const p=el.offsetParent;
     const h=(p? p.getBoundingClientRect().height : innerHeight)||1;
     const px=Math.round(el.getBoundingClientRect().top - (p? p.getBoundingClientRect().top : 0));
+    /* dans une section au contenu centré, l'accroche centrale est la bonne :
+       l'élément suit le bloc au lieu de dériver avec la hauteur de fenêtre */
+    const centre = el.closest('#lock') || el.closest('.hero');
     const ratio=px/h;
-    const a = ratio<0.28 ? 'top' : (ratio>0.72 ? 'bottom' : 'center');
+    const a = centre ? 'center' : (ratio<0.28 ? 'top' : (ratio>0.72 ? 'bottom' : 'center'));
     el.dataset.anc=a; el.dataset.fy=px;
     el.style.removeProperty('--fy');
     if(a==='center'){ el.style.bottom='auto'; el.style.top='calc(50% + '+Math.round(px-h/2)+'px)'; }
@@ -3481,6 +3493,9 @@ function previewDoc(){
   if(previewMode==='site'){
     html=html.replace('<body class="locked"','<body class=""')
              .replace('<div id="lock"','<div id="lock" class="gone"');
+  }else{
+    /* l'aperçu partage la session du site : sans ce marqueur il s'ouvrirait déverrouillé */
+    html=html.replace('</head>','<script>document.documentElement.setAttribute("data-force-lock","1");<\/script></head>');
   }
   return html;
 }
