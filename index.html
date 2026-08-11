@@ -503,9 +503,15 @@ body.editing .shape{outline:1px dashed rgba(139,90,125,.45); outline-offset:2px;
   /* Les positions étant en pourcentage, elles suivent naturellement l'écran.
      On se contente d'empêcher un débordement ; le reste s'ajuste dans la vue mobile. */
   .shape.free, .freeimg{max-width:calc(100vw - 20px)}
-  /* Les décalages de l'accueil suivent le réglage « Ampleur des décalages » du thème,
-     puis chaque élément peut être affiné dans ses réglages mobile. */
-  .hero .shape.free{left:50% !important; transform:translateX(-50%) !important; max-width:94vw !important}
+  /* Sur l'accueil, les décalages réglés pour un grand écran sont neutralisés :
+     les textes restent centrés. Chaque élément reste affinable dans ses réglages mobile. */
+  .hero-in [data-ox], .hero-in [data-oy]{--om:0}
+  /* Sur mobile, le décor de l'accueil se centre exactement comme le bloc de titre
+     qu'il encadre : les deux restent solidaires quelle que soit la hauteur d'écran. */
+  .hero .shape.free, .hero .freeimg{
+    left:50% !important; top:50% !important; bottom:auto !important;
+    transform:translate(-50%,-50%) !important; max-width:94vw !important;
+  }
   .no-mobile{display:none !important}
   body{font-size:16px}
   .hero-in{padding:5.5rem 1.1rem 5.5rem}
@@ -513,7 +519,9 @@ body.editing .shape{outline:1px dashed rgba(139,90,125,.45); outline-offset:2px;
   .hero-in [style*="letter-spacing"]{letter-spacing:.1em !important}
   .lock-card .mono{font-size:2.4rem !important}
   .lock-card h1{font-size:clamp(1.7rem,8vw,2.4rem)}
-  .hero-names{font-size:clamp(calc(2.3rem * var(--mt,1)), 13.5vw, 4rem); line-height:1.07; margin:.1rem 0 .7rem}
+  .hero-names{font-size:clamp(calc(1.9rem * var(--mt,1)), 11vw, 3.4rem); line-height:1.08; margin:.1rem 0 .5rem}
+  .hero-date{white-space:normal; word-spacing:normal}
+  .hero-in{overflow:hidden}
   .hero-in .eyebrow{font-size:calc(.7rem * var(--mt,1)); letter-spacing:.18em; margin-bottom:.7rem}
   .hero-date{font-size:calc(1.15rem * var(--mt,1)); letter-spacing:.1em}
   .hero-in .ed{line-height:1.5}
@@ -537,8 +545,25 @@ body.editing .shape{outline:1px dashed rgba(139,90,125,.45); outline-offset:2px;
   .detail-body{padding:1.4rem}
   .cal-menu{min-width:min(86vw,260px)}
   .lock-card{width:min(100% - 2rem, 460px)}
-  /* les barres du navigateur amputent la hauteur : on se cale sur la zone visible */
-  #lock{bottom:auto; height:100svh}
+  /* Sur téléphone, l'écran d'accès devient une colonne : les éléments libres
+     se rangent au-dessus du bloc au lieu de flotter par-dessus. Aucun
+     chevauchement possible, quelle que soit la hauteur disponible. */
+  /* Centrage par marges automatiques : le contenu reste centré quand il y a de la place,
+     et rien n'est jamais rogné en haut quand l'écran est court. */
+  body #lock{
+    bottom:auto; height:100svh; display:flex; flex-direction:column;
+    justify-content:flex-start; align-items:center; padding:14px 0; overflow-y:auto;
+  }
+  body #lock .lock-free, body #lock .freeimg, body #lock .shape{
+    position:relative !important; left:auto !important; right:auto !important;
+    top:auto !important; bottom:auto !important; transform:none !important;
+    margin:auto auto 10px !important; order:-1; flex:none;
+    width:min(104px, 17vh) !important; height:auto !important; max-width:104px !important;
+  }
+  body #lock .bgimg, body #lock .veil{position:absolute !important; margin:0 !important}
+  body #lock .lock-card{order:1; animation:none; margin-bottom:auto}
+  .lock-form{margin-top:1.6rem}
+  .lock-hint{margin-top:1rem}
   .btn{padding:.9rem 1.3rem; font-size:.74rem}
   footer{padding:3.2rem 0 2.4rem}
 }
@@ -809,22 +834,24 @@ body.dragging, body.dragging *{user-select:none !important; cursor:grabbing !imp
 /* Aperçu à la vraie taille d'un téléphone (390 × 844), réduit à l'échelle
    pour tenir à l'écran : le rendu reste rigoureusement fidèle. */
 #mob-preview{
-  --mp-k:.68;
+  --mp-k:.68; --mp-w:390px; --mp-h:740px;
   position:fixed; right:20px; bottom:20px; z-index:151;
-  width:calc(390px * var(--mp-k) + 20px);
-  height:calc(740px * var(--mp-k) + 46px);
+  width:calc(var(--mp-w) * var(--mp-k) + 20px);
+  height:calc(var(--mp-h) * var(--mp-k) + 46px);
   background:#2b241c; border-radius:16px; box-shadow:0 30px 70px rgba(0,0,0,.5);
   display:none; flex-direction:column; overflow:hidden; border:1px solid #453c31;
 }
 @media(min-height:1000px){ #mob-preview{--mp-k:.82} }
-.mp-scale{width:390px; height:740px; transform:scale(var(--mp-k)); transform-origin:top left;
+.mp-scale{width:var(--mp-w); height:var(--mp-h); transform:scale(var(--mp-k)); transform-origin:top left;
   margin-left:10px; border-radius:12px; overflow:hidden; background:#fff}
 #mob-preview.open{display:flex}
 .mp-head{display:flex; align-items:center; justify-content:space-between; padding:.55rem .8rem;
   color:var(--gold); font-size:.66rem; text-transform:uppercase; letter-spacing:.12em; font-family:'Montserrat',sans-serif}
+.mp-head select{background:#3c332a; color:#e9e1d4; border:1px solid #4d4237; border-radius:6px;
+  font-size:.56rem; padding:.18rem .25rem; font-family:'Montserrat',sans-serif; max-width:135px}
 .mp-head button{color:#e9e1d4; font-size:.6rem; padding:.22rem .5rem; border-radius:99px; letter-spacing:.06em}
 .mp-head button.on{background:var(--gold); color:#2b241c}
-#mob-frame{width:390px; height:740px; border:0; background:#fff; display:block}
+#mob-frame{width:var(--mp-w); height:var(--mp-h); border:0; background:#fff; display:block}
 @media(max-width:900px){ #mob-preview{display:none !important} }
 
 #picker{
@@ -1488,7 +1515,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     <p class="edit-holder" style="margin-top:1.4rem"><button class="btn ghost only-edit" data-bgphoto="#hero-img" style="background:rgba(255,255,255,.9)">Changer la photo de fond</button></p>
   </div>
   <a href="#histoire" class="scroll-cue" aria-label="Découvrir"><span class="ic" data-icon="chevron-down" style="font-size: clamp(calc(19px * var(--mt,1)), 2.08vw, 30px);"></span></a>
-<div class="shape free" data-ancx="center" data-fx="304" data-block="" data-anc="center" data-fy="392" style="position: absolute; width: 818px; height: 297px; z-index: 1; left: calc(50% - 416px); right: auto; top: calc(50% + 3px); bottom: auto; background-color: rgba(242, 234, 224, 0.68); border-width: 3px; border-style: solid; border-color: rgb(209, 179, 97); box-shadow: var(--sh-1);" data-m="{&quot;y&quot;:28,&quot;h&quot;:228}" data-uid="udk2718"></div></header>
+<div class="shape free" data-ancx="center" data-fx="304" data-uid="ucadre" data-m='{"h":320,"w":344}' data-block="" data-anc="center" data-fy="392" style="position: absolute; width: 818px; height: 297px; z-index: 1; left: calc(50% - 416px); right: auto; top: calc(50% + 3px); bottom: auto; background-color: rgba(242, 234, 224, 0.68); border-width: 3px; border-style: solid; border-color: rgb(209, 179, 97); box-shadow: var(--sh-1);" data-m="{&quot;y&quot;:28,&quot;h&quot;:228}" data-uid="udk2718"></div></header>
 
 <!-- ============================ HISTOIRE ============================ -->
 <section class="section" id="histoire" data-sec="">
@@ -2164,7 +2191,14 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
 </div>
 
 <div id="mob-preview" class="">
-  <div class="mp-head"><span>Aperçu — 390 × 740 (zone visible)</span>
+  <div class="mp-head"><span>Aperçu</span>
+    <select id="mp-device" title="Appareil">
+      <option value="375x553">iPhone SE — 375 × 553</option>
+      <option value="390x740" selected>iPhone 13 — 390 × 740</option>
+      <option value="430x800">iPhone Max — 430 × 800</option>
+      <option value="360x640">Android — 360 × 640</option>
+      <option value="768x1000">Tablette — 768 × 1000</option>
+    </select>
     <span style="display:flex;gap:.3rem;align-items:center">
       <button id="mp-site" class="on">Site</button>
       <button id="mp-lock">Écran d'accès</button>
@@ -2349,6 +2383,9 @@ window.__freedNotice=function(){
 function unlock(){
   document.body.classList.remove('locked');
   const l = $('#lock'); if(l) l.classList.add('gone');
+  /* le défilement mémorisé pendant le verrouillage ferait démarrer la visite en cours de page */
+  try{ window.scrollTo(0,0); }catch(e){}
+  setTimeout(function(){ try{ window.scrollTo(0,0); }catch(e){} },60);
 }
 function initLock(){
   if(document.documentElement.hasAttribute('data-force-lock')) return;
@@ -2781,13 +2818,16 @@ function applyFavicon(){
   link.setAttribute('href', src);
   try{
     const img=new Image();
+    img.crossOrigin='anonymous';
     img.onload=function(){
-      const c=document.createElement('canvas'); c.width=c.height=180;
-      const x=c.getContext('2d');
-      x.fillStyle=(CFG.theme||{}).ink||'#3b3227';
-      x.fillRect(0,0,180,180);
-      x.drawImage(img,0,0,180,180);
-      const a=$('#favicon-apple'); if(a) a.setAttribute('href', c.toDataURL('image/png'));
+      try{
+        const c=document.createElement('canvas'); c.width=c.height=180;
+        const x=c.getContext('2d');
+        x.fillStyle=(CFG.theme||{}).ink||'#3b3227';
+        x.fillRect(0,0,180,180);
+        x.drawImage(img,0,0,180,180);
+        const a=$('#favicon-apple'); if(a) a.setAttribute('href', c.toDataURL('image/png'));
+      }catch(e){ const a=$('#favicon-apple'); if(a) a.setAttribute('href', src); }
     };
     img.src=src;
   }catch(e){}
@@ -2850,10 +2890,12 @@ window.__checkVersion=checkVersion;
 
 /* Une taille fluide : identique sur grand écran, réduite mais lisible sur mobile.
    Le plancher est multiplié par --mt, réglable depuis le panneau Thème. */
+/* Le plancher mobile est plafonné : sans cela, un grand titre réglé sur ordinateur
+   resterait trop gros sur un téléphone et déborderait. */
+function floorFor(v){ return Math.min(30, Math.max(12, Math.round(v*0.62))); }
 function fluidSize(v){
   v=+v||16;
-  const mini=Math.max(12,Math.round(v*0.62));
-  return 'clamp(calc('+mini+'px * var(--mt,1)), '+(v/14.4).toFixed(2)+'vw, '+v+'px)';
+  return 'clamp(calc('+floorFor(v)+'px * var(--mt,1)), '+(v/14.4).toFixed(2)+'vw, '+v+'px)';
 }
 window.__fluid=fluidSize;
 
@@ -2862,9 +2904,14 @@ function normalizeSizes(){
   $$('[style*="font-size"]').forEach(function(el){
     if(el.closest('#editor')||el.closest('#picker')||el.closest('#toast')) return;
     const fs=el.style.fontSize;
-    if(!fs || fs.indexOf('var(--mt')>-1) return;
-    let m=/^clamp\(\s*([\d.]+)px\s*,([^,]+),\s*([\d.]+)px\s*\)$/.exec(fs);
-    if(m){ el.style.fontSize='clamp(calc('+m[1]+'px * var(--mt,1)),'+m[2]+', '+m[3]+'px)'; return; }
+    if(!fs) return;
+    let m=/^clamp\(\s*(?:calc\(\s*)?([\d.]+)px(?:\s*\*\s*var\(\s*--mt\s*,\s*1\s*\)\s*\))?\s*,([^,]+),\s*([\d.]+)px\s*\)$/.exec(fs);
+    if(m){
+      const plancher=Math.min(30, Math.max(12, Math.round(parseFloat(m[1]))));
+      const neuf='clamp(calc('+plancher+'px * var(--mt,1)),'+m[2]+', '+m[3]+'px)';
+      if(fs!==neuf) el.style.fontSize=neuf;
+      return;
+    }
     m=/^([\d.]+)px$/.exec(fs);
     if(m && +m[1]>19) el.style.fontSize=fluidSize(+m[1]);
   });
@@ -2899,7 +2946,7 @@ function buildMobileCSS(){
     if(m.w) d+='width:'+m.w+'px !important;max-width:none !important;';
     if(m.h) d+='height:'+m.h+'px !important;';
     if(m.fs) d+='font-size:'+m.fs+'px !important;';
-    if(m.x!==undefined || m.y!==undefined) d+='transform:none !important;';
+    if(m.x!==undefined) d+='transform:none !important;';
     else if(m.ox!==undefined || m.oy!==undefined)
       d+='transform:translate('+(m.ox||0)+'px,'+(m.oy||0)+'px) !important;';
     if(d) css+='@media(max-width:760px){[data-uid="'+id+'"]{'+d+'}}\n';
@@ -3506,6 +3553,15 @@ function refreshPreview(){
   clearTimeout(previewTimer);
   previewTimer=setTimeout(function(){ const fr=$('#mob-frame'); if(fr) fr.srcdoc=previewDoc(); },400);
 }
+on(document,'change',function(e){
+  if(!e.target.closest('#mp-device')) return;
+  const v=e.target.value.split('x');
+  const box=$('#mob-preview');
+  box.style.setProperty('--mp-w', v[0]+'px');
+  box.style.setProperty('--mp-h', v[1]+'px');
+  box.style.setProperty('--mp-k', Math.max(.4, Math.min(.85, Math.min(360/(+v[0]), (innerHeight-170)/(+v[1])))).toFixed(2));
+  const fr=$('#mob-frame'); if(fr) fr.srcdoc=previewDoc();
+});
 on(document,'click',function(e){
   const a=e.target.closest('#mp-site'), b=e.target.closest('#mp-lock');
   if(!a && !b) return;
