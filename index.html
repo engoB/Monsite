@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" data-processed-962537473="true" style="--bg: #faf6f0; --bg2: #f2eae0; --ink: #3b3227; --ink2: #6b5d4f; --gold: #c39a55; --terra: #a8533e; --plum: #8b5a7d; --teal: #2a7d7d; --f-display: &quot;Cormorant Garamond&quot;,serif; --f-body: &quot;Alegreya Sans&quot;,sans-serif; --f-script: &quot;Parisienne&quot;,cursive; --sep-w: 159px; --sep-h: 10px; --sep-grad: linear-gradient(90deg,rgba(26,54,39,1),rgba(144,146,99,1),rgba(207,105,56,1),rgba(213,188,147,1)); --sep-grad2: linear-gradient(90deg,rgba(213,188,147,1),rgba(207,105,56,1),rgba(144,146,99,1),rgba(26,54,39,1)); --sep-dot: 5px; --bar-h: 52px;" data-processed-1765985744="true"><head>
+<html lang="fr" style="--bg: #faf6f0; --bg2: #f2eae0; --ink: #3b3227; --ink2: #6b5d4f; --gold: #c39a55; --terra: #a8533e; --plum: #8b5a7d; --teal: #2a7d7d; --f-display: &quot;Cormorant Garamond&quot;,serif; --f-body: &quot;Alegreya Sans&quot;,sans-serif; --f-script: &quot;Parisienne&quot;,cursive; --sep-w: 159px; --sep-h: 10px; --sep-grad: linear-gradient(90deg,rgba(26,54,39,1),rgba(144,146,99,1),rgba(207,105,56,1),rgba(213,188,147,1)); --sep-grad2: linear-gradient(90deg,rgba(213,188,147,1),rgba(207,105,56,1),rgba(144,146,99,1),rgba(26,54,39,1)); --sep-dot: 5px; --bar-h: 52px;"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
@@ -456,6 +456,20 @@ body.editing .shape{outline:1px dashed rgba(139,90,125,.45); outline-offset:2px;
 
 /* ============================ MOBILE ============================ */
 @media(max-width:760px){
+  /* les décalages et positions libres, réglés sur grand écran, se réduisent d'autant */
+  :root{--om:.36}
+  /* Un élément posé librement se recentre plutôt que de déborder du petit écran. */
+  .shape.free, .freeimg{max-width:92vw !important; left:50% !important; transform:translateX(-50%) !important}
+  /* Sur l'accueil et l'écran d'accès, tout se recentre : les décalages pensés
+     pour un grand écran n'ont plus de sens sur 390 px de large. */
+  .hero-in [data-ox], .hero-in [data-oy], #lock [data-ox], #lock [data-oy]{--om:0}
+  .hero .shape.free, .hero .freeimg,
+  #lock .shape.free, #lock .freeimg{
+    top:50% !important; left:50% !important; transform:translate(-50%,-50%) !important;
+    max-width:92vw !important;
+  }
+  #lock .freeimg{max-width:64vw !important}
+  .no-mobile{display:none !important}
   body{font-size:16px}
   .hero-in{padding:5.5rem 1.1rem 5.5rem}
   /* une taille saisie en pixels sur grand écran ne doit pas casser la mise en page ici */
@@ -675,6 +689,9 @@ body.no-guides .shape{outline:none !important}
 body.no-guides .is-sel{outline:none !important}
 body.no-guides .blk-tools, body.no-guides .sec-tools, body.no-guides .sec-grip,
 body.no-guides #drag-handle, body.no-guides .only-edit{display:none !important}
+/* Une commande réservée à l'édition ne doit jamais déplacer le contenu réel. */
+body.editing .hero-in .only-edit{position:absolute; left:50%; bottom:5%; transform:translateX(-50%); z-index:6; margin:0}
+body.editing .hero-in > p.edit-holder{height:0 !important; overflow:visible}
 body.no-guides .ph::after{display:none !important}
 body.no-guides [data-sec]:hover{outline-color:transparent !important}
 body.editing .ph{cursor:pointer}
@@ -1148,7 +1165,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     <p class="hero-date ed" data-ox="5" data-oy="197" style="transform: translate(5px, 197px);"><span style="font-size: 54px; font-weight: bold;"><span data-w="1" style="font-size: clamp(41px, 5.63vw, 81px); color: rgb(127, 86, 83);">31</span> <span style="color: rgb(106, 165, 150);">juillet</span> <span data-w="1" style="font-size: clamp(39px, 5.35vw, 77px); color: rgb(80, 39, 41);">2027</span></span></p>
     <p class="ed" style="font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.85; margin-top: 0.8rem; transform: translate(1px, 192px);" data-ox="1" data-oy="192"><span style="color: rgb(128, 47, 38); font-style: italic; font-weight: bold;">Château Balac · Saint-Laurent-Médoc</span></p>
     <div class="hero-rule"></div>
-    <p style="margin-top:1.4rem"><button class="btn ghost only-edit" data-bgphoto="#hero-img" style="background:rgba(255,255,255,.9)">Changer la photo de fond</button></p>
+    <p class="edit-holder" style="margin-top:1.4rem"><button class="btn ghost only-edit" data-bgphoto="#hero-img" style="background:rgba(255,255,255,.9)">Changer la photo de fond</button></p>
   </div>
   <a href="#histoire" class="scroll-cue" aria-label="Découvrir"><span class="ic" data-icon="chevron-down" style="font-size:30px"></span></a>
 <div class="shape free" data-block="" style="position: absolute; width: 818px; height: 297px; z-index: 1; left: 20.99%; top: 393px; background-color: rgba(242, 234, 224, 0.68); border-width: 3px; border-style: solid; border-color: rgb(209, 179, 97); box-shadow: var(--sh-1);"></div></header>
@@ -2479,7 +2496,7 @@ async function checkVersion(){
     const txt=await r.text();
     const m=/"build"\s*:\s*"([^"]*)"/.exec(txt);
     const remote=m? m[1]:'';
-    if(!remote || remote===CFG.build) return;
+    if(!remote || remote===CFG.build){ tidyURL(); return; }
     let n=0;
     try{ n=parseInt(sessionStorage.getItem('ms_try_'+remote)||'0',10)||0; }catch(e){}
     if(n<2){
@@ -2491,22 +2508,42 @@ async function checkVersion(){
   }catch(e){}
 }
 function startVersionWatch(){
-  setTimeout(checkVersion,1200);
+  checkVersion();
   setInterval(checkVersion,60000);
   document.addEventListener('visibilitychange',function(){ if(!document.hidden) checkVersion(); });
   window.addEventListener('focus',checkVersion);
 }
 window.__checkVersion=checkVersion;
 
+/* Convertit les positions posées avant cette version vers le format adaptatif. */
+function normalizePositions(){
+  $$('[data-ox],[data-oy]').forEach(function(el){
+    const x=parseFloat(el.dataset.ox||0)||0, y=parseFloat(el.dataset.oy||0)||0;
+    if(!x && !y) return;
+    if((el.style.transform||'').indexOf('var(--ox')>-1) return;
+    const rot=el.dataset.rot? ' rotate('+el.dataset.rot+'deg)':'';
+    el.style.setProperty('--ox', x+'px');
+    el.style.setProperty('--oy', y+'px');
+    el.style.transform='translate(calc(var(--ox) * var(--om,1)), calc(var(--oy) * var(--om,1)))'+rot;
+  });
+  $$('.freeimg, .shape.free').forEach(function(el){
+    if((el.style.top||'').indexOf('var(--fy')>-1) return;
+    const t=parseFloat(el.style.top);
+    if(isNaN(t)) return;
+    el.dataset.fy=t;
+    el.style.setProperty('--fy', t+'px');
+    el.style.top='calc(var(--fy) * var(--om,1))';
+  });
+}
+
 /* ---------------------------- Démarrage ---------------------------- */
 function mount(){
-  [paintIcons,applyTheme,renderBindings,applyFavicon,initReveal,initSpy,initCountdown,guestFields,markOrder,applyInviteCode,watchEdges,onScroll]
+  [paintIcons,applyTheme,renderBindings,applyFavicon,normalizePositions,initReveal,initSpy,initCountdown,guestFields,markOrder,applyInviteCode,watchEdges,onScroll]
     .forEach(function(fn){ try{ fn(); }catch(e){ if(window.console) console.warn('mount:',e); } });
 }
 window.__mount = mount;
 mount();
 initLock();
-tidyURL();
 startVersionWatch();
 })();
 </script>
@@ -2732,10 +2769,24 @@ on(window,'scroll',placeHandle,{passive:true});
 on(window,'resize',placeHandle);
 
 function offsetOf(el){ return {x:parseFloat(el.dataset.ox||0)||0, y:parseFloat(el.dataset.oy||0)||0}; }
+/* Décalages exprimés en variables : ils se réduisent d'eux-mêmes sur petit écran. */
 function setOffset(el,x,y){
   el.dataset.ox=x; el.dataset.oy=y;
   const rot=el.dataset.rot? ' rotate('+el.dataset.rot+'deg)':'';
-  el.style.transform=(x||y||rot)? ('translate('+x+'px,'+y+'px)'+rot) : '';
+  if(!x && !y && !rot){ el.style.transform=''; el.style.removeProperty('--ox'); el.style.removeProperty('--oy'); return; }
+  el.style.setProperty('--ox', x+'px');
+  el.style.setProperty('--oy', y+'px');
+  el.style.transform='translate(calc(var(--ox) * var(--om,1)), calc(var(--oy) * var(--om,1)))'+rot;
+}
+function setFreeTop(el,v){
+  el.dataset.fy=v;
+  el.style.setProperty('--fy', v+'px');
+  el.style.top='calc(var(--fy) * var(--om,1))';
+}
+function freeTop(el){
+  const d=parseFloat(el.dataset.fy);
+  if(!isNaN(d)) return d;
+  return parseFloat(el.style.top)||0;
 }
 function startDrag(e,el){
   snapshot();
@@ -2745,7 +2796,7 @@ function startDrag(e,el){
     const o=offsetOf(m);
     return {el:m, free:f,
       ox: f? parseFloat(m.style.left)||0 : o.x,
-      oy: f? parseFloat(m.style.top)||0 : o.y,
+      oy: f? freeTop(m) : o.y,
       pw: m.offsetParent? m.offsetParent.clientWidth : innerWidth};
   });
   drag={items:infos, sx:e.clientX, sy:e.clientY};
@@ -2759,7 +2810,7 @@ on(document,'pointermove',function(e){
   drag.items.forEach(function(it){
     if(it.free){
       it.el.style.left=(it.ox+(dx/(it.pw||innerWidth))*100).toFixed(2)+'%';
-      it.el.style.top=Math.round(it.oy+dy)+'px';
+      setFreeTop(it.el, Math.round(it.oy+dy));
     }else{
       setOffset(it.el, Math.round(it.ox+dx), Math.round(it.oy+dy));
     }
@@ -2888,6 +2939,22 @@ function breakPack(el){
   packMembers(el).forEach(function(e){ e.removeAttribute('data-pack'); });
   renderInspector();
   toast('Groupe délié');
+}
+function uiMobile(el){
+  const off=el.classList.contains('no-mobile');
+  return '<div class="e-group"><span class="e-lab">Sur mobile</span>'+
+    '<button class="e-btn'+(off?' on':'')+'" id="mob-hide" style="width:100%;justify-content:center">'+
+    (off? 'Masqué sur mobile — réafficher' : 'Masquer cet élément sur mobile')+'</button>'+
+    '<p class="e-help">Les décalages et positions libres sont automatiquement réduits sur petit écran.</p></div>';
+}
+function bindMobile(el){
+  const b=$('#mob-hide'); if(!b) return;
+  b.onclick=function(){
+    snapshot();
+    el.classList.toggle('no-mobile');
+    renderInspector();
+    toast(el.classList.contains('no-mobile')? 'Masqué sur mobile' : 'Affiché sur mobile');
+  };
 }
 function uiPack(el){
   const id=packOf(el);
@@ -3368,7 +3435,7 @@ function uiImage(){
   if(free){
     h+=ctlRange('f-w','Largeur',60,1200,px(ph.style.width,220),'px');
     h+=ctlRange('f-x','Position horizontale',0,95,px(ph.style.left,8),'%');
-    h+=ctlRange('f-y','Position verticale',0,Math.max(2000,document.body.scrollHeight),px(ph.style.top,200),'px',10);
+    h+=ctlRange('f-y','Position verticale',0,Math.max(2000,document.body.scrollHeight),Math.round(freeTop(ph))||200,'px',10);
     h+=ctlRange('f-z','Superposition',-5,60,px(ph.style.zIndex,2),'');
     h+='<p class="e-help" style="margin:-.8rem 0 1rem">En dessous de 0, l\'image passe <b>derrière les textes</b> de la section, tout en restant au-dessus de son fond.</p>';
     h+=ctlRange('f-r','Rotation',-30,30,px((ph.style.transform||'').replace(/[^\d.\-]/g,''),0),'°');
@@ -3446,7 +3513,7 @@ function bindImage(){
   bindRange('img-r',function(v){ applyRadiusChain(ph,v); });
   bindRange('f-w',function(v){ ph.style.width=v+'px'; });
   bindRange('f-x',function(v){ ph.style.left=v+'%'; });
-  bindRange('f-y',function(v){ ph.style.top=v+'px'; });
+  bindRange('f-y',function(v){ setFreeTop(ph,+v); });
   bindRange('f-z',function(v){ ph.style.zIndex=v; });
   bindRange('f-r',function(v){ ph.style.transform='rotate('+v+'deg)'; });
   const seg=$('#img-filter');
@@ -3702,7 +3769,7 @@ function bindOrder(el){
 }
 function uiOffset(el){
   const o=offsetOf(el);
-  return uiOrder(el)+uiPack(el)+
+  return uiOrder(el)+uiPack(el)+uiMobile(el)+
     '<div class="e-group"><span class="e-lab">Position</span>'+
     '<p class="e-help" style="margin:0 0 .5rem">Glissez la pastille <b>✥</b> à côté de l\'élément, ou maintenez <b>Alt</b> et faites glisser l\'élément. Alt + flèches pour ajuster au pixel.</p></div>'+
     ctlRange('off-x','Décalage horizontal',-400,400,o.x,'px')+
@@ -3710,7 +3777,7 @@ function uiOffset(el){
     '<button class="e-btn" id="off-reset" style="width:100%;justify-content:center;margin-bottom:1rem">Remettre à sa place d\'origine</button>';
 }
 function bindOffset(el){
-  bindOrder(el); bindPack(el);
+  bindOrder(el); bindPack(el); bindMobile(el);
   const move=function(){ setOffset(el, +$('#off-x').value, +$('#off-y').value); placeHandle(); };
   bindRange('off-x',move); bindRange('off-y',move);
   const r=$('#off-reset');
@@ -4029,7 +4096,7 @@ function uiShape(){
      '<button data-s="none">Aucune</button><button data-s="var(--sh-1)">Légère</button><button data-s="var(--sh-2)">Marquée</button></div></div>';
   if(free){
     h+=ctlRange('sh-x','Position horizontale',0,95,px(el.style.left,10),'%');
-    h+=ctlRange('sh-y','Position verticale',0,Math.max(2000,document.body.scrollHeight),px(el.style.top,200),'px',10);
+    h+=ctlRange('sh-y','Position verticale',0,Math.max(2000,document.body.scrollHeight),Math.round(freeTop(el))||200,'px',10);
     h+=ctlRange('sh-z','Superposition',-5,60,px(el.style.zIndex,2),'');
     h+='<p class="e-help" style="margin:-.8rem 0 1rem">En dessous de 0, la forme passe <b>derrière les textes</b> ; au-dessus de 40, elle passe devant tout.</p>';
   }else{
@@ -4083,7 +4150,7 @@ function bindShape(){
       el.style.boxShadow=b.getAttribute('data-s'); };
   });
   bindRange('sh-x',function(v){ el.style.left=v+'%'; placeHandle(); });
-  bindRange('sh-y',function(v){ el.style.top=v+'px'; placeHandle(); });
+  bindRange('sh-y',function(v){ setFreeTop(el,+v); placeHandle(); });
   bindRange('sh-z',function(v){ el.style.zIndex=v; });
   if(!el.classList.contains('free')) bindOffset(el);
   bindDelete(el);
