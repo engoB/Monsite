@@ -458,15 +458,12 @@ body.editing .shape{outline:1px dashed rgba(139,90,125,.45); outline-offset:2px;
 @media(max-width:760px){
   /* les décalages et positions libres, réglés sur grand écran, se réduisent d'autant */
   :root{--om:var(--omBase,.36)}
-  /* Un élément posé librement se recentre plutôt que de déborder du petit écran… */
-  .shape.free:not(.lock-free), .freeimg:not(.lock-free){max-width:92vw !important; left:50% !important; transform:translateX(-50%) !important}
-  /* …sur l'accueil, décalages annulés et décor recentré sur le bloc de titre… */
-  .hero-in [data-ox], .hero-in [data-oy]{--om:0}
-  .hero .shape.free, .hero .freeimg{
-    top:50% !important; left:50% !important; transform:translate(-50%,-50%) !important; max-width:92vw !important;
-  }
-  /* …mais l'écran d'accès conserve exactement la composition réglée sur ordinateur. */
-  .lock-free{max-width:58vw !important}
+  /* Les positions étant en pourcentage, elles suivent naturellement l'écran.
+     On se contente d'empêcher un débordement ; le reste s'ajuste dans la vue mobile. */
+  .shape.free, .freeimg{max-width:calc(100vw - 20px)}
+  /* Les décalages de l'accueil suivent le réglage « Ampleur des décalages » du thème,
+     puis chaque élément peut être affiné dans ses réglages mobile. */
+  .hero .shape.free{left:50% !important; transform:translateX(-50%) !important; max-width:94vw !important}
   .no-mobile{display:none !important}
   body{font-size:16px}
   .hero-in{padding:5.5rem 1.1rem 5.5rem}
@@ -765,6 +762,18 @@ body.editing .only-edit{display:inline-flex !important}
 body.dragging, body.dragging *{user-select:none !important; cursor:grabbing !important}
 
 /* Sélecteur d'élément sous le curseur */
+#mob-preview{
+  position:fixed; right:20px; bottom:20px; z-index:151; width:410px; height:min(74vh,780px);
+  background:#2b241c; border-radius:16px; box-shadow:0 30px 70px rgba(0,0,0,.5);
+  display:none; flex-direction:column; overflow:hidden; border:1px solid #453c31;
+}
+#mob-preview.open{display:flex}
+.mp-head{display:flex; align-items:center; justify-content:space-between; padding:.55rem .8rem;
+  color:var(--gold); font-size:.66rem; text-transform:uppercase; letter-spacing:.12em; font-family:'Montserrat',sans-serif}
+.mp-head button{color:#e9e1d4; font-size:.9rem; padding:.1rem .4rem}
+#mob-frame{flex:1; width:390px; margin:0 auto 10px; border:0; border-radius:10px; background:#fff}
+@media(max-width:900px){ #mob-preview{display:none !important} }
+
 #picker{
   position:fixed; z-index:152; background:#2b241c; color:#f3ece1; border-radius:10px;
   box-shadow:0 20px 50px rgba(0,0,0,.45); padding:.4rem; min-width:250px; max-width:330px;
@@ -1123,7 +1132,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     </form>
     <p class="lock-hint ed">Indice : <b data-bind="pwHint">La réponse que Magalie doit donner (3 lettres)</b></p>
   </div>
-<span class="ph freeimg" style="position: absolute; width: 128px; z-index: 15; display: block; left: 45.82%; top: 26px; border-radius: 200px; background: transparent;"><img alt="" style="width:100%;height:auto" src="photos/img-1tzl5kxas26g.png"></span></div>
+<span class="ph freeimg" data-anc="top" data-fy="26" style="position: absolute; width: 128px; z-index: 15; display: block; left: 45.82%; top: 26px; bottom: auto; border-radius: 200px; background: transparent;"><img alt="" style="width:100%;height:auto" src="photos/img-1tzl5kxas26g.png"></span></div>
 
 <div class="progress" id="progress" style=""></div>
 
@@ -1169,7 +1178,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     <p class="edit-holder" style="margin-top:1.4rem"><button class="btn ghost only-edit" data-bgphoto="#hero-img" style="background:rgba(255,255,255,.9)">Changer la photo de fond</button></p>
   </div>
   <a href="#histoire" class="scroll-cue" aria-label="Découvrir"><span class="ic" data-icon="chevron-down" style="font-size:30px"></span></a>
-<div class="shape free" data-block="" style="position: absolute; width: 818px; height: 297px; z-index: 1; left: 20.99%; top: 393px; background-color: rgba(242, 234, 224, 0.68); border-width: 3px; border-style: solid; border-color: rgb(209, 179, 97); box-shadow: var(--sh-1);"></div></header>
+<div class="shape free" data-block="" data-anc="center" data-fy="393" style="position: absolute; width: 818px; height: 297px; z-index: 1; left: 20.99%; top: calc(50% - 57px); bottom: auto; background-color: rgba(242, 234, 224, 0.68); border-width: 3px; border-style: solid; border-color: rgb(209, 179, 97); box-shadow: var(--sh-1);"></div></header>
 
 <!-- ============================ HISTOIRE ============================ -->
 <section class="section" id="histoire" data-sec="">
@@ -1657,6 +1666,7 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
     <button class="e-btn gold" title="Réponses" data-tool="rsvp"><span class="ic" data-icon="users"></span> Réponses <span class="e-badge" id="rsvp-count">0</span></button>
     <button class="e-btn" title="Ajouter" data-tool="add"><span class="ic" data-icon="plus"></span> Ajouter</button>
     <button class="e-btn on" title="Écran d'accès" data-tool="lock"><span class="ic" data-icon="lock"></span> Écran d'accès</button>
+    <button class="e-btn" title="Aperçu mobile" data-tool="preview"><span class="ic" data-icon="image"></span> Mobile</button>
     <button class="e-btn" title="Aperçu" data-tool="guides"><span class="ic" data-icon="eye"></span> Aperçu</button>
     <button class="e-btn" title="Calques" data-tool="layers"><span class="ic" data-icon="grid"></span> Calques</button>
     <button class="e-btn" title="Forme libre" data-tool="shape"><span class="ic" data-icon="box"></span> Forme libre</button>
@@ -1843,6 +1853,10 @@ table.rsvp td{padding:.6rem .7rem; border-bottom:1px solid var(--line); vertical
   </div>
 </div>
 
+<div id="mob-preview">
+  <div class="mp-head"><span>Aperçu mobile — 390 px</span><button data-tool="preview" title="Fermer">✕</button></div>
+  <iframe id="mob-frame" title="Aperçu mobile"></iframe>
+</div>
 <div id="picker" class=""></div>
 <button id="drag-handle" title="Glissez pour déplacer cet élément" class=""><span class="ic" data-icon="move"></span></button>
 <div class="toast" id="toast"><span class="ic" data-icon="check" style="font-size:16px"></span><span id="toast-msg">Aperçu de l'écran d'accès — Échap ou « Fermer l'aperçu » pour revenir au site</span></div>
@@ -2541,6 +2555,46 @@ function normalizeSizes(){
 }
 
 /* Convertit les positions posées avant cette version vers le format adaptatif. */
+/* Chaque élément peut recevoir des réglages propres au mobile, écrits dans une
+   feuille de style dédiée : ils n'altèrent jamais la version ordinateur. */
+function uidOf(el){
+  if(!el.dataset.uid) el.dataset.uid='u'+Math.random().toString(36).slice(2,8);
+  return el.dataset.uid;
+}
+function mobData(el){
+  try{ return JSON.parse(el.getAttribute('data-m')||'{}'); }catch(e){ return {}; }
+}
+function setMob(el,key,val){
+  const m=mobData(el);
+  if(val===null || val==='' || val===undefined) delete m[key]; else m[key]=val;
+  if(Object.keys(m).length){ el.setAttribute('data-m',JSON.stringify(m)); uidOf(el); }
+  else el.removeAttribute('data-m');
+  buildMobileCSS();
+}
+function buildMobileCSS(){
+  let css='';
+  $$('[data-m]').forEach(function(el){
+    const m=mobData(el), id=el.getAttribute('data-uid');
+    if(!id || !Object.keys(m).length) return;
+    let d='';
+    if(m.hide) d+='display:none !important;';
+    if(m.x!==undefined) d+='left:'+m.x+'% !important;right:auto !important;';
+    if(m.y!==undefined) d+='top:'+m.y+'% !important;bottom:auto !important;';
+    if(m.w) d+='width:'+m.w+'px !important;max-width:none !important;';
+    if(m.h) d+='height:'+m.h+'px !important;';
+    if(m.fs) d+='font-size:'+m.fs+'px !important;';
+    if(m.x!==undefined || m.y!==undefined) d+='transform:none !important;';
+    else if(m.ox!==undefined || m.oy!==undefined)
+      d+='transform:translate('+(m.ox||0)+'px,'+(m.oy||0)+'px) !important;';
+    if(d) css+='@media(max-width:760px){[data-uid="'+id+'"]{'+d+'}}\n';
+  });
+  let st=document.getElementById('mobile-css');
+  if(!st){ st=document.createElement('style'); st.id='mobile-css'; document.head.appendChild(st); }
+  if(st.textContent!==css) st.textContent=css;
+}
+window.__buildMobileCSS=buildMobileCSS;
+window.__mob=mobData; window.__setMob=setMob;
+
 function normalizePositions(){
   $$('#lock .freeimg, #lock .shape').forEach(function(el){ el.classList.add('lock-free'); });
   $$('[data-ox],[data-oy]').forEach(function(el){
@@ -2553,18 +2607,23 @@ function normalizePositions(){
     el.style.transform='translate(calc(var(--ox) * var(--om,1)), calc(var(--oy) * var(--om,1)))'+rot;
   });
   $$('.freeimg, .shape.free').forEach(function(el){
-    if((el.style.top||'').indexOf('var(--fy')>-1) return;
-    const t=parseFloat(el.style.top);
-    if(isNaN(t)) return;
-    el.dataset.fy=t;
-    el.style.setProperty('--fy', t+'px');
-    el.style.top='calc(var(--fy) * var(--om,1))';
+    if(el.dataset.anc) return;
+    const p=el.offsetParent;
+    const h=(p? p.getBoundingClientRect().height : innerHeight)||1;
+    const px=Math.round(el.getBoundingClientRect().top - (p? p.getBoundingClientRect().top : 0));
+    const ratio=px/h;
+    const a = ratio<0.28 ? 'top' : (ratio>0.72 ? 'bottom' : 'center');
+    el.dataset.anc=a; el.dataset.fy=px;
+    el.style.removeProperty('--fy');
+    if(a==='center'){ el.style.bottom='auto'; el.style.top='calc(50% + '+Math.round(px-h/2)+'px)'; }
+    else if(a==='bottom'){ const eh=el.getBoundingClientRect().height||0; el.style.top='auto'; el.style.bottom=Math.round(h-px-eh)+'px'; }
+    else { el.style.bottom='auto'; el.style.top=px+'px'; }
   });
 }
 
 /* ---------------------------- Démarrage ---------------------------- */
 function mount(){
-  [paintIcons,applyTheme,renderBindings,applyFavicon,normalizeSizes,normalizePositions,initReveal,initSpy,initCountdown,guestFields,markOrder,applyInviteCode,watchEdges,onScroll]
+  [paintIcons,applyTheme,renderBindings,applyFavicon,normalizeSizes,normalizePositions,buildMobileCSS,initReveal,initSpy,initCountdown,guestFields,markOrder,applyInviteCode,watchEdges,onScroll]
     .forEach(function(fn){ try{ fn(); }catch(e){ if(window.console) console.warn('mount:',e); } });
 }
 window.__mount = mount;
@@ -2804,15 +2863,40 @@ function setOffset(el,x,y){
   el.style.setProperty('--oy', y+'px');
   el.style.transform='translate(calc(var(--ox) * var(--om,1)), calc(var(--oy) * var(--om,1)))'+rot;
 }
-function setFreeTop(el,v){
-  el.dataset.fy=v;
-  el.style.setProperty('--fy', v+'px');
-  el.style.top='calc(var(--fy) * var(--om,1))';
+/* La position verticale d'un élément libre est mémorisée en pourcentage de sa section.
+   Ainsi elle suit le contenu centré, quelle que soit la hauteur de l'écran. */
+function hostH(el){
+  const p=el.offsetParent;
+  return (p? p.getBoundingClientRect().height : innerHeight) || 1;
 }
+/* Un élément libre s'accroche au haut, au centre ou au bas de sa section.
+   Accroché au centre, il suit exactement le contenu centré : plus aucune dérive
+   d'un écran à l'autre, quelle que soit la hauteur. */
+function anchorOf(el){ return el.dataset.anc || 'top'; }
 function freeTop(el){
-  const d=parseFloat(el.dataset.fy);
-  if(!isNaN(d)) return d;
-  return parseFloat(el.style.top)||0;
+  const p=el.offsetParent;
+  return Math.round(el.getBoundingClientRect().top - (p? p.getBoundingClientRect().top : 0));
+}
+function setFreeTop(el,vpx,anc){
+  const h=hostH(el);
+  const a=anc||anchorOf(el);
+  el.dataset.anc=a;
+  el.dataset.fy=Math.round(vpx);
+  if(a==='center'){
+    el.style.bottom='auto';
+    el.style.top='calc(50% + '+Math.round(vpx-h/2)+'px)';
+  }else if(a==='bottom'){
+    const eh=el.getBoundingClientRect().height||0;
+    el.style.top='auto';
+    el.style.bottom=Math.round(h-vpx-eh)+'px';
+  }else{
+    el.style.bottom='auto';
+    el.style.top=Math.round(vpx)+'px';
+  }
+}
+function reanchor(el,a){
+  const cur=freeTop(el);
+  setFreeTop(el,cur,a);
 }
 function startDrag(e,el){
   snapshot();
@@ -2966,20 +3050,51 @@ function breakPack(el){
   renderInspector();
   toast('Groupe délié');
 }
+function bindAnchor(id,el){
+  const box=$('#'+id); if(!box) return;
+  $$('button',box).forEach(function(b){
+    if(b.getAttribute('data-a')===anchorOf(el)) b.classList.add('on');
+    b.onclick=function(){
+      snapshot();
+      $$('button',box).forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      reanchor(el,b.getAttribute('data-a'));
+      placeHandle();
+      toast('Accroche : '+b.textContent.toLowerCase());
+    };
+  });
+}
 function uiMobile(el){
-  const off=el.classList.contains('no-mobile');
-  return '<div class="e-group"><span class="e-lab">Sur mobile</span>'+
-    '<button class="e-btn'+(off?' on':'')+'" id="mob-hide" style="width:100%;justify-content:center">'+
-    (off? 'Masqué sur mobile — réafficher' : 'Masquer cet élément sur mobile')+'</button>'+
-    '<p class="e-help">Les décalages et positions libres sont automatiquement réduits sur petit écran.</p></div>';
+  const m=window.__mob(el);
+  const free=el.classList.contains('freeimg')||el.classList.contains('free');
+  const cs=getComputedStyle(el), r=el.getBoundingClientRect();
+  let h='<div class="e-group" style="border-top:1px solid #453c31;padding-top:.9rem">'+
+    '<span class="e-lab" style="color:var(--teal)">Réglages mobile</span>'+
+    '<p class="e-help" style="margin:0 0 .6rem">Ne s\'appliquent qu\'aux écrans de moins de 760 px. La version ordinateur n\'est jamais modifiée.</p>'+
+    '<button class="e-btn'+(m.hide?' on':'')+'" id="mob-hide" style="width:100%;justify-content:center">'+
+    (m.hide? 'Masqué sur mobile — réafficher':'Masquer sur mobile')+'</button></div>';
+  if(free){
+    h+=ctlRange('mob-x','Mobile — position horizontale',-10,100,m.x!==undefined?m.x:Math.round(parseFloat(el.style.left)||10),'%');
+    h+=ctlRange('mob-y','Mobile — position verticale',-10,110,m.y!==undefined?m.y:Math.round(parseFloat(el.dataset.fyp)||20),'%');
+    h+=ctlRange('mob-w','Mobile — largeur',30,400,m.w||Math.round(r.width)||200,'px');
+    if(el.classList.contains('shape'))
+      h+=ctlRange('mob-h','Mobile — hauteur',30,600,m.h||Math.round(r.height)||150,'px');
+  }else{
+    h+=ctlRange('mob-ox','Mobile — décalage horizontal',-200,200,m.ox||0,'px');
+    h+=ctlRange('mob-oy','Mobile — décalage vertical',-300,300,m.oy||0,'px');
+    h+=ctlRange('mob-fs','Mobile — taille du texte',10,90,m.fs||Math.round(parseFloat(cs.fontSize)),'px');
+  }
+  return h+'<button class="e-btn" id="mob-reset" style="width:100%;justify-content:center;margin-bottom:.6rem">Effacer les réglages mobile</button>';
 }
 function bindMobile(el){
-  const b=$('#mob-hide'); if(!b) return;
-  b.onclick=function(){
-    snapshot();
-    el.classList.toggle('no-mobile');
-    renderInspector();
-    toast(el.classList.contains('no-mobile')? 'Masqué sur mobile' : 'Affiché sur mobile');
+  const set=function(k,v){ window.__setMob(el,k,v); refreshPreview(); };
+  const b=$('#mob-hide');
+  if(b) b.onclick=function(){ snapshot(); set('hide', window.__mob(el).hide? null : 1); renderInspector(); };
+  ['x','y','w','h','ox','oy','fs'].forEach(function(k){ bindRange('mob-'+k,function(v){ set(k,+v); }); });
+  const rs=$('#mob-reset');
+  if(rs) rs.onclick=function(){
+    snapshot(); el.removeAttribute('data-m'); window.__buildMobileCSS(); refreshPreview();
+    renderInspector(); toast('Réglages mobile effacés');
   };
 }
 function uiPack(el){
@@ -2998,6 +3113,21 @@ function uiPack(el){
 function bindPack(el){
   const mk=$('#pack-make'); if(mk) mk.onclick=makePack;
   const br=$('#pack-break'); if(br) br.onclick=function(){ breakPack(el); };
+}
+
+let previewTimer=null;
+function previewOpen(){ const f=$('#mob-preview'); return f && f.classList.contains('open'); }
+function refreshPreview(){
+  if(!previewOpen()) return;
+  clearTimeout(previewTimer);
+  previewTimer=setTimeout(function(){ const fr=$('#mob-frame'); if(fr) fr.srcdoc=buildHTML(true); },400);
+}
+function togglePreview(){
+  const box=$('#mob-preview');
+  const on=box.classList.toggle('open');
+  const btn=document.querySelector('[data-tool="preview"]');
+  if(btn) btn.classList.toggle('on',on);
+  if(on) $('#mob-frame').srcdoc=buildHTML(true);
 }
 
 /* ---------------------------- Sélecteur d'élément ---------------------------- */
@@ -3462,6 +3592,9 @@ function uiImage(){
     h+=ctlRange('f-w','Largeur',60,1200,px(ph.style.width,220),'px');
     h+=ctlRange('f-x','Position horizontale',0,95,px(ph.style.left,8),'%');
     h+=ctlRange('f-y','Position verticale',0,Math.max(2000,document.body.scrollHeight),Math.round(freeTop(ph))||200,'px',10);
+    h+='<div class="e-group"><span class="e-lab">Accroche verticale</span><div class="e-seg" id="f-anc">'+
+       '<button data-a="top">Haut</button><button data-a="center">Centre</button><button data-a="bottom">Bas</button></div>'+
+       '<p class="e-help">« Centre » colle l\'élément au contenu centré : il reste à sa place sur tous les écrans.</p></div>';
     h+=ctlRange('f-z','Superposition',-5,60,px(ph.style.zIndex,2),'');
     h+='<p class="e-help" style="margin:-.8rem 0 1rem">En dessous de 0, l\'image passe <b>derrière les textes</b> de la section, tout en restant au-dessus de son fond.</p>';
     h+=uiPack(ph)+uiMobile(ph);
@@ -3541,6 +3674,7 @@ function bindImage(){
   bindRange('f-w',function(v){ ph.style.width=v+'px'; });
   bindRange('f-x',function(v){ ph.style.left=v+'%'; });
   bindRange('f-y',function(v){ setFreeTop(ph,+v); });
+  bindAnchor('f-anc',ph);
   bindRange('f-z',function(v){ ph.style.zIndex=v; });
   bindRange('f-r',function(v){ ph.style.transform='rotate('+v+'deg)'; });
   const seg=$('#img-filter');
@@ -4120,6 +4254,9 @@ function uiShape(){
   if(free){
     h+=ctlRange('sh-x','Position horizontale',0,95,px(el.style.left,10),'%');
     h+=ctlRange('sh-y','Position verticale',0,Math.max(2000,document.body.scrollHeight),Math.round(freeTop(el))||200,'px',10);
+    h+='<div class="e-group"><span class="e-lab">Accroche verticale</span><div class="e-seg" id="sh-anc">'+
+       '<button data-a="top">Haut</button><button data-a="center">Centre</button><button data-a="bottom">Bas</button></div>'+
+       '<p class="e-help">« Centre » colle la forme au contenu centré : elle reste à sa place sur tous les écrans.</p></div>';
     h+=ctlRange('sh-z','Superposition',-5,60,px(el.style.zIndex,2),'');
     h+='<p class="e-help" style="margin:-.8rem 0 1rem">En dessous de 0, la forme passe <b>derrière les textes</b> ; au-dessus de 40, elle passe devant tout.</p>';
     h+=uiPack(el)+uiMobile(el);
@@ -4175,6 +4312,7 @@ function bindShape(){
   });
   bindRange('sh-x',function(v){ el.style.left=v+'%'; placeHandle(); });
   bindRange('sh-y',function(v){ setFreeTop(el,+v); placeHandle(); });
+  bindAnchor('sh-anc',el);
   bindRange('sh-z',function(v){ el.style.zIndex=v; });
   if(!el.classList.contains('free')) bindOffset(el);
   else { bindPack(el); bindMobile(el); }
@@ -4523,6 +4661,7 @@ on(document,'click',function(e){
     if(a==='rsvp'){ renderRsvp(); $('#modal-rsvp').classList.add('open'); loadLive().then(function(ok){ if(ok) renderRsvp(); }); }
     if(a==='add'){ openAdd(); }
     if(a==='lock'){ toggleLockPreview(); }
+    if(a==='preview'){ togglePreview(); }
     if(a==='guides'){
       const on=document.body.classList.toggle('no-guides');
       t.classList.toggle('on',on);
@@ -5097,9 +5236,8 @@ async function publish(){
 }
 
 /* ---------------------------- Export ---------------------------- */
-function buildHTML(){
-  try{ tidySpans(document); }catch(e){}
-  CFG.build=Date.now().toString(36);
+function buildHTML(apercu){
+  if(!apercu){ try{ tidySpans(document); }catch(e){} CFG.build=Date.now().toString(36); }
   saveCFG();
   const clone=document.documentElement.cloneNode(true);
   const q=function(s){ return Array.prototype.slice.call(clone.querySelectorAll(s)); };
@@ -5119,6 +5257,8 @@ function buildHTML(){
   q('.pick-flash').forEach(function(e){ e.classList.remove('pick-flash'); });
   q('.in-pack').forEach(function(e){ e.classList.remove('in-pack'); });
   q('#picker').forEach(function(e){ e.className=''; e.innerHTML=''; e.removeAttribute('style'); });
+  q('#mob-preview').forEach(function(e){ e.classList.remove('open'); });
+  q('#mob-frame').forEach(function(e){ e.removeAttribute('srcdoc'); });
   q('#lightbox').forEach(function(e){ e.classList.remove('open'); });
   q('#lock').forEach(function(e){ e.classList.remove('gone','wrong','preview'); });
   q('#rsvp-form').forEach(function(e){ e.classList.remove('hidden'); });
